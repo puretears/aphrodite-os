@@ -1,0 +1,10 @@
+[section .text]
+
+global _start
+_start:
+
+	mov ah, 0FH
+	mov al, 'K'
+	mov es, VEDIO_SEL 
+	mov [es:((80 * 22 + 39) * 2)], ax
+	jmp $

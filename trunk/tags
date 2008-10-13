@@ -1,0 +1,339 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.7	//
+A	kernel/test.c	3;"	d	file:
+APHRODITE_BOOT	Makefile	/^APHRODITE_BOOT = boot\/boot.bin boot\/loader.bin$/;"	m
+APHRODITE_KERNEL	Makefile	/^APHRODITE_KERNEL = kernel.bin$/;"	m
+APIC_EXIST	kernel/kernel.asm	/^APIC_EXIST:$/;"	l
+ARD_DISP_OVER	boot/loader.asm	/^ARD_DISP_OVER:$/;"	l
+ASM	Makefile	/^ASM = nasm$/;"	m
+ASM_BOOT_FLAGS	Makefile	/^ASM_BOOT_FLAGS = -I boot\/include\/$/;"	m
+ASM_KERNEL_FLAGS	Makefile	/^ASM_KERNEL_FLAGS = -I include\/ -f elf$/;"	m
+AVAILABLE_TSS32	include/protect.h	52;"	d
+AVAILIABLE_TSS16	include/protect.h	44;"	d
+B	kernel/test.c	4;"	d	file:
+BASE_OF_STACK	boot/loader.asm	/^BASE_OF_STACK	equ 0100H ; Because stack will come from 0100H, so we cannot$/;"	d
+BUSY_TSS16	include/protect.h	46;"	d
+BUSY_TSS32	include/protect.h	54;"	d
+CALL_GATE16	include/protect.h	47;"	d
+CALL_GATE32	include/protect.h	55;"	d
+CC	Makefile	/^CC = gcc$/;"	m
+CFLAGS	Makefile	/^CFLAGS = -I include\/ -c -fno-builtin -fno-stack-protector$/;"	m
+CONST_H	include/const.h	2;"	d
+CONTINUE_MATCHING	boot/boot_loader.asm	/^CONTINUE_MATCHING:$/;"	l
+CONTINUE_MATCHING	boot/loader.asm	/^CONTINUE_MATCHING:$/;"	l
+DASM	Makefile	/^DASM = ndisasm$/;"	m
+DASMFLAGS	Makefile	/^DASMFLAGS = -u -o $(KERNEL_ENTRYPOINT) -e $(KERNEL_ENTRYOFFSET)$/;"	m
+DASM_OUTPUT	Makefile	/^DASM_OUTPUT = kernel.bin.asm$/;"	m
+DB_FLAG	include/protect.h	35;"	d
+DEBUG_TEST	kernel/kernel.asm	/^DEBUG_TEST:$/;"	l
+DISP_OVER	boot/boot_loader.asm	/^DISP_OVER:$/;"	l
+DISP_OVER16	boot/loader.asm	/^DISP_OVER16:$/;"	l
+DPL0	include/protect.h	38;"	d
+DPL1	include/protect.h	39;"	d
+DPL2	include/protect.h	40;"	d
+DPL3	include/protect.h	41;"	d
+DUMMY_SEL	include/protect.h	25;"	d
+FALSE	include/const.h	9;"	d
+FINISH_LOADING	boot/boot_loader.asm	/^FINISH_LOADING:	 		$/;"	l
+FINISH_LOADING	boot/loader.asm	/^FINISH_LOADING:$/;"	l
+FLAT_C_SEL	boot/loader.asm	/^FLAT_C_SEL	equ GDT_FLAT_C - GDT_DUMMY$/;"	d
+FLAT_C_SEL	include/protect.h	26;"	d
+FLAT_D_SEL	boot/loader.asm	/^FLAT_D_SEL	equ GDT_FLAT_D - GDT_DUMMY$/;"	d
+FLAT_D_SEL	include/protect.h	27;"	d
+GDT_DUMMY	boot/loader.asm	/^GDT_DUMMY:	descriptor 0, 0, 0$/;"	l
+GDT_FLAT_C	boot/loader.asm	/^GDT_FLAT_C:	descriptor 0, 0FFFFFH, EXECUTE_READ | S_FLAG | P_FLAG | DB_FLAG | G_FLAG$/;"	l
+GDT_FLAT_D	boot/loader.asm	/^GDT_FLAT_D:	descriptor 0, 0FFFFFH, READ_WR | S_FLAG | P_FLAG | DB_FLAG | G_FLAG$/;"	l
+GDT_LEN	boot/loader.asm	/^GDT_LEN	equ $ - GDT_DUMMY$/;"	d
+GDT_SIZE	include/const.h	4;"	d
+GDT_VEDIO	boot/loader.asm	/^GDT_VEDIO:	descriptor 0B8000H, 0FFFFH, READ_WR | S_FLAG | P_FLAG | DPL3$/;"	l
+GENERAL_CHAR16	boot/loader.asm	/^GENERAL_CHAR16:$/;"	l
+GO_ON_DISP	boot/boot_loader.asm	/^GO_ON_DISP:$/;"	l
+GO_ON_DISP16	boot/loader.asm	/^GO_ON_DISP16:$/;"	l
+GO_ON_DISP_ARD_ENTRY	boot/loader.asm	/^GO_ON_DISP_ARD_ENTRY:$/;"	l
+GO_ON_LOADING	boot/boot_loader.asm	/^GO_ON_LOADING:$/;"	l
+GO_ON_LOADING	boot/loader.asm	/^GO_ON_LOADING:$/;"	l
+G_FLAG	include/protect.h	34;"	d
+IDT_SIZE	include/const.h	5;"	d
+INIT_PDE	boot/loader.asm	/^INIT_PDE:$/;"	l
+INIT_PTE	boot/loader.asm	/^INIT_PTE:$/;"	l
+INTERRUPT_GATE16	include/protect.h	49;"	d
+INTERRUPT_GATE32	include/protect.h	57;"	d
+INTERRUPT_IRQ0	include/protect.h	86;"	d
+INTERRUPT_IRQ8	include/protect.h	87;"	d
+INT_ALIGNMENT_CHECK	include/protect.h	78;"	d
+INT_BOUND_RANGE_EXCEED	include/protect.h	66;"	d
+INT_BREAKPOINT	include/protect.h	64;"	d
+INT_COPROCESSOR_SEG_OVERRUN	include/protect.h	70;"	d
+INT_DEV_NOT_AVAILABLE	include/protect.h	68;"	d
+INT_DIVIDE_ERROR	include/protect.h	61;"	d
+INT_DOUBLE_FAULT	include/protect.h	69;"	d
+INT_GENERAL_PROTECTION	include/protect.h	74;"	d
+INT_INVALID_OPCODE	include/protect.h	67;"	d
+INT_INVALID_TSS	include/protect.h	71;"	d
+INT_MACHINE_CHECK	include/protect.h	79;"	d
+INT_MASTER1	include/const.h	17;"	d
+INT_MASTER2	include/const.h	18;"	d
+INT_NMI_INTERRUPT	include/protect.h	63;"	d
+INT_OVERFLOW	include/protect.h	65;"	d
+INT_PAGE_FAULT	include/protect.h	75;"	d
+INT_RESERVED	include/protect.h	62;"	d
+INT_RESERVED1	include/protect.h	76;"	d
+INT_SEG_NOT_PRESENT	include/protect.h	72;"	d
+INT_SLAVE1	include/const.h	19;"	d
+INT_SLAVE2	include/const.h	20;"	d
+INT_STACK_SEG_FAULT	include/protect.h	73;"	d
+INT_X87_FPU_FAULT	include/protect.h	77;"	d
+INT_XF_SMID_EXCEPTION	include/protect.h	80;"	d
+KERNEL_ENTRYOFFSET	Makefile	/^KERNEL_ENTRYOFFSET = 0x400$/;"	m
+KERNEL_ENTRYPOINT	Makefile	/^KERNEL_ENTRYPOINT = 0x30400$/;"	m
+KERNEL_FOUND	boot/loader.asm	/^KERNEL_FOUND:$/;"	l
+KERNEL_SEL	kernel/kernel.asm	/^KERNEL_SEL	equ 8$/;"	d
+LABEL_DATA32	boot/loader.asm	/^LABEL_DATA32:$/;"	l
+LABEL_DISP_CHAR	lib/klib.asm	/^LABEL_DISP_CHAR:$/;"	l
+LABEL_DISP_COLOR_CHAR	lib/klib.asm	/^LABEL_DISP_COLOR_CHAR:$/;"	l
+LABEL_DISP_COLOR_OVER	lib/klib.asm	/^LABEL_DISP_COLOR_OVER:$/;"	l
+LABEL_DISP_OVER	lib/klib.asm	/^LABEL_DISP_OVER:$/;"	l
+LABEL_EVEN	boot/boot_loader.asm	/^LABEL_EVEN:	$/;"	l
+LABEL_EVEN	boot/loader.asm	/^LABEL_EVEN:	$/;"	l
+LABEL_FIND_NEXT_ENTRY1	boot/boot_loader.asm	/^LABEL_FIND_NEXT_ENTRY1:$/;"	l
+LABEL_FIND_NEXT_ENTRY1	boot/loader.asm	/^LABEL_FIND_NEXT_ENTRY1:$/;"	l
+LABEL_FIND_NEXT_ENTRY2	boot/boot_loader.asm	/^LABEL_FIND_NEXT_ENTRY2:$/;"	l
+LABEL_FIND_NEXT_ENTRY2	boot/loader.asm	/^LABEL_FIND_NEXT_ENTRY2:$/;"	l
+LABEL_GDT	boot/loader.asm	/^LABEL_GDT:$/;"	l
+LABEL_KERNEL_STACK	kernel/kernel.asm	/^LABEL_KERNEL_STACK resb 2 * 1024$/;"	l
+LABEL_LOAD_COLOR_STRING	lib/klib.asm	/^LABEL_LOAD_COLOR_STRING:$/;"	l
+LABEL_LOAD_STRING	lib/klib.asm	/^LABEL_LOAD_STRING:$/;"	l
+LABEL_MEM_CHK	boot/loader.asm	/^LABEL_MEM_CHK:$/;"	l
+LABEL_MEM_CHK_FAIL	boot/loader.asm	/^LABEL_MEM_CHK_FAIL:$/;"	l
+LABEL_MEM_CHK_SUCCESS	boot/loader.asm	/^LABEL_MEM_CHK_SUCCESS:			$/;"	l
+LABEL_NO_KERNEL	boot/loader.asm	/^LABEL_NO_KERNEL:$/;"	l
+LABEL_NO_LOADER	boot/boot_loader.asm	/^LABEL_NO_LOADER:$/;"	l
+LABEL_PM_STACK	boot/loader.asm	/^LABEL_PM_STACK:$/;"	l
+LABEL_PM_START	boot/loader.asm	/^LABEL_PM_START:$/;"	l
+LABEL_RET	boot/boot_loader.asm	/^LABEL_RET:$/;"	l
+LABEL_RET	boot/loader.asm	/^LABEL_RET:$/;"	l
+LABEL_START	boot/boot_loader.asm	/^LABEL_START:$/;"	l
+LABEL_START	boot/loader.asm	/^LABEL_START:$/;"	l
+LD	Makefile	/^LD = ld$/;"	m
+LDFLAGS	Makefile	/^LDFLAGS = -s -Ttext $(KERNEL_ENTRYPOINT)$/;"	m
+LDT	include/protect.h	45;"	d
+LOAD_PROGRAM_HEADER	boot/loader.asm	/^LOAD_PROGRAM_HEADER:$/;"	l
+MEM_ADDR_UNAVAIL	boot/loader.asm	/^MEM_ADDR_UNAVAIL:$/;"	l
+NEXT_ARD_ENTRY	boot/loader.asm	/^NEXT_ARD_ENTRY:$/;"	l
+NO_REMAINDER	boot/loader.asm	/^NO_REMAINDER:$/;"	l
+NULL_PROGRAM_HEADER	boot/loader.asm	/^NULL_PROGRAM_HEADER:$/;"	l
+OBJS	Makefile	/^OBJS = kernel\/kernel.o kernel\/start.o kernel\/i8259.o kernel\/global.o kernel\/protect.o\\$/;"	m
+PESUDO_GDT	boot/loader.asm	/^PESUDO_GDT:	dw GDT_LEN - 1$/;"	d
+PRIVILEGE_KERNEL	include/const.h	12;"	d
+PRIVILEGE_SERVICE	include/const.h	13;"	d
+PRIVILEGE_USER	include/const.h	14;"	d
+PROTECT_H	include/protect.h	2;"	d
+PROTO_H	include/proto.h	2;"	d
+P_FLAG	include/protect.h	36;"	d
+P_INT_GATE32	kernel/protect.c	6;"	d	file:
+READ_NEXT_SECTOR1	boot/boot_loader.asm	/^READ_NEXT_SECTOR1:$/;"	l
+READ_NEXT_SECTOR1	boot/loader.asm	/^READ_NEXT_SECTOR1:$/;"	l
+READ_NEXT_SECTOR2	boot/boot_loader.asm	/^READ_NEXT_SECTOR2:$/;"	l
+READ_NEXT_SECTOR2	boot/loader.asm	/^READ_NEXT_SECTOR2:$/;"	l
+RET_CHAR	boot/boot_loader.asm	/^RET_CHAR:$/;"	l
+RET_CHAR16	boot/loader.asm	/^RET_CHAR16:$/;"	l
+SELECTOR_KERNEL_CS	include/protect.h	30;"	d
+SELECTOR_KERNEL_DS	include/protect.h	31;"	d
+STRING_FOUND	boot/boot_loader.asm	/^STRING_FOUND:$/;"	l
+STRING_H	include/string.h	2;"	d
+TASK_GATE	include/protect.h	48;"	d
+TOPOFSTACK	boot/loader.asm	/^TOPOFSTACK equ LOADERBASE_PHY_ADDR + \$$/;"	d
+TOP_OF_STACK	kernel/kernel.asm	/^TOP_OF_STACK:$/;"	l
+TRAP_GATE16	include/protect.h	50;"	d
+TRAP_GATE32	include/protect.h	58;"	d
+TRUE	include/const.h	8;"	d
+TYPE_H	include/type.h	2;"	d
+VEDIO_SEL	boot/loader.asm	/^VEDIO_SEL	equ GDT_VEDIO - GDT_DUMMY + 3$/;"	d
+VEDIO_SEL	include/protect.h	28;"	d
+__ard	boot/loader.asm	/^__ard:$/;"	l
+__ard_count	boot/loader.asm	/^__ard_count		  dd 0$/;"	d
+__base_addr_high	boot/loader.asm	/^__base_addr_high	dd 0$/;"	d
+__base_addr_low	boot/loader.asm	/^__base_addr_low		dd 0$/;"	d
+__curr_disp_pos	boot/loader.asm	/^__curr_disp_pos		  dd 0$/;"	d
+__limit_high	boot/loader.asm	/^__limit_high		dd 0$/;"	d
+__limit_low	boot/loader.asm	/^__limit_low		dd 0$/;"	d
+__mem_chk_buff	boot/loader.asm	/^__mem_chk_buff:	times 256 db 0$/;"	l
+__mem_size	boot/loader.asm	/^__mem_size		  dd 0$/;"	d
+__str_mem_chk_fail	boot/loader.asm	/^__str_mem_chk_fail 	  db "Memroy check failed!", 0$/;"	d
+__str_mem_chk_title	boot/loader.asm	/^__str_mem_chk_title 	  db "BaseAddrL BaseAddrH LengthLow LengthHigh Type", 0AH, 0$/;"	d
+__str_mem_size	boot/loader.asm	/^__str_mem_size		  db "Total memory size is: ", 0$/;"	d
+__type	boot/loader.asm	/^__type			dd 0$/;"	d
+_descriptor	include/protect.h	/^typedef struct _descriptor {$/;"	s
+_gate	include/protect.h	/^typedef struct _gate {$/;"	s
+_start	kernel/kernel.asm	/^_start:$/;"	l
+ard	boot/loader.asm	/^ard		  equ LOADERBASE_PHY_ADDR + __ard$/;"	d
+ard_count	boot/loader.asm	/^ard_count	  equ LOADERBASE_PHY_ADDR + __ard_count$/;"	d
+attr	include/protect.h	/^	t_8 attr;$/;"	m	struct:_gate
+attr1	include/protect.h	/^	t_8 attr1;$/;"	m	struct:_descriptor
+attr2_limit_high	include/protect.h	/^	t_8 attr2_limit_high;$/;"	m	struct:_descriptor
+bOdd	boot/boot_loader.asm	/^bOdd		db 0$/;"	d
+bOdd	boot/loader.asm	/^bOdd		db 0$/;"	d
+base_addr_high	boot/loader.asm	/^base_addr_high	  equ LOADERBASE_PHY_ADDR + __base_addr_high$/;"	d
+base_addr_high	include/protect.h	/^	t_8 base_addr_high;$/;"	m	struct:_descriptor
+base_addr_low	boot/loader.asm	/^base_addr_low	  equ LOADERBASE_PHY_ADDR + __base_addr_low$/;"	d
+base_addr_low	include/protect.h	/^	t_16 base_addr_low;$/;"	m	struct:_descriptor
+base_addr_mid	include/protect.h	/^	t_8 base_addr_mid;$/;"	m	struct:_descriptor
+boot_str	boot/boot_loader.asm	/^boot_str	db "Booting", 0$/;"	d
+bound_range_exceeded	kernel/kernel.asm	/^bound_range_exceeded:$/;"	l
+breakpoint	kernel/kernel.asm	/^breakpoint:$/;"	l
+clear_scr	boot/boot_loader.asm	/^clear_scr:$/;"	l
+coprocessor_segment_overrun	kernel/kernel.asm	/^coprocessor_segment_overrun:$/;"	l
+cstart	kernel/start.c	/^void cstart() {$/;"	f
+curr_disp_pos	boot/loader.asm	/^curr_disp_pos	  equ LOADERBASE_PHY_ADDR + __curr_disp_pos$/;"	d
+curr_pos	kernel/global.c	/^int curr_pos = 0;$/;"	v
+dcount	include/protect.h	/^	t_8 dcount;	\/\/ Only valid for call gate$/;"	m	struct:_gate
+descriptor	include/protect.h	/^}descriptor;$/;"	t	typeref:struct:_descriptor
+device_not_available	kernel/kernel.asm	/^device_not_available:$/;"	l
+disp_al	boot/boot_loader.asm	/^disp_al:$/;"	l
+disp_color_str	lib/klib.asm	/^disp_color_str:$/;"	l
+disp_int	lib/klib.c	/^void disp_int(unsigned int _num) {$/;"	f
+disp_mem_info	boot/loader.asm	/^disp_mem_info:$/;"	l
+disp_ret_16	boot/loader.asm	/^disp_ret_16:$/;"	l
+disp_str	boot/boot_loader.asm	/^disp_str:$/;"	l
+disp_str	lib/klib.asm	/^disp_str:$/;"	l
+disp_str_16	boot/loader.asm	/^disp_str_16:$/;"	l
+divide_error	kernel/kernel.asm	/^divide_error:$/;"	l
+double_fault	kernel/kernel.asm	/^double_fault:$/;"	l
+exception	kernel/kernel.asm	/^exception:$/;"	l
+exception_handler	kernel/protect.c	/^void exception_handler(int vector_number, int error_code,$/;"	f
+extern	kernel/kernel.asm	/^extern cstart$/;"	l
+extern	kernel/kernel.asm	/^extern curr_pos$/;"	l
+extern	kernel/kernel.asm	/^extern disp_str$/;"	l
+extern	kernel/kernel.asm	/^extern exception_handler$/;"	l
+extern	kernel/kernel.asm	/^extern gdt_ptr$/;"	l
+extern	kernel/kernel.asm	/^extern idt_ptr$/;"	l
+extern	kernel/kernel.asm	/^extern spurious_irq$/;"	l
+extern	lib/klib.asm	/^extern curr_pos$/;"	l
+gate	include/protect.h	/^}gate;$/;"	t	typeref:struct:_gate
+gdt	kernel/global.c	/^descriptor gdt[GDT_SIZE];$/;"	v
+gdt_ptr	kernel/global.c	/^t_8 gdt_ptr[6];$/;"	v
+general_protection	kernel/kernel.asm	/^general_protection:$/;"	l
+get_fat_entry	boot/boot_loader.asm	/^get_fat_entry:$/;"	l
+get_fat_entry	boot/loader.asm	/^get_fat_entry:$/;"	l
+global	kernel/kernel.asm	/^global _start$/;"	l
+global	kernel/kernel.asm	/^global bound_range_exceeded$/;"	l
+global	kernel/kernel.asm	/^global breakpoint$/;"	l
+global	kernel/kernel.asm	/^global coprocessor_segment_overrun$/;"	l
+global	kernel/kernel.asm	/^global device_not_available$/;"	l
+global	kernel/kernel.asm	/^global divide_error$/;"	l
+global	kernel/kernel.asm	/^global double_fault$/;"	l
+global	kernel/kernel.asm	/^global general_protection$/;"	l
+global	kernel/kernel.asm	/^global hw_irq00$/;"	l
+global	kernel/kernel.asm	/^global hw_irq01$/;"	l
+global	kernel/kernel.asm	/^global hw_irq02$/;"	l
+global	kernel/kernel.asm	/^global hw_irq03$/;"	l
+global	kernel/kernel.asm	/^global hw_irq04$/;"	l
+global	kernel/kernel.asm	/^global hw_irq05$/;"	l
+global	kernel/kernel.asm	/^global hw_irq06$/;"	l
+global	kernel/kernel.asm	/^global hw_irq07$/;"	l
+global	kernel/kernel.asm	/^global hw_irq08$/;"	l
+global	kernel/kernel.asm	/^global hw_irq09$/;"	l
+global	kernel/kernel.asm	/^global hw_irq10$/;"	l
+global	kernel/kernel.asm	/^global hw_irq11$/;"	l
+global	kernel/kernel.asm	/^global hw_irq12$/;"	l
+global	kernel/kernel.asm	/^global hw_irq13$/;"	l
+global	kernel/kernel.asm	/^global hw_irq14$/;"	l
+global	kernel/kernel.asm	/^global hw_irq15$/;"	l
+global	kernel/kernel.asm	/^global invalid_opcode$/;"	l
+global	kernel/kernel.asm	/^global invalid_tss$/;"	l
+global	kernel/kernel.asm	/^global nmi_interrupt$/;"	l
+global	kernel/kernel.asm	/^global overflow$/;"	l
+global	kernel/kernel.asm	/^global page_fault$/;"	l
+global	kernel/kernel.asm	/^global segment_not_present$/;"	l
+global	kernel/kernel.asm	/^global single_step_error$/;"	l
+global	kernel/kernel.asm	/^global stack_fault$/;"	l
+global	kernel/kernel.asm	/^global x87_fpu_floating_point_error$/;"	l
+global	lib/klib.asm	/^global disp_color_str$/;"	l
+global	lib/klib.asm	/^global disp_str$/;"	l
+global	lib/klib.asm	/^global read_from_port$/;"	l
+global	lib/klib.asm	/^global write_to_port$/;"	l
+global	lib/string.asm	/^global memcpy$/;"	l
+hw_irq00	kernel/kernel.asm	/^hw_irq00:$/;"	l
+hw_irq01	kernel/kernel.asm	/^hw_irq01:$/;"	l
+hw_irq02	kernel/kernel.asm	/^hw_irq02:$/;"	l
+hw_irq03	kernel/kernel.asm	/^hw_irq03:$/;"	l
+hw_irq04	kernel/kernel.asm	/^hw_irq04:$/;"	l
+hw_irq05	kernel/kernel.asm	/^hw_irq05:$/;"	l
+hw_irq06	kernel/kernel.asm	/^hw_irq06:$/;"	l
+hw_irq07	kernel/kernel.asm	/^hw_irq07:$/;"	l
+hw_irq08	kernel/kernel.asm	/^hw_irq08:$/;"	l
+hw_irq09	kernel/kernel.asm	/^hw_irq09:$/;"	l
+hw_irq10	kernel/kernel.asm	/^hw_irq10:$/;"	l
+hw_irq11	kernel/kernel.asm	/^hw_irq11:$/;"	l
+hw_irq12	kernel/kernel.asm	/^hw_irq12:$/;"	l
+hw_irq13	kernel/kernel.asm	/^hw_irq13:$/;"	l
+hw_irq14	kernel/kernel.asm	/^hw_irq14:$/;"	l
+hw_irq15	kernel/kernel.asm	/^hw_irq15:$/;"	l
+hw_irq16	kernel/kernel.asm	/^hw_irq16:$/;"	l
+idt	kernel/global.c	/^gate idt[IDT_SIZE];$/;"	v
+idt_ptr	kernel/global.c	/^t_8 idt_ptr[6];$/;"	v
+inc	boot/boot_loader.asm	/^	inc di$/;"	d
+inc	boot/loader.asm	/^	inc di$/;"	d
+init_8259A	kernel/i8259.c	/^void init_8259A() {$/;"	f
+init_idt	kernel/protect.c	/^void init_idt() {$/;"	f
+init_idt_descriptor	kernel/protect.c	/^void init_idt_descriptor(unsigned char vector, t_8 gate_type, $/;"	f
+init_kernel	boot/loader.asm	/^init_kernel:$/;"	l
+interrupt_handler	include/type.h	/^typedef void (* interrupt_handler) ();$/;"	t
+invalid_opcode	kernel/kernel.asm	/^invalid_opcode:$/;"	l
+invalid_tss	kernel/kernel.asm	/^invalid_tss:$/;"	l
+itoa	lib/klib.c	/^char * itoa(char *p_str, unsigned int num) {$/;"	f
+kill_motor	boot/loader.asm	/^kill_motor:$/;"	l
+limit_high	boot/loader.asm	/^limit_high	  equ LOADERBASE_PHY_ADDR + __limit_high$/;"	d
+limit_low	boot/loader.asm	/^limit_low	  equ LOADERBASE_PHY_ADDR + __limit_low$/;"	d
+limit_low	include/protect.h	/^	t_16 limit_low;$/;"	m	struct:_descriptor
+loader_name	boot/boot_loader.asm	/^loader_name	db "LOADER  BIN", 0$/;"	d
+main	kernel/test.c	/^void main() {$/;"	f
+mem_chk_buff	boot/loader.asm	/^mem_chk_buff	  equ LOADERBASE_PHY_ADDR + __mem_chk_buff$/;"	d
+mem_size	boot/loader.asm	/^mem_size	  equ LOADERBASE_PHY_ADDR + __mem_size$/;"	d
+memcpy	lib/string.asm	/^memcpy:$/;"	l
+nmi_interrupt	kernel/kernel.asm	/^nmi_interrupt:$/;"	l
+no_loader	boot/boot_loader.asm	/^no_loader	db "No loader", 0$/;"	d
+offset_high	include/protect.h	/^	t_16 offset_high;$/;"	m	struct:_gate
+offset_low	include/protect.h	/^	t_16 offset_low;$/;"	m	struct:_gate
+overflow	kernel/kernel.asm	/^overflow:$/;"	l
+page_fault	kernel/kernel.asm	/^page_fault:$/;"	l
+pop	boot/boot_loader.asm	/^	pop di$/;"	d
+pop	boot/boot_loader.asm	/^	pop dx$/;"	d
+pop	boot/loader.asm	/^	pop dx$/;"	d
+push	boot/boot_loader.asm	/^	push di$/;"	d
+push	boot/boot_loader.asm	/^	push dx		; save the remainder$/;"	d
+push	boot/boot_loader.asm	/^	push dx$/;"	d
+push	boot/loader.asm	/^	push dx		; save the remainder$/;"	d
+push	boot/loader.asm	/^	push dx$/;"	d
+read_from_port	lib/klib.asm	/^read_from_port:$/;"	l
+read_sector	boot/boot_loader.asm	/^read_sector:$/;"	l
+read_sector	boot/loader.asm	/^read_sector:$/;"	l
+rootdir_sector	boot/loader.asm	/^rootdir_sector	dw 14$/;"	d
+rootdir_sectors	boot/boot_loader.asm	/^rootdir_sectors	dw ROOTDIR_SECTORS$/;"	d
+segment_not_present	kernel/kernel.asm	/^segment_not_present:$/;"	l
+selector	include/protect.h	/^	t_16 selector;$/;"	m	struct:_gate
+setup_paging	boot/loader.asm	/^setup_paging:$/;"	l
+single_step_error	kernel/kernel.asm	/^single_step_error:$/;"	l
+spurious_irq	kernel/i8259.c	/^void spurious_irq(int irq) {$/;"	f
+stack_fault	kernel/kernel.asm	/^stack_fault:$/;"	l
+str_apic_exist	kernel/kernel.asm	/^str_apic_exist db "APIC existed!", 0AH, 0$/;"	d
+str_apic_noexist	kernel/kernel.asm	/^str_apic_noexist db "APIC doesn't exist!", 0AH, 0$/;"	d
+str_kernel_load	boot/loader.asm	/^str_kernel_load	db "Loading kernel", 0$/;"	d
+str_kernel_name	boot/loader.asm	/^str_kernel_name	db "KERNEL  BIN", 0$/;"	d
+str_loading	boot/loader.asm	/^str_loading	db "Loading", 0$/;"	d
+str_mem_chk_title	boot/loader.asm	/^str_mem_chk_title equ LOADERBASE_PHY_ADDR + __str_mem_chk_title$/;"	d
+str_mem_size	boot/loader.asm	/^str_mem_size	  equ LOADERBASE_PHY_ADDR + __str_mem_size$/;"	d
+str_no_kernel	boot/loader.asm	/^str_no_kernel	db "No kernel was found!", 0$/;"	d
+t_16	include/type.h	/^typedef unsigned short t_16;$/;"	t
+t_32	include/type.h	/^typedef unsigned int t_32;$/;"	t
+t_8	include/type.h	/^typedef unsigned char t_8;$/;"	t
+t_bool	include/type.h	/^typedef int t_bool;$/;"	t
+t_port	include/type.h	/^typedef unsigned int t_port;$/;"	t
+times	boot/boot_loader.asm	/^times 510 - ($ - $$) db 0$/;"	l
+type	boot/loader.asm	/^type		  equ LOADERBASE_PHY_ADDR + __type$/;"	d
+write_to_port	lib/klib.asm	/^write_to_port:$/;"	l
+x87_fpu_floating_point_error	kernel/kernel.asm	/^x87_fpu_floating_point_error:$/;"	l
