@@ -106,6 +106,8 @@ restart:
 	lldt word [esp + PROCESS_LDT_SEL]
 	lea eax, [esp + TOP_OF_PROC_STACK]
 	mov dword [tss0 + TSS_ESP0], eax
+restart_reenter:
+	dec dword [int_re_enter]
 	pop gs
 	pop fs
 	pop es
@@ -134,53 +136,55 @@ hw_irq00:
 	; eip
 	; into ring 0 stack which is read from TSS.
 	; So we need to jump over 4 bytes of retaddr field of stack_frame.
-	sub esp, 4
-	pushad
-	push ds
-	push es
-	push fs
-	push gs
+	;sub esp, 4
+	call save
+	;pushad
+	;push ds
+	;push es
+	;push fs
+	;push gs
 	
 	; Use kernel self data segments
-	mov dx, ss
-	mov ds, dx
-	mov es, dx
-	inc byte [gs:0]
+	;mov dx, ss
+	;mov ds, dx
+	;mov es, dx
+	;inc byte [gs:0]
 	mov al, EOI
 	out INT_MASTER1, al
 
 	inc dword [int_re_enter]
 	cmp dword [int_re_enter], 0
-	jnz INT_RE_ENTER	
-	
+	jnz INT_RE_ENTER		
 	; Switch to kernel-self stack
 	mov esp, TOP_OF_STACK	
+	push restart
+	jmp RESUME_KER
+INT_RE_ENTER:
+	push restart_reenter
+RESUME_KER:
 	sti
-
 	;push clock_int_msg
 	;call disp_str
 	;add esp, 4
 	push 0
 	call clock_handler
 	add esp, 4
-	
 	cli
-	; Switch to kernel process storing stack
-	mov esp, [p_curr_proc]
-	lldt [esp + PROCESS_LDT_SEL]
-	lea eax, [esp + TOP_OF_PROC_STACK]
-	mov [tss0 + TSS_ESP0], eax
-	; Restore the new process state
-INT_RE_ENTER:
-	dec dword [int_re_enter]
-	pop gs
-	pop fs
-	pop es
-	pop ds
-	popad
-	add esp, 4
-	iretd
+	ret
 
+save:
+	pushad
+	push ds
+	push es
+	push fs
+	push gs
+	mov dx, ss
+	mov ds, dx
+	mov es, dx
+
+	mov eax, esp
+	inc dword [int_re_enter]
+	cmp dword [int_re_enter], 0
 ALIGN 16
 hw_irq01:
 	hw_irq_handler 1
