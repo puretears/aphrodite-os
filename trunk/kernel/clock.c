@@ -4,6 +4,8 @@
 
 extern process *p_curr_proc;
 extern process proc_list[NR_TASKS];
+extern int int_re_enter;
+
 
 void clock_handler(int irq) {
 	disp_str("#");
@@ -12,7 +14,6 @@ void clock_handler(int irq) {
 		disp_str("!");
 		// When reenter clock interrupt, we don't need to
 		// schedule processes.
-		return 0;
 	}	
 
 	p_curr_proc++;

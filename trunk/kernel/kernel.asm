@@ -16,6 +16,7 @@ extern delay
 extern int_re_enter
 extern clock_handler
 
+; The kernel own 2K stack space
 [section .bss]
 LABEL_KERNEL_STACK resb 2 * 1024
 TOP_OF_STACK:
@@ -152,16 +153,16 @@ hw_irq00:
 	mov al, EOI
 	out INT_MASTER1, al
 
-	inc dword [int_re_enter]
-	cmp dword [int_re_enter], 0
-	jnz INT_RE_ENTER		
+	;inc dword [int_re_enter]
+	;cmp dword [int_re_enter], 0
+	;jnz INT_RE_ENTER		
 	; Switch to kernel-self stack
-	mov esp, TOP_OF_STACK	
-	push restart
-	jmp RESUME_KER
-INT_RE_ENTER:
-	push restart_reenter
-RESUME_KER:
+	;mov esp, TOP_OF_STACK	
+	;push restart
+	;jmp RESUME_KER
+;INT_RE_ENTER:
+;	push restart_reenter
+;RESUME_KER:
 	sti
 	;push clock_int_msg
 	;call disp_str
@@ -185,6 +186,14 @@ save:
 	mov eax, esp
 	inc dword [int_re_enter]
 	cmp dword [int_re_enter], 0
+	jne HANDLE_INT_REENTER
+	mov esp, TOP_OF_STACK
+	push restart
+	jmp [eax + RET_ADDR - STACK_BASE]
+HANDLE_INT_REENTER:	
+	push restart_reenter
+	jmp [eax + RET_ADDR - STACK_BASE]
+	
 ALIGN 16
 hw_irq01:
 	hw_irq_handler 1
