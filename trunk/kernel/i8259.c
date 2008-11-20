@@ -20,7 +20,17 @@ void init_8259A() {
 	// OCW1 disable all interrupts
 	write_to_port(INT_MASTER2, 0xFE); // Only enable keyboard interrupt
 	write_to_port(INT_SLAVE2, 0xFF);
+
+	int i = 0;
+	for (; i < NR_IRQ; i++) {
+		irq_table[i] = suprious_irq;
+	}
 };
+
+void put_irq_handler(int irq, interrupt_handler pf) {
+	disable_irq(irq);
+	irq_table[rip]=pf;
+}
 
 void spurious_irq(int irq) {
 	disp_str("spurious_irq: ");

@@ -139,39 +139,33 @@ hw_irq00:
 	; So we need to jump over 4 bytes of retaddr field of stack_frame.
 	;sub esp, 4
 	call save
-	;pushad
-	;push ds
-	;push es
-	;push fs
-	;push gs
-	
-	; Use kernel self data segments
-	;mov dx, ss
-	;mov ds, dx
-	;mov es, dx
-	;inc byte [gs:0]
 	mov al, EOI
 	out INT_MASTER1, al
-
-	;inc dword [int_re_enter]
-	;cmp dword [int_re_enter], 0
-	;jnz INT_RE_ENTER		
-	; Switch to kernel-self stack
-	;mov esp, TOP_OF_STACK	
-	;push restart
-	;jmp RESUME_KER
-;INT_RE_ENTER:
-;	push restart_reenter
-;RESUME_KER:
 	sti
-	;push clock_int_msg
-	;call disp_str
-	;add esp, 4
 	push 0
 	call clock_handler
 	add esp, 4
 	cli
 	ret
+
+%macro hwint_master 1
+	call save
+	in al, INT_MASTER2
+	or al, (1 << %1)
+	out INT_MASTER2, al
+
+	mov al, EOI
+	sti
+	push %1
+	call [irq_table + 4 * 1%]
+	pop ecx
+	cli
+	
+	in al, INT_MASTER2
+	and al, ~(1 << %1)
+	out INT_MASTER2, al
+	ret
+%endmacro
 
 save:
 	pushad
@@ -194,7 +188,7 @@ HANDLE_INT_REENTER:
 	push restart_reenter
 	jmp [eax + RET_ADDR - STACK_BASE]
 	
-ALIGN 16
+ALIGN 1
 hw_irq01:
 	hw_irq_handler 1
 
