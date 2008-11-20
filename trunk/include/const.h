@@ -24,5 +24,7 @@
 #define INT_SLAVE1 0xA0
 #define INT_SLAVE2 0xA1
 
+#define CLOCK_IRQ 0
+
 #define NR_IRQ 16
 #endif 

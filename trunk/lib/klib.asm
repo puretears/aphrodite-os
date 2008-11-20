@@ -1,3 +1,4 @@
+%include "sconst.inc"
 
 extern curr_pos
 
@@ -6,7 +7,8 @@ global disp_str
 global disp_color_str
 global write_to_port
 global read_from_port
-
+global disable_irq
+global enable_irq
 disp_str:
 	push ebp
 	mov ebp, esp
@@ -115,4 +117,81 @@ read_from_port:
 	pop edx
 	mov esp, ebp
 	pop ebp
-	ret	
+	ret
+
+disable_irq:
+	push ebp
+	mov ebp, esp
+	pushf
+	push ecx
+
+	mov ecx, [ebp + 8]
+	cli
+	mov ah, 1
+	rol ah, cl
+	cmp cl, 8
+	jae disable_8
+disable_0:
+	in al, INT_MASTER2
+	test al, ah
+	jnz already_disabled
+	or al, ah
+	out INT_MASTER2, al
+	pop ecx
+	popf
+	mov esp, ebp
+	pop ebp
+	mov eax, 1
+	ret
+disable_8:
+	in al, INT_SLAVE2
+	test al, ah
+	jnz already_disabled
+	or al, ah
+	out INT_SLAVE2, al
+	pop ecx
+	popf
+	mov esp, ebp
+	pop ebp
+	mov eax, 1
+	ret
+already_disabled:
+	pop ecx
+	popf
+	mov esp, ebp
+	pop ebp
+	xor eax, eax
+	ret
+
+enable_irq:
+	push ebp
+	mov ebp, esp
+	pushf
+	push ecx
+
+	mov ecx, [ebp + 8]
+	cli
+	mov ah, ~1
+	rol ah, cl
+	cmp cl, 8
+	jae enable_8
+	in al, INT_MASTER2
+	and al, ah
+	out INT_MASTER2, AL
+	pop ecx
+	popf
+	mov esp, ebp
+	pop ebp
+	mov eax, 1
+	ret
+enable_8:
+	in al, INT_SLAVE2
+	and al, ah
+	out INT_SLAVE2, al
+	pop ecx
+	popf
+	mov esp, ebp
+	pop ebp
+	mov eax, 1
+	ret
+

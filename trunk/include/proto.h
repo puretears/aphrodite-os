@@ -9,6 +9,8 @@ int read_from_port(t_port port);
 void disp_str(char *p_str);
 void disp_color_str(char *p_str, int color);
 void disp_int(unsigned int num);
+int disable_irq(int irq);
+int enable_irq(int irq);
 
 /* protect.c*/
 void init_idt();
@@ -26,5 +28,9 @@ void process1();
 
 /* clock.c*/
 void clock_handler(int irq);
+
+/* i8259.c*/
+void put_irq_handler(int irq, interrupt_handler pf);
+void spurious_irq(int irq);
 
 #endif

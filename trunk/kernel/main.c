@@ -77,6 +77,9 @@ int aphrodite_main() {
 	
 	int_re_enter = -1;
 	p_curr_proc = proc_list;
+	
+	put_irq_handler(CLOCK_IRQ, clock_handler);
+	enable_irq(CLOCK_IRQ);
 	restart();
 	while (1) {}
 
