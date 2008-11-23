@@ -122,6 +122,8 @@ typedef struct _gate {
 #define INT_ALIGNMENT_CHECK 17
 #define INT_MACHINE_CHECK 18
 #define INT_XF_SMID_EXCEPTION 19
+#define INT_VECTOR_SYSCALL 0x90
+
 
 /* 8259A*/
 #define INTERRUPT_IRQ0 0x20

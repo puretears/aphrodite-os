@@ -18,8 +18,9 @@ DASMFLAGS = -u -o $(KERNEL_ENTRYPOINT) -e $(KERNEL_ENTRYOFFSET)
 #
 APHRODITE_BOOT = boot/boot.bin boot/loader.bin
 APHRODITE_KERNEL = kernel.bin
-OBJS = kernel/kernel.o kernel/start.o kernel/i8259.o kernel/global.o kernel/main.o kernel/protect.o\
-		kernel/clock.o	kernel/klib.o lib/klib.o lib/klibc.o lib/string.o
+OBJS = kernel/kernel.o kernel/start.o kernel/syscall.o kernel/i8259.o\
+	   kernel/global.o kernel/syscall_c.o kernel/main.o kernel/protect.o\
+	   kernel/clock.o kernel/klib.o lib/klib.o lib/klibc.o lib/string.o
 DASM_OUTPUT = kernel.bin.asm
 
 #All phony target
@@ -63,6 +64,9 @@ $(APHRODITE_KERNEL): $(OBJS)
 kernel/kernel.o: kernel/kernel.asm include/sconst.inc
 	$(ASM) $(ASM_KERNEL_FLAGS) -o $@ $<
 
+kernel/syscall.o: kernel/syscall.asm include/sconst.inc
+	$(ASM) $(ASM_KERNEL_FLAGS) -o $@ $<
+	
 kernel/main.o: kernel/main.c include/proto.h include/type.h include/const.h \
   include/protect.h
 
@@ -80,7 +84,6 @@ kernel/global.o: kernel/global.c include/type.h include/const.h include/protect.
 kernel/klib.o: kernel/klib.c
 	$(CC) $(CFLAGS) -o $@ $<
 
-
 kernel/clock.o: kernel/clock.c include/proto.h include/type.h include/process.h include/const.h
 	$(CC) $(CFLAGS) -o $@ $<
 
@@ -88,7 +91,10 @@ kernel/protect.o: kernel/protect.c include/proto.h include/type.h \
   include/protect.h include/type.h include/const.h include/process.h
 	$(CC) $(CFLAGS) -o $@ $<
 
-lib/klibc.o:  lib/klib.c include/type.h include/const.h include/protect.h \
+kernel/syscall_c.o: kernel/syscall.c include/proto.h include/type.h
+	$(CC) $(CFLAGS) -o $@ $<
+	
+lib/klibc.o: lib/klib.c include/type.h include/const.h include/protect.h \
   include/type.h include/proto.h include/string.h
 	$(CC) $(CFLAGS) -o $@ $<
 

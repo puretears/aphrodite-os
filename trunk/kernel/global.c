@@ -19,6 +19,8 @@ char process_stack[TOTAL_STACK_SIZE];
 interrupt_handler irq_table[NR_IRQ];
 
 init_proc_info init_proc_table[NR_TASKS] = {
-	{process0, PROCESS0_STACK_SIZE, "process0"},
-	{process1, PROCESS1_STACK_SIZE, "process1"}
+	{ process0, PROCESS0_STACK_SIZE, "process0" },
+	{ process1, PROCESS1_STACK_SIZE, "process1" }
 };
+
+t_sys_call sys_call_table[NR_SYS_CALL] = { sys_get_ticks };

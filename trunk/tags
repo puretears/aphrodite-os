@@ -4,7 +4,6 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.7	//
-A	kernel/test.c	3;"	d	file:
 APHRODITE_BOOT	Makefile	/^APHRODITE_BOOT = boot\/boot.bin boot\/loader.bin$/;"	m
 APHRODITE_KERNEL	Makefile	/^APHRODITE_KERNEL = kernel.bin$/;"	m
 APIC_EXIST	kernel/kernel.asm	/^APIC_EXIST:$/;"	l
@@ -14,7 +13,6 @@ ASM_BOOT_FLAGS	Makefile	/^ASM_BOOT_FLAGS = -I boot\/include\/$/;"	m
 ASM_KERNEL_FLAGS	Makefile	/^ASM_KERNEL_FLAGS = -I include\/ -f elf$/;"	m
 AVAILABLE_TSS32	include/protect.h	76;"	d
 AVAILIABLE_TSS16	include/protect.h	68;"	d
-B	kernel/test.c	4;"	d	file:
 BASE_OF_STACK	boot/loader.asm	/^BASE_OF_STACK	equ 0100H ; Because stack will come from 0100H, so we cannot$/;"	d
 BUSY_TSS16	include/protect.h	70;"	d
 BUSY_TSS32	include/protect.h	78;"	d
@@ -22,6 +20,7 @@ CALL_GATE16	include/protect.h	71;"	d
 CALL_GATE32	include/protect.h	79;"	d
 CC	Makefile	/^CC = gcc$/;"	m
 CFLAGS	Makefile	/^CFLAGS = -I include\/ -c -fno-builtin -fno-stack-protector$/;"	m
+CLOCK_IRQ	include/const.h	27;"	d
 CONST_H	include/const.h	2;"	d
 CONTINUE_MATCHING	boot/boot_loader.asm	/^CONTINUE_MATCHING:$/;"	l
 CONTINUE_MATCHING	boot/loader.asm	/^CONTINUE_MATCHING:$/;"	l
@@ -77,8 +76,8 @@ INIT_PDE	boot/loader.asm	/^INIT_PDE:$/;"	l
 INIT_PTE	boot/loader.asm	/^INIT_PTE:$/;"	l
 INTERRUPT_GATE16	include/protect.h	73;"	d
 INTERRUPT_GATE32	include/protect.h	81;"	d
-INTERRUPT_IRQ0	include/protect.h	127;"	d
-INTERRUPT_IRQ8	include/protect.h	128;"	d
+INTERRUPT_IRQ0	include/protect.h	129;"	d
+INTERRUPT_IRQ8	include/protect.h	130;"	d
 INT_ALIGNMENT_CHECK	include/protect.h	122;"	d
 INT_BOUND_RANGE_EXCEED	include/protect.h	110;"	d
 INT_BREAKPOINT	include/protect.h	108;"	d
@@ -97,11 +96,12 @@ INT_OVERFLOW	include/protect.h	109;"	d
 INT_PAGE_FAULT	include/protect.h	119;"	d
 INT_RESERVED	include/protect.h	106;"	d
 INT_RESERVED1	include/protect.h	120;"	d
-INT_RE_ENTER	kernel/kernel.asm	/^INT_RE_ENTER:$/;"	l
 INT_SEG_NOT_PRESENT	include/protect.h	116;"	d
 INT_SLAVE1	include/const.h	24;"	d
 INT_SLAVE2	include/const.h	25;"	d
 INT_STACK_SEG_FAULT	include/protect.h	117;"	d
+INT_VECTOR_SYSCALL	include/protect.h	125;"	d
+INT_VECTOR_SYS_CALL	kernel/syscall.asm	/^INT_VECTOR_SYS_CALL equ 144$/;"	d
 INT_X87_FPU_FAULT	include/protect.h	121;"	d
 INT_XF_SMID_EXCEPTION	include/protect.h	124;"	d
 KERNEL_ENTRYOFFSET	Makefile	/^KERNEL_ENTRYOFFSET = 0x400$/;"	m
@@ -142,9 +142,11 @@ LOAD_PROGRAM_HEADER	boot/loader.asm	/^LOAD_PROGRAM_HEADER:$/;"	l
 MEM_ADDR_UNAVAIL	boot/loader.asm	/^MEM_ADDR_UNAVAIL:$/;"	l
 NEXT_ARD_ENTRY	boot/loader.asm	/^NEXT_ARD_ENTRY:$/;"	l
 NO_REMAINDER	boot/loader.asm	/^NO_REMAINDER:$/;"	l
+NR_IRQ	include/const.h	29;"	d
+NR_SYS_CALL	include/const.h	32;"	d
 NR_TASKS	include/process.h	7;"	d
 NULL_PROGRAM_HEADER	boot/loader.asm	/^NULL_PROGRAM_HEADER:$/;"	l
-OBJS	Makefile	/^OBJS = kernel\/kernel.o kernel\/start.o kernel\/i8259.o kernel\/global.o kernel\/main.o kernel\/protect.o\\$/;"	m
+OBJS	Makefile	/^OBJS = kernel\/kernel.o kernel\/start.o kernel\/syscall.o kernel\/i8259.o\\$/;"	m
 PESUDO_GDT	boot/loader.asm	/^PESUDO_GDT:	dw GDT_LEN - 1$/;"	d
 PRIVILEGE_KERNEL	include/const.h	12;"	d
 PRIVILEGE_SERVICE	include/const.h	13;"	d
@@ -164,7 +166,6 @@ READ_NEXT_SECTOR1	boot/boot_loader.asm	/^READ_NEXT_SECTOR1:$/;"	l
 READ_NEXT_SECTOR1	boot/loader.asm	/^READ_NEXT_SECTOR1:$/;"	l
 READ_NEXT_SECTOR2	boot/boot_loader.asm	/^READ_NEXT_SECTOR2:$/;"	l
 READ_NEXT_SECTOR2	boot/loader.asm	/^READ_NEXT_SECTOR2:$/;"	l
-RESUME_KER	kernel/kernel.asm	/^RESUME_KER:$/;"	l
 RET_CHAR	boot/boot_loader.asm	/^RET_CHAR:$/;"	l
 RET_CHAR16	boot/loader.asm	/^RET_CHAR16:$/;"	l
 RPL_KERNEL	include/const.h	17;"	d
@@ -205,6 +206,7 @@ TYPE_H	include/type.h	2;"	d
 VEDIO_INDEX	include/protect.h	28;"	d
 VEDIO_SEL	boot/loader.asm	/^VEDIO_SEL	equ GDT_VEDIO - GDT_DUMMY + 3$/;"	d
 VEDIO_SEL	include/protect.h	36;"	d
+__NR_get_ticks	kernel/syscall.asm	/^__NR_get_ticks equ 0$/;"	d
 __ard	boot/loader.asm	/^__ard:$/;"	l
 __ard_count	boot/loader.asm	/^__ard_count		  dd 0$/;"	d
 __base_addr_high	boot/loader.asm	/^__base_addr_high	dd 0$/;"	d
@@ -221,6 +223,7 @@ __type	boot/loader.asm	/^__type			dd 0$/;"	d
 _descriptor	include/protect.h	/^typedef struct _descriptor {$/;"	s
 _gate	include/protect.h	/^typedef struct _gate {$/;"	s
 _start	kernel/kernel.asm	/^_start:$/;"	l
+already_disabled	lib/klib.asm	/^already_disabled:$/;"	l
 aphrodite_main	kernel/main.c	/^int aphrodite_main() {$/;"	f
 ard	boot/loader.asm	/^ard		  equ LOADERBASE_PHY_ADDR + __ard$/;"	d
 ard_count	boot/loader.asm	/^ard_count	  equ LOADERBASE_PHY_ADDR + __ard_count$/;"	d
@@ -234,6 +237,7 @@ base_addr_high	include/protect.h	/^	t_8 base_addr_high;$/;"	m	struct:_descriptor
 base_addr_low	boot/loader.asm	/^base_addr_low	  equ LOADERBASE_PHY_ADDR + __base_addr_low$/;"	d
 base_addr_low	include/protect.h	/^	t_16 base_addr_low;$/;"	m	struct:_descriptor
 base_addr_mid	include/protect.h	/^	t_8 base_addr_mid;$/;"	m	struct:_descriptor
+bits	kernel/syscall.asm	/^bits 32$/;"	l
 boot_str	boot/boot_loader.asm	/^boot_str	db "Booting", 0$/;"	d
 bound_range_exceeded	kernel/kernel.asm	/^bound_range_exceeded:$/;"	l
 breakpoint	kernel/kernel.asm	/^breakpoint:$/;"	l
@@ -252,6 +256,9 @@ dcount	include/protect.h	/^	t_8 dcount;	\/\/ Only valid for call gate$/;"	m	stru
 delay	kernel/klib.c	/^void delay(int time) {$/;"	f
 descriptor	include/protect.h	/^}descriptor;$/;"	t	typeref:struct:_descriptor
 device_not_available	kernel/kernel.asm	/^device_not_available:$/;"	l
+disable_0	lib/klib.asm	/^disable_0:$/;"	l
+disable_8	lib/klib.asm	/^disable_8:$/;"	l
+disable_irq	lib/klib.asm	/^disable_irq:$/;"	l
 disp_al	boot/boot_loader.asm	/^disp_al:$/;"	l
 disp_color_str	lib/klib.asm	/^disp_color_str:$/;"	l
 disp_int	lib/klib.c	/^void disp_int(unsigned int _num) {$/;"	f
@@ -281,6 +288,8 @@ eflags	include/process.h	/^	t_32 eflags;$/;"	m	struct:__anon2
 eip	include/process.h	/^	t_32 eip;$/;"	m	struct:__anon1
 eip	include/process.h	/^	t_32 eip;$/;"	m	struct:__anon2
 eip	include/process.h	/^	t_pf_task eip;$/;"	m	struct:__anon3
+enable_8	lib/klib.asm	/^enable_8:$/;"	l
+enable_irq	lib/klib.asm	/^enable_irq:$/;"	l
 es	include/process.h	/^	t_32 es;$/;"	m	struct:__anon1
 es	include/process.h	/^	t_32 es;$/;"	m	struct:__anon2
 esi	include/process.h	/^	t_32 esi;$/;"	m	struct:__anon1
@@ -302,8 +311,10 @@ extern	kernel/kernel.asm	/^extern exception_handler$/;"	l
 extern	kernel/kernel.asm	/^extern gdt_ptr$/;"	l
 extern	kernel/kernel.asm	/^extern idt_ptr$/;"	l
 extern	kernel/kernel.asm	/^extern int_re_enter$/;"	l
+extern	kernel/kernel.asm	/^extern irq_table$/;"	l
 extern	kernel/kernel.asm	/^extern p_curr_proc$/;"	l
 extern	kernel/kernel.asm	/^extern spurious_irq$/;"	l
+extern	kernel/kernel.asm	/^extern sys_call_table$/;"	l
 extern	kernel/kernel.asm	/^extern tss0$/;"	l
 extern	lib/klib.asm	/^extern curr_pos$/;"	l
 fs	include/process.h	/^	t_32 fs;$/;"	m	struct:__anon1
@@ -314,6 +325,7 @@ gdt_ptr	kernel/global.c	/^t_8 gdt_ptr[6];$/;"	v
 general_protection	kernel/kernel.asm	/^general_protection:$/;"	l
 get_fat_entry	boot/boot_loader.asm	/^get_fat_entry:$/;"	l
 get_fat_entry	boot/loader.asm	/^get_fat_entry:$/;"	l
+get_ticks	kernel/syscall.asm	/^get_ticks:$/;"	l
 global	kernel/kernel.asm	/^global _start$/;"	l
 global	kernel/kernel.asm	/^global bound_range_exceeded$/;"	l
 global	kernel/kernel.asm	/^global breakpoint$/;"	l
@@ -347,9 +359,13 @@ global	kernel/kernel.asm	/^global restart$/;"	l
 global	kernel/kernel.asm	/^global segment_not_present$/;"	l
 global	kernel/kernel.asm	/^global single_step_error$/;"	l
 global	kernel/kernel.asm	/^global stack_fault$/;"	l
+global	kernel/kernel.asm	/^global sys_call$/;"	l
 global	kernel/kernel.asm	/^global x87_fpu_floating_point_error$/;"	l
+global	kernel/syscall.asm	/^global get_ticks$/;"	l
+global	lib/klib.asm	/^global disable_irq$/;"	l
 global	lib/klib.asm	/^global disp_color_str$/;"	l
 global	lib/klib.asm	/^global disp_str$/;"	l
+global	lib/klib.asm	/^global enable_irq$/;"	l
 global	lib/klib.asm	/^global read_from_port$/;"	l
 global	lib/klib.asm	/^global write_to_port$/;"	l
 global	lib/string.asm	/^global memcpy$/;"	l
@@ -386,10 +402,11 @@ init_kernel	boot/loader.asm	/^init_kernel:$/;"	l
 init_proc_info	include/process.h	/^} init_proc_info;$/;"	t	typeref:struct:__anon3
 init_proc_table	kernel/global.c	/^init_proc_info init_proc_table[NR_TASKS] = {$/;"	v
 int_re_enter	kernel/global.c	/^int int_re_enter;$/;"	v
-interrupt_handler	include/type.h	/^typedef void (* interrupt_handler) ();$/;"	t
+interrupt_handler	include/type.h	/^typedef void (* interrupt_handler) (int irq);$/;"	t
 invalid_opcode	kernel/kernel.asm	/^invalid_opcode:$/;"	l
 invalid_tss	kernel/kernel.asm	/^invalid_tss:$/;"	l
 iobase	include/process.h	/^	t_16 iobase;$/;"	m	struct:__anon2
+irq_table	kernel/global.c	/^interrupt_handler irq_table[NR_IRQ];$/;"	v
 itoa	lib/klib.c	/^char * itoa(char *p_str, unsigned int num) {$/;"	f
 kernel_esp	include/process.h	/^	t_32 kernel_esp;$/;"	m	struct:__anon1
 kill_motor	boot/loader.asm	/^kill_motor:$/;"	l
@@ -400,7 +417,6 @@ limit_high	boot/loader.asm	/^limit_high	  equ LOADERBASE_PHY_ADDR + __limit_high
 limit_low	boot/loader.asm	/^limit_low	  equ LOADERBASE_PHY_ADDR + __limit_low$/;"	d
 limit_low	include/protect.h	/^	t_16 limit_low;$/;"	m	struct:_descriptor
 loader_name	boot/boot_loader.asm	/^loader_name	db "LOADER  BIN", 0$/;"	d
-main	kernel/test.c	/^void main() {$/;"	f
 mem_chk_buff	boot/loader.asm	/^mem_chk_buff	  equ LOADERBASE_PHY_ADDR + __mem_chk_buff$/;"	d
 mem_size	boot/loader.asm	/^mem_size	  equ LOADERBASE_PHY_ADDR + __mem_size$/;"	d
 memcpy	lib/string.asm	/^memcpy:$/;"	l
@@ -431,6 +447,7 @@ push	boot/boot_loader.asm	/^	push dx$/;"	d
 push	boot/loader.asm	/^	push dx		; save the remainder$/;"	d
 push	boot/loader.asm	/^	push dx$/;"	d
 push	kernel/kernel.asm	/^	push ds$/;"	d
+put_irq_handler	kernel/i8259.c	/^void put_irq_handler(int irq, interrupt_handler pf) {$/;"	f
 read_from_port	lib/klib.asm	/^read_from_port:$/;"	l
 read_sector	boot/boot_loader.asm	/^read_sector:$/;"	l
 read_sector	boot/loader.asm	/^read_sector:$/;"	l
@@ -464,12 +481,16 @@ str_mem_chk_title	boot/loader.asm	/^str_mem_chk_title equ LOADERBASE_PHY_ADDR + 
 str_mem_size	boot/loader.asm	/^str_mem_size	  equ LOADERBASE_PHY_ADDR + __str_mem_size$/;"	d
 str_no_kernel	boot/loader.asm	/^str_no_kernel	db "No kernel was found!", 0$/;"	d
 strcpy	lib/string.asm	/^strcpy:$/;"	l
+sys_call	kernel/kernel.asm	/^sys_call:$/;"	l
+sys_call_table	kernel/global.c	/^t_sys_call sys_call_table[NR_SYS_CALL] = { sys_get_ticks };$/;"	v
+sys_get_ticks	kernel/syscall.c	/^int sys_get_ticks() {$/;"	f
 t_16	include/type.h	/^typedef unsigned short t_16;$/;"	t
 t_32	include/type.h	/^typedef unsigned int t_32;$/;"	t
 t_8	include/type.h	/^typedef unsigned char t_8;$/;"	t
 t_bool	include/type.h	/^typedef int t_bool;$/;"	t
 t_pf_task	include/type.h	/^typedef void (* t_pf_task)();$/;"	t
 t_port	include/type.h	/^typedef unsigned int t_port;$/;"	t
+t_sys_call	include/type.h	/^typedef void * t_sys_call;$/;"	t
 times	boot/boot_loader.asm	/^times 510 - ($ - $$) db 0$/;"	l
 trap	include/process.h	/^	t_16 trap;$/;"	m	struct:__anon2
 tss	include/process.h	/^} tss;$/;"	t	typeref:struct:__anon2

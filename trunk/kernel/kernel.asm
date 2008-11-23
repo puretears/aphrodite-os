@@ -15,6 +15,8 @@ extern tss0
 extern delay
 extern int_re_enter
 extern clock_handler
+extern irq_table
+extern sys_call_table
 
 ; The kernel own 2K stack space
 [section .bss]
@@ -28,6 +30,9 @@ TOP_OF_STACK:
 [section .text]
 global _start
 global restart
+;system calls
+global sys_call
+
 ; Exception and interrupt referrence
 global divide_error
 global single_step_error
@@ -120,11 +125,42 @@ restart_reenter:
 
 ; Hardware interrupt
 %macro hw_irq_handler 1
-	push 1
+	push %1
 	call spurious_irq
 	add esp, 4
 	hlt
 %endmacro
+
+
+%macro hwint_master 1
+	call save
+	in al, INT_MASTER2
+	or al, (1 << %1)
+	out INT_MASTER2, al
+
+	mov al, EOI
+	out INT_MASTER1, al
+	sti
+	push %1
+	call [irq_table + 4 * %1]
+	pop ecx
+	cli
+	
+	in al, INT_MASTER2
+	and al, ~(1 << %1)
+	out INT_MASTER2, al
+	ret
+%endmacro
+
+; System calls here
+sys_call:
+	call save
+	sti
+	call [sys_call_table + eax * 4]
+	mov [esi + REG_EAX - STACK_BASE], eax
+	cli
+	ret
+
 
 ALIGN 16
 ; Time interrupt
@@ -137,60 +173,11 @@ hw_irq00:
 	; eip
 	; into ring 0 stack which is read from TSS.
 	; So we need to jump over 4 bytes of retaddr field of stack_frame.
-	;sub esp, 4
-	call save
-	mov al, EOI
-	out INT_MASTER1, al
-	sti
-	push 0
-	call clock_handler
-	add esp, 4
-	cli
-	ret
+	hwint_master 0
 
-%macro hwint_master 1
-	call save
-	in al, INT_MASTER2
-	or al, (1 << %1)
-	out INT_MASTER2, al
-
-	mov al, EOI
-	sti
-	push %1
-	call [irq_table + 4 * 1%]
-	pop ecx
-	cli
-	
-	in al, INT_MASTER2
-	and al, ~(1 << %1)
-	out INT_MASTER2, al
-	ret
-%endmacro
-
-save:
-	pushad
-	push ds
-	push es
-	push fs
-	push gs
-	mov dx, ss
-	mov ds, dx
-	mov es, dx
-
-	mov eax, esp
-	inc dword [int_re_enter]
-	cmp dword [int_re_enter], 0
-	jne HANDLE_INT_REENTER
-	mov esp, TOP_OF_STACK
-	push restart
-	jmp [eax + RET_ADDR - STACK_BASE]
-HANDLE_INT_REENTER:	
-	push restart_reenter
-	jmp [eax + RET_ADDR - STACK_BASE]
-	
-ALIGN 1
+ALIGN 16
 hw_irq01:
-	hw_irq_handler 1
+	hwint_master 1
 
 ALIGN 16
 hw_irq02:
@@ -317,5 +304,23 @@ exception:
 	add esp, 8
 	hlt
 
+save:
+	pushad
+	push ds
+	push es
+	push fs
+	push gs
+	mov dx, ss
+	mov ds, dx
+	mov es, dx
 
-
+	mov esi, esp
+	inc dword [int_re_enter]
+	cmp dword [int_re_enter], 0
+	jne HANDLE_INT_REENTER
+	mov esp, TOP_OF_STACK
+	push restart
+	jmp [esi + RET_ADDR - STACK_BASE]
+HANDLE_INT_REENTER:	
+	push restart_reenter
+	jmp [esi + RET_ADDR - STACK_BASE]

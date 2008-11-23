@@ -137,6 +137,8 @@ void init_idt() {
 	init_idt_descriptor(INTERRUPT_IRQ8 + 5, P_INT_GATE32, hw_irq13, PRIVILEGE_KERNEL);
 	init_idt_descriptor(INTERRUPT_IRQ8 + 6, P_INT_GATE32, hw_irq14, PRIVILEGE_KERNEL);
 	init_idt_descriptor(INTERRUPT_IRQ8 + 7, P_INT_GATE32, hw_irq15, PRIVILEGE_KERNEL);
+
+	init_idt_descriptor(INT_VECTOR_SYSCALL, P_INT_GATE32, sys_call, PRIVILEGE_USER);
 }
 
 

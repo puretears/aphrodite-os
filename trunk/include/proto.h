@@ -18,6 +18,7 @@ t_32 sel_to_phys(t_16 sel);
 
 /* kernel.asm*/
 void restart();
+void sys_call(); // IDT entry for system calls
 
 /* klib.c*/
 void delay(int time);
@@ -32,5 +33,12 @@ void clock_handler(int irq);
 /* i8259.c*/
 void put_irq_handler(int irq, interrupt_handler pf);
 void spurious_irq(int irq);
+
+/* syscall.asm */
+void get_ticks();
+
+/* process.c*/
+int sys_get_ticks(); // only used for system call table definition
+
 
 #endif
