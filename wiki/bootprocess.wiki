@@ -16,13 +16,10 @@ MBR used to load loader into memory.
  * boot/loader.asm
 Checking total memroy size, load kernel into memory, enable protect mode then jump to kernel.
 
+==== Boot process ====
+boot_loader.asm ==> boot.bin ==> MBR of floopy disk
+loader.asm ==> loader.bin ==> Loader of aphrodite-os
 
+boot.bin will find loader.bin in the root directory of floopy disk. After found, it will load loader.bin into LOADER_BASE:LOADER_OFFSET defined in load.inc.
 
-
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+loader.bin will first get a memory map by INT 15H. Then load kernel.bin into KERENEL_BASE:KERNEL_OFFSET defined in load.inc. After finish loading kernel image, loader.bin will enable protect mode then jump to kernel.
