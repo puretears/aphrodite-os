@@ -1,19 +1,19 @@
 #Aphrodite-OS booting process.
 
 ==== Source file ====
-*boot/include/protect.inc
+* boot/include/protect.inc
 Constant and macro definitions used in protect mode.
-*boot/include/load.inc
+* boot/include/load.inc
 Physical address of loader and kernel image file.
 Physical address of kernel entry point.
 Physical base address of page directory and page table.
-*boot/include/lib32.inc
+* boot/include/lib32.inc
 Some display and memory copy functions.
-*boot/include/fat12hdr.inc
+* boot/include/fat12hdr.inc
 FAT12 file system definitions.
-*boot/boot_loader.asm
+* boot/boot_loader.asm
 MBR used to load loader into memory.
-*boot/loader.asm
+* boot/loader.asm
 Checking total memroy size, load kernel into memory, enable protect mode then jump to kernel.
 
 
