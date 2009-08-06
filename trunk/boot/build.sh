@@ -1,7 +1,15 @@
 #!/bin/bash
 
-`dd if=boot.bin of=a.img bs=512 count=1 conv=notrunc`
+if [ ! -d "./debug" ]; then
+	mkdir "./debug"
 
-sudo mount -o loop a.img /mnt/floppy/
-sudo cp loader.bin /mnt/floppy -v
-sudo umount /mnt/floppy
+else
+	echo "debug directory has already been created."
+fi
+
+
+#`dd if=boot.bin of=a.img bs=512 count=1 conv=notrunc`
+
+#sudo mount -o loop a.img /mnt/floppy/
+#sudo cp loader.bin /mnt/floppy -v
+#sudo umount /mnt/floppy
