@@ -2,9 +2,11 @@
 
 if [ ! -d "./debug" ]; then
 	mkdir "./debug"
-
+	cd ./debug
+	pwd
 else
 	echo "debug directory has already been created."
+	pwd
 fi
 
 
