@@ -1,0 +1,85 @@
+#Process about how the bootstrap code loads the loader into memory.
+
+= Introduction =
+
+Aphrodite OS 启动代码的详细设计。
+
+= How Aphrodite OS is booted up =
+
+一个操作系统的启动分成三个过程：
+
+ × 首先是MBR被加载到内存里。MBR中代码的作用通常是加载另一个程序到内存里，并把控制权交给它，我们管这个程序叫做Loader。之所以要加载Loader，是因为内核初始化的代码通常要大于512字节，不能在MBR中全部完成。
+
+ × Loader为内核进行必要的初始化工作，之后在启动媒介中找到内核，把内核加载到内存中，然后交出控制权。
+
+ × 内核接管控制权，初始化，开始执行。
+
+= Why we started from a loader? =
+
+ # 从源头开始体验操作系统符合人们的思维习惯；
+
+ # 有一个自己写的Loader便于在内核发生故障时进行调试；
+
+其实，无论是MBR在启动媒介中寻找Loader，还是Loader在启动媒介中寻找内核，道理都是一样的，MBR或者Loader要能够识别启动媒介的文件系统，所以，我们可以从最简单的启动媒介开始体验——软盘。软盘使用的是FAT12文件系统，可以参考。这里说一些我们用的到的东西：
+
+= Details of FAT12 MBR =
+FAT12的MBR格式分成五部分：
+
+||一个跳转到MBR代码的short跳转指令||
+||一个nop指令||
+||BPB结构||
+||MBR代码||
+||0xAA55结束标记||
+
+写成一个nasm的代码框架如下：
+{{{
+    org 07C00H
+
+    jmp short LABLE_START
+
+    ; BPB definition here
+
+LABEL_START:
+
+    ; Bootstrap codes here
+
+    times (510 - ($ - $$)) db 0
+    dw 0xAA55
+}}}
+
+首先来看BPB的定义：
+{{{
+    ;BPB here
+    BS_OEMName          db "PURETEAR"
+    BPB_BytesPerSec     dw 0200H
+    BPB_SecPerClus      db 1
+    BPB_RsvdSecCnt      dw 1
+    BPB_NumFATs         db 2
+    BPB_RootEntCnt      dw 0E0H
+    BPB_TotSec16        dw 0B40H
+    BPB_Media           db 0xF0
+    BPB_FATSz16         dw 9
+    BPB_SecPerTrk       dw 12H 
+    BPB_NumHeads        dw 2
+    BPB_HiddenSec       dd 0
+    BPB_TotSec32        dd 0
+    BS_DrvNum           db 0
+    BS_Reserved1        db 0
+    BS_BootSig          db 0x29
+    BS_VolID            dd 0
+    BS_VolLab           db "puretears  "
+    BS_FileSysType      db "FAT12   "
+}}}
+其中，需要我们关注的成员有以下几个：
+||成员||含义||FAT12对应值||
+||BPB_BytesPerSec||每一个扇区的字节数||0200H||
+||BPB_NumFATs||FAT12拥有的FAT表数量||2||
+||BPB_RootEntCnt||FAT12根目录最大文件数||0E0H||
+||BPB_SecPerTrk||每磁道的扇区数||012H||
+
+根据上面的数值，我们可以计算出来一些FAT12常用的数值：
+
+ # FAT表开始扇区号：1
+ # FAT表共占用扇区数：18
+ # 根目录开始扇区号：SECTOR_OF_ROOTDIR = 9 + 9 + 1 = 19
+ # 根目录表最多占用扇区数：TOTAL_ROOTDIR_SEC = BPB_RootEntCnt * 32 / 512 = 14
