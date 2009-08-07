@@ -34,6 +34,7 @@ FAT12的MBR格式分成五部分：
 写成一个nasm的代码框架如下：
 {{{
     org 07C00H
+    nop
 
     jmp short LABLE_START
 
