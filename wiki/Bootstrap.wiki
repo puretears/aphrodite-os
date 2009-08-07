@@ -8,17 +8,17 @@ Aphrodite OS 启动代码的详细设计。
 
 一个操作系统的启动分成三个过程：
 
- × 首先是MBR被加载到内存里。MBR中代码的作用通常是加载另一个程序到内存里，并把控制权交给它，我们管这个程序叫做Loader。之所以要加载Loader，是因为内核初始化的代码通常要大于512字节，不能在MBR中全部完成。
+ * 首先是MBR被加载到内存里。MBR中代码的作用通常是加载另一个程序到内存里，并把控制权交给它，我们管这个程序叫做Loader。之所以要加载Loader，是因为内核初始化的代码通常要大于512字节，不能在MBR中全部完成。
 
- × Loader为内核进行必要的初始化工作，之后在启动媒介中找到内核，把内核加载到内存中，然后交出控制权。
+ * Loader为内核进行必要的初始化工作，之后在启动媒介中找到内核，把内核加载到内存中，然后交出控制权。
 
- × 内核接管控制权，初始化，开始执行。
+ * 内核接管控制权，初始化，开始执行。
 
 = Why we started from a loader? =
 
- # 从源头开始体验操作系统符合人们的思维习惯；
+ * 头开始体验操作系统符合人们的思维习惯；
 
- # 有一个自己写的Loader便于在内核发生故障时进行调试；
+ * 自己写的Loader便于在内核发生故障时进行调试；
 
 其实，无论是MBR在启动媒介中寻找Loader，还是Loader在启动媒介中寻找内核，道理都是一样的，MBR或者Loader要能够识别启动媒介的文件系统，所以，我们可以从最简单的启动媒介开始体验——软盘。软盘使用的是FAT12文件系统，可以参考。这里说一些我们用的到的东西：
 
@@ -83,4 +83,100 @@ LABEL_START:
  # FAT表开始扇区号：1
  # FAT表共占用扇区数：18
  # 根目录开始扇区号：SECTOR_OF_ROOTDIR = 9 + 9 + 1 = 19
- # 根目录表最多占用扇区数：TOTAL_ROOTDIR_SEC = BPB_RootEntCnt * 32 / 512 = 14
+ # 根目录表最多占用扇区数：TOTAL_ROOTDIR_SEC = BPB_RootEntCnt `*` 32 / 512 = 14
+
+= Some auxiliary functions =
+*read_sector*
+
+第一个是用来读软盘的函数，由于int 13H对软盘的读写比较麻烦，我们只需要指定逻辑上我们要读的软盘中的扇区号，要连续读几个扇区以及在es:bx中指定缓冲区的地址，read_sector会自动帮助我们执行读操作。
+{{{
+; es:bx data buffer
+; push starting sector number
+; push numbers of sectors want to read
+; call read_sector
+read_sector:
+    enter 6
+    push cx
+    push dx
+
+    xor dx, dx
+    mov ax, [bp + 6] ; starting sector number
+    mov cx, SECTORS_PER_TRACK
+    div cx
+
+    inc dx
+    mov [bp - 2], dx ; sector number
+
+    mov cx, ax
+    shr ax, 1
+    mov [bp - 4], ax ; track number
+
+    and cx, 1
+    mov [bp - 6], cx ; head number
+    
+    mov ch, [bp - 4]
+    mov cl, [bp - 2]
+    mov dh, [bp - 6]
+    mov dl, 0
+    
+CONTINUE_READING:
+    mov ah, 02H 
+    mov al, [bp + 4]
+    int 13H 
+    jc CONTINUE_READING ; Continue reading until successful
+    
+    pop dx
+    pop cx
+    add sp, 6
+    leave
+    ret 
+}}}
+
+*get_fat_entry*
+
+当我们在FAT根目录表中读到了文件的第一个扇区数时，我们还要根据这个扇区数，在FAT table中查询是否还有后续扇区，get_fat_entry便用来进行该项操作。要点是判断在FAT table中的索引是奇数还是偶数，如果是奇数，在读取到相应的fat entry后，要右移四位。
+{{{
+; push entry_index
+; call get_fat_entry
+get_fat_entry:
+    enter
+    push es
+
+    mov ax, BASE_OF_LOADER
+    sub ax, 0100
+    mov es, ax
+
+    mov ax, [bp + 4] ; entry index of fat table
+    ; Whether the index is an odd
+    xor dx, dx
+    mov bx, 3
+    mul bx
+    mov bx, 2
+    div bx
+    cmp dx, 0
+    jz EVEN_INDEX
+    mov byte [db_odd_index], 1
+EVEN_INDEX:
+    xor dx, dx
+    mov bx, [BPB_BytesPerSec]
+    div bx
+    xor bx, bx
+    add ax, 1
+    push ax
+    push 2
+    call read_sector
+    add bx, dx
+    mov ax, [es:bx]
+    cmp byte [db_odd_index], 1
+    jnz GET_ENTRY
+    shr ax, 4
+GET_ENTRY:
+    and ax, 0FFFH
+    pop es
+    leave
+    ret
+}}}
+
+*load_file*
+
+把一个指定的文件加载到特定的内存地址，由于我们不仅在MBR加载loader的时候会用到，在loader加载内核的时候同样会用到，因此把这个过程整合成一个函数；
