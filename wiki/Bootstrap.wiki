@@ -179,4 +179,16 @@ GET_ENTRY:
 
 *load_file*
 
-把一个指定的文件加载到特定的内存地址，由于我们不仅在MBR加载loader的时候会用到，在loader加载内核的时候同样会用到，因此把这个过程整合成一个函数；
+把一个指定的文件加载到特定的内存地址，由于我们不仅在MBR加载loader的时候会用到，在loader加载内核的时候同样会用到，因此把这个过程整合成一个函数。输入要加载的文件名，缓冲区地址，load_file会把特定的文件加载到指定的内存。
+
+{{{
+; push [address of the file name]
+; push offset of buffer
+; push base of buffer
+; call load_file
+load_file:
+    enter
+
+    leave
+    ret
+}}}
