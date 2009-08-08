@@ -13,6 +13,7 @@ BYTES_PER_SECTOR	equ 200H
 SECTORS_PER_TRACK	equ 18
 TOTAL_ROOTDIR_SEC	equ 14
 DIRENTRY_PER_SEC	equ 16
+TOTAL_ROOTDIR_ENTRY equ 224
 
 	jmp short LABEL_START
 	nop
@@ -45,64 +46,57 @@ LABEL_START:
 	mov ss, ax
 	mov sp, BASE_OF_STACK
 
-	; Reset floppy disk
-	xor ah, ah
-	xor dl, dl
+	; Reset floopy disk
+	xor ax, ax
+	xor dx, dx
 	int 13H
 
-	mov ax, BASE_OF_LOADER
-	mov es, ax
-
-READ_SECTOR:
-	cmp word [dw_total_rootdir_sec], 0 ; Root directory occupies 14 sectors at most
-	jz ALL_SECTORS_READ
-	mov bx, OFFSET_OF_LOADER
-	push word [dw_sector_of_rootdir]
-	push 1
-	call read_sector
-
-ROOTDIR_ENTRY:
-	mov di, OFFSET_OF_LOADER
-NEXT_ROOTDIR_ENTRY:
-	mov si, str_loader_name
-	mov cx, 11
-COMPARE_NAME:
-	lodsb
-	cmp byte [es:di], al
-	jz COMPARE_NEXT_CHAR
-	cmp word [dw_direntry_per_sec], 0
-	jz READ_NEXT_SECTOR
-	dec word [dw_direntry_per_sec]
-	and di, 0FFE0H
-	add di, 20H
-	jmp NEXT_ROOTDIR_ENTRY
-
-COMPARE_NEXT_CHAR:
-	inc di
-	dec cx
-	jcxz FOUND_LOADER
-	jmp COMPARE_NAME
-
-READ_NEXT_SECTOR:
-	mov word [dw_direntry_per_sec], DIRENTRY_PER_SEC
-	dec word [dw_total_rootdir_sec]
-	inc word [dw_sector_of_rootdir]
-	jmp READ_SECTOR
-
-ALL_SECTORS_READ:
-	mov ax, 1234H
+TRY_TO_RELOAD:
+	push str_loader_name
+	push OFFSET_OF_LOADER
+	push BASE_OF_LOADER
+	call load_file
+	cmp ax, 1
+	jnz LOAD_LOADER_FAILED
+	; Jump to the loader
+	mov di, 0
+	push str_boot_msg
+	call disp_str
+	;jmp BASE_OF_LOADER:OFFSET_OF_LOADER
 	jmp $
+LOAD_LOADER_FAILED:
+	jmp TRY_TO_RELOAD ; Try to reload the loader until successful
 
-FOUND_LOADER:
-	mov ax, 9876H
-	jmp BASE_OF_LOADER:OFFSET_OF_LOADER
+;================================ Auxiliary Functions ================================
+; push [string address]
+; call disp_str
+disp_str:
+	enter 0, 0
+	push gs
+	push si
+	mov ax, 0B800H
+	mov gs, ax
+	mov si, [bp + 4]
+GO_ON_DISP:
+	lodsb
+	cmp al, 0
+	jz DISP_OVER
+	mov ah, 0CH
+	mov [gs:di], ax
+	add di, 2
+	jmp GO_ON_DISP
+DISP_OVER:
+	pop si
+	pop gs
+	leave
+	ret
 
 ; es:bx data buffer
 ; push starting sector number
 ; push numbers of sectors want to read
 ; call read_sector
 read_sector:
-	enter 6
+	enter 6, 0
 	push cx
 	push dx
 
@@ -141,7 +135,7 @@ CONTINUE_READING:
 ; push entry_index
 ; call get_fat_entry
 get_fat_entry:
-	enter
+	enter 0,0
 	push es
 	push bx
 	push dx
@@ -187,7 +181,7 @@ GET_ENTRY:
 ; push base of buffer
 ; call load_file
 load_file:
-	enter
+	enter 0, 0
 	push bx
 READ_SECTOR:
 	; Load all rootdir sectors into memory
@@ -212,29 +206,26 @@ CONTINUE_MATCH:
 NEXT_ENTRY:
 	dec word [dw_total_rootdir_entry]
 	jz ALL_ROOTDIR_ENTRIES_READ
-	
 	and di, 0FFE0H ; 32-bytes alignment
 	add di, 20H	; Next rootdir entry
 	mov cx, 11
 	jmp COMPARE_NAME
 
-
 ALL_ROOTDIR_ENTRIES_READ:
 	xor ax, ax
 ENTRY_FOUND:
 	mov ax, 1
-
 	pop bx
 	leave
 	ret
 
-
+str_boot_msg			db "Booting...", 0
 str_loader_name			db "LOADER  BIN", 0
 db_odd_index			db 0
 dw_sector_of_rootdir	dw SECTOR_OF_ROOTDIR
 dw_total_rootdir_sec	dw TOTAL_ROOTDIR_SEC
 dw_direntry_per_sec		dw DIRENTRY_PER_SEC
-dw_total_rootdir_entry	dw 224
+dw_total_rootdir_entry	dw TOTAL_ROOTDIR_ENTRY
 
 	times (510 - ($ - $$)) db 0
 	dw 0AA55H
