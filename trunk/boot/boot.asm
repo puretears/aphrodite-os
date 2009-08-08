@@ -102,9 +102,7 @@ FOUND_LOADER:
 ; push numbers of sectors want to read
 ; call read_sector
 read_sector:
-	push bp
-	mov bp, sp
-	sub sp, 4
+	enter 6
 	push cx
 	push dx
 
@@ -136,27 +134,72 @@ CONTINUE_READING:
 	
 	pop dx
 	pop cx
-	add sp, 4
-	mov sp, bp
-	pop bp
+	add sp, 6
+	leave
 	ret
 
 ; push entry_index
 ; call get_fat_entry
 get_fat_entry:
-	push bp
-	mov bp, sp
+	enter
+	push es
+	push bx
+	push dx
 
+	mov ax, BASE_OF_LOADER
+	sub ax, 0100H
+	mov es, ax
+	
 	mov ax, [bp + 4] ; entry index of fat table
 	; Whether the index is an odd
 	xor dx, dx
+	mov bx, 3
+	mul bx
+	mov bx, 2
+	div bx
+	cmp dx, 0
+	jz EVEN_INDEX
+	mov byte [db_odd_index], 1
+EVEN_INDEX:
+	xor dx, dx
+	mov bx, [BPB_BytesPerSec]
+	div bx
+	xor bx, bx
+	add ax, 1
+	push ax
+	push 2
+	call read_sector
+	add bx, dx
+	mov ax, [es:bx]
+	cmp byte [db_odd_index], 1
+	jnz GET_ENTRY
+	shr ax, 4
+GET_ENTRY:
+	and ax, 0FFFH
+	pop dx
+	pop bx
+	pop es
+	leave
+	ret
 
-	mov sp, bp
-	pop bp
+; push [address of file name]
+; push offset of buffer
+; push base of buffer
+; call load_file
+load_file:
+	enter
+	
+	mov bx, [bp + 6] ; offset of buffer 
+	push word [dw_sector_of_rootdir]
+	push 1
+	call read_sector
+
+	leave
 	ret
 
 
 str_loader_name			db "LOADER  BIN", 0
+db_odd_index			db 0
 dw_sector_of_rootdir	dw SECTOR_OF_ROOTDIR
 dw_total_rootdir_sec	dw TOTAL_ROOTDIR_SEC
 dw_direntry_per_sec		dw DIRENTRY_PER_SEC
