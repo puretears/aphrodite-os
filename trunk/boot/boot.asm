@@ -188,12 +188,43 @@ GET_ENTRY:
 ; call load_file
 load_file:
 	enter
-	
-	mov bx, [bp + 6] ; offset of buffer 
+	push bx
+READ_SECTOR:
+	; Load all rootdir sectors into memory
+	mov bx, [bp + 6] ; offset of buffer
+	mov ax, [bp + 4]
+	mov es, ax ; es:bx buffer of the file
 	push word [dw_sector_of_rootdir]
-	push 1
+	push 14
 	call read_sector
 
+	mov di, bx
+	mov cx, 11
+COMPARE_NAME:
+	mov si, [bp + 8]
+CONTINUE_MATCH:
+	lodsb
+	cmp al, [es:di]
+	jnz	NEXT_ENTRY
+	inc di
+	loop CONTINUE_MATCH
+	jmp ENTRY_FOUND
+NEXT_ENTRY:
+	dec word [dw_total_rootdir_entry]
+	jz ALL_ROOTDIR_ENTRIES_READ
+	
+	and di, 0FFE0H ; 32-bytes alignment
+	add di, 20H	; Next rootdir entry
+	mov cx, 11
+	jmp COMPARE_NAME
+
+
+ALL_ROOTDIR_ENTRIES_READ:
+	xor ax, ax
+ENTRY_FOUND:
+	mov ax, 1
+
+	pop bx
 	leave
 	ret
 
@@ -203,6 +234,7 @@ db_odd_index			db 0
 dw_sector_of_rootdir	dw SECTOR_OF_ROOTDIR
 dw_total_rootdir_sec	dw TOTAL_ROOTDIR_SEC
 dw_direntry_per_sec		dw DIRENTRY_PER_SEC
-	
+dw_total_rootdir_entry	dw 224
+
 	times (510 - ($ - $$)) db 0
 	dw 0AA55H
