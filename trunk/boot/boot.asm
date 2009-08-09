@@ -56,12 +56,13 @@ TRY_TO_RELOAD:
 	push OFFSET_OF_LOADER
 	push BASE_OF_LOADER
 	call load_file
+	add sp, 6
 	cmp ax, 1
 	jnz LOAD_LOADER_FAILED
 	; Jump to the loader
-	mov di, 0
 	push str_boot_msg
 	call disp_str
+	add sp, 2
 	;jmp BASE_OF_LOADER:OFFSET_OF_LOADER
 	jmp $
 LOAD_LOADER_FAILED:
@@ -74,9 +75,11 @@ disp_str:
 	enter 0, 0
 	push gs
 	push si
+	push di
 	mov ax, 0B800H
 	mov gs, ax
 	mov si, [bp + 4]
+	mov di, dw_curr_pos
 GO_ON_DISP:
 	lodsb
 	cmp al, 0
@@ -86,6 +89,8 @@ GO_ON_DISP:
 	add di, 2
 	jmp GO_ON_DISP
 DISP_OVER:
+	mov word [dw_curr_pos], di
+	pop di
 	pop si
 	pop gs
 	leave
@@ -163,6 +168,7 @@ EVEN_INDEX:
 	push ax
 	push 2
 	call read_sector
+	add sp, 4
 	add bx, dx
 	mov ax, [es:bx]
 	cmp byte [db_odd_index], 1
@@ -182,7 +188,12 @@ GET_ENTRY:
 ; call load_file
 load_file:
 	enter 0, 0
+	push es
 	push bx
+	push cx
+	push si
+	push di
+
 READ_SECTOR:
 	; Load all rootdir sectors into memory
 	mov bx, [bp + 6] ; offset of buffer
@@ -191,7 +202,7 @@ READ_SECTOR:
 	push word [dw_sector_of_rootdir]
 	push 14
 	call read_sector
-
+	add sp, 4
 	mov di, bx
 	mov cx, 11
 COMPARE_NAME:
@@ -213,19 +224,49 @@ NEXT_ENTRY:
 
 ALL_ROOTDIR_ENTRIES_READ:
 	xor ax, ax
+	jmp FAILED_RETURN
 ENTRY_FOUND:
+	and di, 0FFE0H
+	add di, 1AH
+	; Display a dot for loading a sector
+	push str_loading_dot
+	call disp_str
+	add sp, 2
+	mov dx, [es:di]
+	add dx, 31
+CONTINUE_LOAD:
+	push dx
+	push 1
+	call read_sector
+	add sp, 4
+	push dx
+	call get_fat_entry
+	add sp, 2
+	cmp ax, 0FF8H
+	jae LOAD_OVER
+	add bx, 200H
+	mov dx, ax
+	jmp CONTINUE_LOAD
+LOAD_OVER:
 	mov ax, 1
+FAILED_RETURN:
+	pop di
+	pop si
+	pop cx
 	pop bx
+	pop es
 	leave
 	ret
 
-str_boot_msg			db "Booting...", 0
+str_loading_dot			db ".", 0
+str_boot_msg			db "Booting", 0
 str_loader_name			db "LOADER  BIN", 0
 db_odd_index			db 0
 dw_sector_of_rootdir	dw SECTOR_OF_ROOTDIR
 dw_total_rootdir_sec	dw TOTAL_ROOTDIR_SEC
 dw_direntry_per_sec		dw DIRENTRY_PER_SEC
 dw_total_rootdir_entry	dw TOTAL_ROOTDIR_ENTRY
+dw_curr_pos				dw 0
 
 	times (510 - ($ - $$)) db 0
 	dw 0AA55H
