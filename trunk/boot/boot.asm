@@ -63,8 +63,8 @@ TRY_TO_RELOAD:
 	push str_boot_msg
 	call disp_str
 	add sp, 2
-	;jmp BASE_OF_LOADER:OFFSET_OF_LOADER
-	jmp $
+	jmp BASE_OF_LOADER:OFFSET_OF_LOADER
+	;jmp $
 LOAD_LOADER_FAILED:
 	jmp TRY_TO_RELOAD ; Try to reload the loader until successful
 
@@ -79,7 +79,7 @@ disp_str:
 	mov ax, 0B800H
 	mov gs, ax
 	mov si, [bp + 4]
-	mov di, dw_curr_pos
+	mov di, [dw_curr_pos]
 GO_ON_DISP:
 	lodsb
 	cmp al, 0
@@ -240,8 +240,11 @@ CONTINUE_LOAD:
 	call read_sector
 	add sp, 4
 	push dx
+	sub dx, 31
+	push dx
 	call get_fat_entry
 	add sp, 2
+	pop dx
 	cmp ax, 0FF8H
 	jae LOAD_OVER
 	add bx, 200H
