@@ -46,6 +46,10 @@ LABEL_START:
 	mov ss, ax
 	mov sp, BASE_OF_STACK
 
+	push str_boot_msg
+	call disp_str
+	add sp, 2
+
 	; Reset floopy disk
 	xor ax, ax
 	xor dx, dx
@@ -59,12 +63,7 @@ TRY_TO_RELOAD:
 	add sp, 6
 	cmp ax, 1
 	jnz LOAD_LOADER_FAILED
-	; Jump to the loader
-	push str_boot_msg
-	call disp_str
-	add sp, 2
 	jmp BASE_OF_LOADER:OFFSET_OF_LOADER
-	;jmp $
 LOAD_LOADER_FAILED:
 	jmp TRY_TO_RELOAD ; Try to reload the loader until successful
 
@@ -217,8 +216,8 @@ CONTINUE_MATCH:
 NEXT_ENTRY:
 	dec word [dw_total_rootdir_entry]
 	jz ALL_ROOTDIR_ENTRIES_READ
-	and di, 0FFE0H ; 32-bytes alignment
-	add di, 20H	; Next rootdir entry
+	and di, 0FFE0H	; 32-bytes alignment
+	add di, 20H		; Next rootdir entry
 	mov cx, 11
 	jmp COMPARE_NAME
 
