@@ -232,21 +232,21 @@ ENTRY_FOUND:
 	call disp_str
 	add sp, 2
 	mov dx, [es:di]
-	add dx, 31
+	mov [dw_fat_table_entry], dx
 CONTINUE_LOAD:
+	add dx, 31
 	push dx
 	push 1
 	call read_sector
 	add sp, 4
-	push dx
-	sub dx, 31
-	push dx
+	
+	push word [dw_fat_table_entry]
 	call get_fat_entry
 	add sp, 2
-	pop dx
 	cmp ax, 0FF8H
 	jae LOAD_OVER
 	add bx, 200H
+	mov [dw_fat_table_entry], ax
 	mov dx, ax
 	jmp CONTINUE_LOAD
 LOAD_OVER:
@@ -269,6 +269,7 @@ dw_total_rootdir_sec	dw TOTAL_ROOTDIR_SEC
 dw_direntry_per_sec		dw DIRENTRY_PER_SEC
 dw_total_rootdir_entry	dw TOTAL_ROOTDIR_ENTRY
 dw_curr_pos				dw 0
+dw_fat_table_entry		dw 0
 
 	times (510 - ($ - $$)) db 0
 	dw 0AA55H
