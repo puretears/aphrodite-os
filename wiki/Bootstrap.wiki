@@ -289,3 +289,42 @@ load_file可以分成三部分来看，对应源代码注释中的三个phrase�
  # 开始，load_file把根目录表的14个扇区都加载到向load_file传入的地址内；
  # 其次，遍历每一个根目录表项，找loader.bin对应的表项；
  # 最后，把找到的loader.bin逐个扇区的加载到load_file指定的缓冲区；
+
+= The whole loading process =
+有了上面这些辅助函数，我们MBR中的启动代码就非常简单了：
+{{{
+LABEL_START:
+    mov ax, cs
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov sp, BASE_OF_STACK
+
+    push str_boot_msg
+    call disp_str
+    add sp, 2
+
+    ; Reset floopy disk
+    xor ax, ax
+    xor dx, dx
+    int 13H
+
+TRY_TO_RELOAD:
+    push str_loader_name
+    push OFFSET_OF_LOADER
+    push BASE_OF_LOADER
+    call load_file
+    add sp, 6
+    cmp ax, 1
+    jnz LOAD_LOADER_FAILED
+    jmp BASE_OF_LOADER:OFFSET_OF_LOADER
+LOAD_LOADER_FAILED:
+    jmp TRY_TO_RELOAD ; Try to reload the loader until successful
+}}}
+
+显示Booting，然后每读一个扇区会显示一个点，读成功了就跳转到Loader，否则就不停的读，一直到成功为止>_<。
+
+= How to build? =
+我们把编译出来的
+
+至此，我们关于Bootloader这一部分的工作就全部结束了，意义非比寻常，因为有一个Loader，可以让你非常方便的调式Ring 0的代码。这样，你再也不会为写了一段保护模式代码无法正常工作的问题头疼了。虽然我们刚刚开始，但是你应该感到信心百倍了。
