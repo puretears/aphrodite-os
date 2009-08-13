@@ -8,36 +8,11 @@ BASE_OF_STACK	equ 07C00H
 
 BASE_OF_LOADER		equ 9000H
 OFFSET_OF_LOADER	equ 0100H
-SECTOR_OF_ROOTDIR	equ 19
-BYTES_PER_SECTOR	equ 200H
-SECTORS_PER_TRACK	equ 18
-TOTAL_ROOTDIR_SEC	equ 14
-DIRENTRY_PER_SEC	equ 16
-TOTAL_ROOTDIR_ENTRY equ 224
 
 	jmp short LABEL_START
 	nop
 
-	;BPB here
-	BS_OEMName			db "PURETEAR"
-	BPB_BytesPerSec		dw 0200H
-	BPB_SecPerClus		db 1
-	BPB_RsvdSecCnt		dw 1
-	BPB_NumFATs			db 2
-	BPB_RootEntCnt		dw 0E0H
-	BPB_TotSec16		dw 0B40H
-	BPB_Media			db 0xF0
-	BPB_FATSz16			dw 9
-	BPB_SecPerTrk		dw 12H
-	BPB_NumHeads		dw 2
-	BPB_HiddenSec		dd 0
-	BPB_TotSec32		dd 0
-	BS_DrvNum			db 0
-	BS_Reserved1		db 0
-	BS_BootSig			db 0x29
-	BS_VolID			dd 0
-	BS_VolLab			db "puretears  "
-	BS_FileSysType		db "FAT12   "
+	%include "fat12header.inc"
 
 LABEL_START:
 	mov ax, cs
@@ -175,6 +150,7 @@ EVEN_INDEX:
 	shr ax, 4
 GET_ENTRY:
 	and ax, 0FFFH
+	mov byte [db_odd_index], 0
 	pop dx
 	pop bx
 	pop es
@@ -239,7 +215,7 @@ ENTRY_FOUND:
 	mov dx, [es:di]
 	mov [dw_fat_table_entry], dx
 CONTINUE_LOAD:
-	add dx, 31
+	add dx, OFFSET_OF_DATASEC
 	push dx
 	push 1
 	call read_sector
