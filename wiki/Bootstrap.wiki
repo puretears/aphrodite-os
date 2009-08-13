@@ -327,7 +327,7 @@ LOAD_LOADER_FAILED:
 = How to build? =
 我们把编译出来的boot.bin和loader.bin都放在./boot/debug里面。同样，用于测试的虚拟机环境，也在debug目录里。我们在boot目录下放两个脚本Makefile用来编译，build.sh用来构建整个测试环境。
 
-Makefile
+*Makefile*
 {{{
 .phony: ALL, clean
 
@@ -363,6 +363,32 @@ dd if=boot.bin of=a.img bs=512 count=1 conv=notrunc
 sudo mount -o loop a.img /mnt/floppy/
 sudo cp loader.bin /mnt/floppy -v
 sudo umount /mnt/floppy
+}}}
+
+*VM config file*
+{{{
+# how much memory the emulated machine will have
+megs: 32
+
+# filename of ROM images
+romimage: file=/usr/share/bochs/BIOS-bochs-latest
+vgaromimage: file=/usr/share/bochs/VGABIOS-lgpl-latest
+
+# what disk images will be used 
+floppya: 1_44=a.img, status=inserted
+
+# hard disk
+ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
+ata0-master: type=disk, path="hd10meg.img", cylinders=306, heads=4, spt=17
+
+# choose the boot disk.
+boot: floppy
+
+# where do we send log messages?
+log: bochsout.txt
+
+# disable the mouse, since Aphrodite-OS is text only
+mouse: enabled=0
 }}}
 
 至此，我们关于Bootloader这一部分的工作就全部结束了，意义非比寻常，因为有一个Loader，可以让你非常方便的调式Ring 0的代码。这样，你再也不会为写了一段保护模式代码无法正常工作的问题头疼了。虽然我们刚刚开始，但是你应该感到信心百倍了。
