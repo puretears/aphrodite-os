@@ -88,7 +88,7 @@ GO_ON_DISP:
 	add di, 2
 	jmp GO_ON_DISP
 DISP_OVER:
-	mov word [dw_curr_pos], di
+	mov [dw_curr_pos], di
 	pop di
 	pop si
 	pop gs
@@ -193,6 +193,7 @@ load_file:
 	push si
 	push di
 
+;Phrase 1: Load all rootdir table entries into memory.
 READ_SECTOR:
 	; Load all rootdir sectors into memory
 	mov bx, [bp + 6] ; offset of buffer
@@ -202,6 +203,8 @@ READ_SECTOR:
 	push 14
 	call read_sector
 	add sp, 4
+
+;Phrase 2: Find the corresponding "loader.bin" entry
 	mov di, bx
 	mov cx, 11
 COMPARE_NAME:
@@ -224,6 +227,8 @@ NEXT_ENTRY:
 ALL_ROOTDIR_ENTRIES_READ:
 	xor ax, ax
 	jmp FAILED_RETURN
+
+;Phrase 3: Load "loader.bin" into memroy
 ENTRY_FOUND:
 	and di, 0FFE0H
 	add di, 1AH
