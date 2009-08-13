@@ -391,4 +391,8 @@ log: bochsout.txt
 mouse: enabled=0
 }}}
 
+=Result=
+到build.sh创建的debug里，运行bochs。看到下面的截图，我们的MBR就完成了。
+[http://aphrodite-os.googlecode.com/files/booting.png]
+
 至此，我们关于Bootloader这一部分的工作就全部结束了，意义非比寻常，因为有一个Loader，可以让你非常方便的调式Ring 0的代码。这样，你再也不会为写了一段保护模式代码无法正常工作的问题头疼了。虽然我们刚刚开始，但是你应该感到信心百倍了。
