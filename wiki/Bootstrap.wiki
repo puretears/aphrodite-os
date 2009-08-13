@@ -1,3 +1,4 @@
+#labels OS,Bootstrap
 #Process about how the bootstrap code loads the loader into memory.
 
 = Introduction =
@@ -179,16 +180,112 @@ GET_ENTRY:
 
 *load_file*
 
-把一个指定的文件加载到特定的内存地址，由于我们不仅在MBR加载loader的时候会用到，在loader加载内核的时候同样会用到，因此把这个过程整合成一个函数。输入要加载的文件名，缓冲区地址，load_file会把特定的文件加载到指定的内存。
+把一个指定的文件加载到特定的内存地址，由于我们不仅在MBR加载loader的时候会用到，在loader加载内核的时候同样会用到，因此把这个过程整合成一个函数。输入要加载的文件名，缓冲区地址，load_file会把特定的文件加载到指定的内存。下面是完成的代码。
 
 {{{
-; push [address of the file name]
+; push [address of file name]
 ; push offset of buffer
 ; push base of buffer
 ; call load_file
 load_file:
-    enter
+    enter 0, 0
+    push es
+    push bx
+    push cx
+    push si
+    push di
 
+;Phrase 1: Load all rootdir table entries into memory.
+READ_SECTOR:
+    ; Load all rootdir sectors into memory
+    mov bx, [bp + 6] ; offset of buffer
+    mov ax, [bp + 4]
+    mov es, ax ; es:bx buffer of the file
+    push word [dw_sector_of_rootdir]
+    push 14
+    call read_sector
+    add sp, 4
+
+    push es
+    push bx
+    push cx
+    push si
+    push di
+
+;Phrase 1: Load all rootdir table entries into memory.
+READ_SECTOR:
+    ; Load all rootdir sectors into memory
+    mov bx, [bp + 6] ; offset of buffer
+    mov ax, [bp + 4]
+    mov es, ax ; es:bx buffer of the file
+    push word [dw_sector_of_rootdir]
+    push 14
+    call read_sector
+    add sp, 4
+
+;Phrase 2: Find the corresponding "loader.bin" entry
+    mov di, bx
+    mov cx, 11
+COMPARE_NAME:
+    mov si, [bp + 8]
+CONTINUE_MATCH:
+    lodsb
+    cmp al, [es:di]
+    jnz NEXT_ENTRY
+    inc di
+    loop CONTINUE_MATCH
+    jmp ENTRY_FOUND
+NEXT_ENTRY:
+    dec word [dw_total_rootdir_entry]
+    jz ALL_ROOTDIR_ENTRIES_READ
+    and di, 0FFE0H  ; 32-bytes alignment
+    add di, 20H     ; Next rootdir entry
+    mov cx, 11
+    jmp COMPARE_NAME
+
+ALL_ROOTDIR_ENTRIES_READ:
+    xor ax, ax
+    jmp FAILED_RETURN
+
+;Phrase 3: Load "loader.bin" into memroy
+ENTRY_FOUND:
+    and di, 0FFE0H
+    add di, 1AH
+    ; Display a dot for loading a sector
+    push str_loading_dot
+    call disp_str
+    add sp, 2
+    mov dx, [es:di]
+    mov [dw_fat_table_entry], dx
+CONTINUE_LOAD:
+    add dx, 31
+    push dx
+    push 1
+    call read_sector
+    add sp, 4
+
+    push word [dw_fat_table_entry]
+    call get_fat_entry
+    add sp, 2
+    cmp ax, 0FF8H
+    jae LOAD_OVER
+    add bx, 200H
+    mov [dw_fat_table_entry], ax
+    mov dx, ax
+    jmp CONTINUE_LOAD
+LOAD_OVER:
+    mov ax, 1
+FAILED_RETURN:
+    pop di
+    pop si
+    pop cx
+    pop bx
+    pop es
     leave
     ret
 }}}
+
+load_file可以分成三部分来看，对应源代码注释中的三个phrase：
+ # 开始，load_file把根目录表的14个扇区都加载到向load_file传入的地址内；
+ # 其次，遍历每一个根目录表项，找loader.bin对应的表项；
+ # 最后，把找到的loader.bin逐个扇区的加载到load_file指定的缓冲区；
