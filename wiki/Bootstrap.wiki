@@ -325,6 +325,44 @@ LOAD_LOADER_FAILED:
 显示Booting，然后每读一个扇区会显示一个点，读成功了就跳转到Loader，否则就不停的读，一直到成功为止>_<。
 
 = How to build? =
-我们把编译出来的
+我们把编译出来的boot.bin和loader.bin都放在./boot/debug里面。同样，用于测试的虚拟机环境，也在debug目录里。我们在boot目录下放两个脚本Makefile用来编译，build.sh用来构建整个测试环境。
+
+Makefile
+{{{
+.phony: ALL, clean
+
+ALL: boot.bin loader.bin
+
+boot.bin: boot.asm
+    nasm boot.asm -o ./debug/boot.bin
+
+loader.bin: loader.asm
+    nasm loader.asm -o ./debug/loader.bin
+
+clean:
+    rm ./debug/*.bin
+}}}
+
+*build.sh*
+{{{
+#!/bin/bash
+
+if [ ! -d "./debug" ]; then
+    mkdir "./debug"
+fi
+
+make
+
+cd ./debug
+
+if [ ! -f "a.img" ]; then
+    bximage -q -fd -size=1.44 a.img
+fi
+
+dd if=boot.bin of=a.img bs=512 count=1 conv=notrunc
+sudo mount -o loop a.img /mnt/floppy/
+sudo cp loader.bin /mnt/floppy -v
+sudo umount /mnt/floppy
+}}}
 
 至此，我们关于Bootloader这一部分的工作就全部结束了，意义非比寻常，因为有一个Loader，可以让你非常方便的调式Ring 0的代码。这样，你再也不会为写了一段保护模式代码无法正常工作的问题头疼了。虽然我们刚刚开始，但是你应该感到信心百倍了。
