@@ -1,7 +1,7 @@
 
 .phony: ALL, clean
 
-ALL: boot.bin loader.bin
+ALL: kernel.bin boot.bin loader.bin
 
 boot.bin: boot.asm fat12header.inc
 	nasm boot.asm -o ./debug/boot.bin
@@ -9,5 +9,7 @@ boot.bin: boot.asm fat12header.inc
 loader.bin: loader.asm fat12header.inc
 	nasm loader.asm -o ./debug/loader.bin
 
+kernel.bin: kernel.asm
+	nasm kernel.asm -o ./debug/kernel.bin
 clean:
 	rm ./debug/*.bin

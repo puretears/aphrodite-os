@@ -22,8 +22,34 @@ LABEL_START:
 	call disp_str
 	add sp, 2
 
+	push str_kernel_name
+	push OFFSET_OF_KERNEL
+	push BASE_OF_KERNEL
+	call load_file
+	add sp, 6
+	cmp ax, 0
+	jz NO_KERNEL_FOUND
+	jmp INIT_FOR_KERNEL
+NO_KERNEL_FOUND:
+	push str_loading_failed
+	call disp_str
+	add sp, 2
 	jmp $
 
+INIT_FOR_KERNEL:
+	push db_ard_buffer
+	push ds
+	push dw_ard_entries
+	call get_mem_mapinfo
+	add sp, 6
+
+	push db_ard_buffer
+	push ds
+	push word [dw_ard_entries]
+	call get_mem_size
+	add sp, 6
+
+	jmp BASE_OF_KERNEL:OFFSET_OF_KERNEL
 ;================================ Auxiliary Functions ================================
 clear_screen:
 	enter 0, 0
@@ -39,7 +65,7 @@ clear_screen:
 CONTINUE_CLEAR:
 	mov [gs:di], ax
 	add di, 2
-	cmp di, 2558
+	cmp di, 3998
 	ja CLEAR_OVER
 	jmp CONTINUE_CLEAR
 CLEAR_OVER:
@@ -245,13 +271,83 @@ FAILED_RETURN:
 	leave
 	ret
 
+; short get_mem_mapinfo([out]short *size, [in]short base_of_ard, [in]short offset_of_ard)
+get_mem_mapinfo:
+	enter 0, 0
+	push ebx
+	push ecx
+	push edx
+	push si
+	push di
+	push es
+	mov si, [bp + 4]
+	mov ax, [bp + 6]
+	mov es, ax
+	mov di, [bp + 8] ; es:bx - address of the buffer
+GET_MEM_INFO:
+	mov di, db_ard_buffer
+	mov ebx, 0
+	mov edx, 534D4150H ; 'SMAP' signature
+CONTINUE_GET_MEMINFO:
+	mov eax, 0E820H
+	mov ecx, 20
+	int 15H
+	inc word [si]
+	jc GET_MEMINFO_ERROR
+	cmp eax, 534D4150H
+	jnz MEMINFO_CHECKSUM_ERROR
+	test ebx, ebx
+	jz GET_MEMINFO_SUCCESSFUL
+	add di, 20
+	jmp CONTINUE_GET_MEMINFO
+GET_MEMINFO_ERROR:
+MEMINFO_CHECKSUM_ERROR:
+	mov word [si], 0
+	xor ax, ax
+GET_MEMINFO_SUCCESSFUL:
+	mov ax, 1
+	pop es
+	pop di
+	pop si
+	pop edx
+	pop ecx
+	pop ebx
+	leave
+	ret
+
+; int get_mem_size([in]short ard_entries, [in]short base_of_ard, [in]short offset_of_ard)
+get_mem_size:
+	enter 0, 0
+	push di
+	push ds
+	push cx
+	mov di, [bp + 8]
+	mov ax, [bp + 6]
+	mov ds, ax
+	mov cx, [bp + 4]
+	xor eax, eax
+
+CONTINUE_CALC_MEMSIZE:
+	add eax, dword [di + 8]
+	add di, 20
+	loop CONTINUE_CALC_MEMSIZE
+	pop cx
+	pop ds
+	pop edi
+	leave
+	ret
+
 str_loading_dot			db ".", 0
+str_loading_failed		db "No kernel.bin found", 0
 str_loading_msg			db "Loading kernel", 0
-str_loader_name			db "KERNEL  BIN", 0
+str_kernel_name			db "KERNEL  BIN", 0
 db_odd_index			db 0
+db_ard_buffer times 512 db 0 ; 25 ard entries support
 dw_sector_of_rootdir	dw SECTOR_OF_ROOTDIR
 dw_total_rootdir_sec	dw TOTAL_ROOTDIR_SEC
 dw_direntry_per_sec		dw DIRENTRY_PER_SEC
 dw_total_rootdir_entry	dw TOTAL_ROOTDIR_ENTRY
 dw_curr_pos				dw 0
 dw_fat_table_entry		dw 0
+dw_ard_entries			dw 0
+dd_total_mem_size		dd 0
