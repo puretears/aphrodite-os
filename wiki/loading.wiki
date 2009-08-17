@@ -9,6 +9,37 @@
  * 开启分页；
  * 将控制权转交内核；
 
+= 清屏 =
+* clear_screen *
+
+在bootstrap代码中，由于MBR的限制，这个功能没有加进去，就放在Loader里面了。功能很简单，把屏幕清成黑色的，然后重置当前显示位置（目前仅支持80x25的分辨率）。
+
+{{{
+clear_screen:
+    enter 0, 0
+    push gs
+    push di
+
+    mov ax, 0B800H
+    mov gs, ax
+
+    xor ax, ax
+    mov al, 20H 
+    mov di, 0
+CONTINUE_CLEAR:
+    mov [gs:di], ax
+    add di, 2
+    cmp di, 3998
+    ja CLEAR_OVER
+    jmp CONTINUE_CLEAR
+CLEAR_OVER:
+    mov word [dw_curr_pos], 0
+    pop di
+    pop gs
+    leave
+    ret 
+}}}
+
 
 = 初始化内存 =
 
