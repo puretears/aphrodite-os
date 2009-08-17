@@ -2,11 +2,11 @@
 	
 	jmp LABEL_START
 
-	TOP_OF_STACK		equ 0100H
-	BASE_OF_KERNEL		equ 08000H
-	OFFSET_OF_KERNEL	equ 0100H
-
 	%include "fat12header.inc"
+	%include "protect.inc"
+	%include "loader.inc"
+
+	CODE32_SEL	equ 0
 
 LABEL_START:
 	mov ax, cs
@@ -18,6 +18,22 @@ LABEL_START:
 
 	call clear_screen
 	
+	;------------------------- Get memory map information ----------------------------
+	push db_ard_buffer
+	push ds
+	push dw_ard_entries
+	call get_mem_mapinfo
+	add sp, 6
+
+	push db_ard_buffer
+	push ds
+	push word [dw_ard_entries]
+	call get_mem_size
+	add sp, 6
+
+	call disp_mem_mapinfo
+	
+	;----------------------------- Start loading kernel ---------------------------
 	push str_loading_msg
 	call disp_str
 	add sp, 2
@@ -36,19 +52,22 @@ NO_KERNEL_FOUND:
 	add sp, 2
 	jmp $
 
+	;---------------------------- Enable protected mode -----------------------------
 INIT_FOR_KERNEL:
-	push db_ard_buffer
-	push ds
-	push dw_ard_entries
-	call get_mem_mapinfo
-	add sp, 6
+	cli
 
-	push db_ard_buffer
-	push ds
-	push word [dw_ard_entries]
-	call get_mem_size
-	add sp, 6
+	in al, 92H
+	or al, 00000010B
+	out 92H, al
 
+	mov eax, cr0
+	or eax, 1
+	mov cr0, eax
+
+	jmp dword CODE32_SEL:(PA_LOADER + LABEL_CODE32_START)
+	;---------------------------- Enable paging mode --------------------------------
+
+	;---------------------------- Transmit control to kernel ------------------------
 	jmp BASE_OF_KERNEL:OFFSET_OF_KERNEL
 ;================================ Auxiliary Functions ================================
 clear_screen:
@@ -283,9 +302,7 @@ get_mem_mapinfo:
 	mov si, [bp + 4]
 	mov ax, [bp + 6]
 	mov es, ax
-	mov di, [bp + 8] ; es:bx - address of the buffer
-GET_MEM_INFO:
-	mov di, db_ard_buffer
+	mov di, [bp + 8] ; es:di - address of the buffer
 	mov ebx, 0
 	mov edx, 534D4150H ; 'SMAP' signature
 CONTINUE_GET_MEMINFO:
@@ -337,6 +354,18 @@ CONTINUE_CALC_MEMSIZE:
 	leave
 	ret
 
+[section .code32]
+[bits 32]
+align 32
+LABEL_CODE32_START:
+disp_mem_mapinfo:
+	enter 0, 0
+	
+	leave
+	ret
+
+[section .data]
+align 32
 str_loading_dot			db ".", 0
 str_loading_failed		db "No kernel.bin found", 0
 str_loading_msg			db "Loading kernel", 0

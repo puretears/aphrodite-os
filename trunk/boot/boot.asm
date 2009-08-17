@@ -1,18 +1,10 @@
-%ifdef DEBUG
-	org 0100H
-BASE_OF_STACK	equ 0100H
-%else
 	org 07C00H
-BASE_OF_STACK	equ 07C00H
-%endif
-
-BASE_OF_LOADER		equ 9000H
-OFFSET_OF_LOADER	equ 0100H
 
 	jmp short LABEL_START
 	nop
 
 	%include "fat12header.inc"
+	%include "loader.inc"
 
 LABEL_START:
 	mov ax, cs
