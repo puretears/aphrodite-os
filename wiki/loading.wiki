@@ -1,0 +1,66 @@
+#在加载内核前，Loader要为其进行的准备工作.
+
+= 在加载内核前，需要哪些准备工作 =
+
+ * 初始化内存；
+ * 
+
+
+= 初始化内存 =
+
+为了之后开启内存分页，我们要对系统的物理内存进行一番检查，用来确定：
+
+ * 物理内存的总量；
+ * 哪些是我们可以用的，那些是系统保留的；
+
+loader.asm提供了下面几个函数用来完成下面的工作：
+
+*get_mem_mapinfo*
+
+向函数传入用来保存ARD的缓冲区地址，以及用来保存内存大小的变量的地址，get_mem_mapinfo会通过int 15H来自动保存上述内容到指定变量。关于int 15H，参考[http://www.uruk.org/orig-grub/mem64mb.html 这里]。
+
+{{{
+; short get_mem_mapinfo([out]short *size, [in]short base_of_ard, [in]short offset_of_ard)
+get_mem_mapinfo:
+    enter 0, 0
+    push ebx 
+    push ecx 
+    push edx 
+    push si
+    push di
+    push es
+    mov si, [bp + 4]
+    mov ax, [bp + 6]
+    mov es, ax
+    mov di, [bp + 8] ; es:bx - address of the buffer
+GET_MEM_INFO:
+    mov di, db_ard_buffer
+    mov ebx, 0
+    mov edx, 534D4150H ; 'SMAP' signature
+CONTINUE_GET_MEMINFO:
+    mov eax, 0E820H
+    mov ecx, 20
+    int 15H 
+    inc word [si]
+    jc GET_MEMINFO_ERROR
+    cmp eax, 534D4150H
+    jnz MEMINFO_CHECKSUM_ERROR
+    test ebx, ebx 
+    jz GET_MEMINFO_SUCCESSFUL
+    add di, 20
+    jmp CONTINUE_GET_MEMINFO
+GET_MEMINFO_ERROR:
+MEMINFO_CHECKSUM_ERROR:
+    mov word [si], 0
+    xor ax, ax
+GET_MEMINFO_SUCCESSFUL:
+    mov ax, 1
+    pop es
+    pop di
+    pop si
+    pop edx 
+    pop ecx 
+    pop ebx 
+    leave
+    ret 
+}}}
