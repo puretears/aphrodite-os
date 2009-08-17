@@ -67,7 +67,7 @@ GET_MEMINFO_SUCCESSFUL:
 
 *get_mem_size*
 
-该函数用来根据ARD缓冲区计算系统物理内存的大小，所以，调用该函数前，应该
+该函数用来根据ARD缓冲区计算系统物理内存的大小，所以，调用该函数前，应该调用get_mem_mapinfo获取一个ard缓冲区和ard项目个数；
 
 {{{
  int get_mem_size([in]short ard_entries, [in]short base_of_ard, [in]short offset_of_ard)
