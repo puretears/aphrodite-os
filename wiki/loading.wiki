@@ -17,7 +17,7 @@ loader.asm提供了下面几个函数用来完成下面的工作：
 
 *get_mem_mapinfo*
 
-向函数传入用来保存ARD的缓冲区地址，以及用来保存内存大小的变量的地址，get_mem_mapinfo会通过int 15H来自动保存上述内容到指定变量。关于int 15H，参考[http://www.uruk.org/orig-grub/mem64mb.html 这里]。
+向函数传入用来保存ARD缓冲区的地址，以及用来保存ARD个数的变量的地址，get_mem_mapinfo会通过int 15H来自动保存上述内容到指定变量。关于int 15H，参考[http://www.uruk.org/orig-grub/mem64mb.html 这里]。
 
 {{{
 ; short get_mem_mapinfo([out]short *size, [in]short base_of_ard, [in]short offset_of_ard)
@@ -63,4 +63,31 @@ GET_MEMINFO_SUCCESSFUL:
     pop ebx 
     leave
     ret 
+}}}
+
+*get_mem_size*
+
+该函数用来根据ARD缓冲区计算系统物理内存的大小，所以，调用该函数前，应该
+
+{{{
+ int get_mem_size([in]short ard_entries, [in]short base_of_ard, [in]short offset_of_ard)
+get_mem_size:
+    enter 0, 0
+    push di
+    push ds
+    push cx
+    mov di, [bp + 8]
+    mov ax, [bp + 6]
+    mov ds, ax
+    mov cx, [bp + 4]
+    xor eax, eax 
+CONTINUE_CALC_MEMSIZE:
+    add eax, dword [di + 8]
+    add di, 20
+    loop CONTINUE_CALC_MEMSIZE
+    pop cx
+    pop ds
+    pop edi
+    leave
+    ret
 }}}
