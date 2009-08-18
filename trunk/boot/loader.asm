@@ -6,7 +6,17 @@
 	%include "protect.inc"
 	%include "loader.inc"
 
-	CODE32_SEL	equ 0
+LABEL_GDT:	descriptor 0, 0, 0
+CODE32:		descriptor 0, 0FFFFFH, 409AH 
+DATA:		descriptor 0, 0FFFFFH, 4092H 
+VEDIO:		descriptor 0B8000H, 0FFFFH, 92H
+
+PESUDO_GDT: dw ($ - LABEL_GDT - 1)
+			dd (PA_LOADER + LABEL_GDT)
+
+CODE32_SEL	equ CODE32 - LABEL_GDT
+DATA_SEL	equ DATA - LABEL_GDT
+VEDIO_SEL	equ VEDIO - LABEL_GDT
 
 LABEL_START:
 	mov ax, cs
@@ -17,7 +27,6 @@ LABEL_START:
 	mov sp, 0100H
 
 	call clear_screen
-	
 	;------------------------- Get memory map information ----------------------------
 	push db_ard_buffer
 	push ds
@@ -30,9 +39,6 @@ LABEL_START:
 	push word [dw_ard_entries]
 	call get_mem_size
 	add sp, 6
-
-	call disp_mem_mapinfo
-	
 	;----------------------------- Start loading kernel ---------------------------
 	push str_loading_msg
 	call disp_str
@@ -45,7 +51,7 @@ LABEL_START:
 	add sp, 6
 	cmp ax, 0
 	jz NO_KERNEL_FOUND
-	jmp INIT_FOR_KERNEL
+	jmp ENTER_PROTECT_MODE
 NO_KERNEL_FOUND:
 	push str_loading_failed
 	call disp_str
@@ -53,22 +59,23 @@ NO_KERNEL_FOUND:
 	jmp $
 
 	;---------------------------- Enable protected mode -----------------------------
-INIT_FOR_KERNEL:
+ENTER_PROTECT_MODE:
+	call new_line
+	; Load GDTR
+	lgdt [PESUDO_GDT]
+	; Shidld external INT
 	cli
-
+	; Open A20
 	in al, 92H
 	or al, 00000010B
 	out 92H, al
-
+	; CR0.PE = 1
 	mov eax, cr0
 	or eax, 1
 	mov cr0, eax
-
+	; Clear instruction cache. Jump to 32-bit code
 	jmp dword CODE32_SEL:(PA_LOADER + LABEL_CODE32_START)
-	;---------------------------- Enable paging mode --------------------------------
 
-	;---------------------------- Transmit control to kernel ------------------------
-	jmp BASE_OF_KERNEL:OFFSET_OF_KERNEL
 ;================================ Auxiliary Functions ================================
 clear_screen:
 	enter 0, 0
@@ -100,23 +107,59 @@ disp_str:
 	push gs
 	push si
 	push di
+	push dx
+	push bx
 	mov ax, 0B800H
 	mov gs, ax
+	xor ax, ax
+	mov ah, 0CH
 	mov si, [bp + 4]
 	mov di, [dw_curr_pos]
-GO_ON_DISP:
+GO_ON_DISP16:
 	lodsb
 	cmp al, 0
-	jz DISP_OVER
-	mov ah, 0CH
+	jz DISP_OVER16
+	cmp al, 0AH
+	jnz DISP_CHAR16
+	xor dx, dx
+	mov ax, di
+	mov bx, 160
+	div bx
+	inc ax
+	xor dx, dx
+	mul bx
+	mov [dw_curr_pos], ax
+	jmp DISP_OVER_RET16
+DISP_CHAR16:	
 	mov [gs:di], ax
 	add di, 2
-	jmp GO_ON_DISP
-DISP_OVER:
+	jmp GO_ON_DISP16
+DISP_OVER16:
 	mov [dw_curr_pos], di
+DISP_OVER_RET16:
+	pop bx
+	pop dx
 	pop di
 	pop si
 	pop gs
+	leave
+	ret
+
+;void new_line()
+new_line:
+	enter 0, 0
+	push bx
+	push dx
+	xor dx, dx
+	mov ax, word [dw_curr_pos]
+	mov bx, 160
+	div bx
+	inc ax
+	xor dx, dx
+	mul bx
+	mov word [dw_curr_pos], ax
+	pop dx
+	pop bx
 	leave
 	ret
 
@@ -358,9 +401,178 @@ CONTINUE_CALC_MEMSIZE:
 [bits 32]
 align 32
 LABEL_CODE32_START:
-disp_mem_mapinfo:
-	enter 0, 0
+	mov ax, DATA_SEL
+	mov ds, ax
+	mov es, ax
+	mov ss, ax
+	mov esp, 0100H
+	mov ax, VEDIO_SEL
+	mov gs, ax
+
+	push _str_mem_table_title
+	call disp_str32
+	add esp, 4
+
+	call new_line32
+
+	push _db_ard_buffer
+	call disp_mem_mapinfo
+	add esp, 4
 	
+	jmp $
+
+;void disp_mem_mapinfo(void *buffer)	
+disp_mem_mapinfo:
+	enter 32, 0
+	push esi
+	push ebx
+	push edx
+	; ebp - 4: base address low
+	; ebp - 8: base address high
+	; ebp - 12: length low
+	; ebp - 16: length high
+	; ebp - 20: type
+	; ebp - 24: alignment fill
+	mov esi, [ebp + 8]
+	mov ecx, [_dw_ard_entries]
+CONTINUE_ARD_DISP:	
+	lodsd
+	mov [ebp - 4], eax
+	lodsd
+	mov [ebp - 8], eax
+	lodsd
+	mov [ebp - 12], eax
+	lodsd
+	mov [ebp - 16], eax
+	add esi, 4 ; Jump type
+	
+	mov edx, [ebp - 4]
+	add edx, [ebp - 12] ; eax = low 32-bit ending address
+	mov ebx, [ebp - 8]
+	adc ebx, [ebp - 16] ; ebx = high 32-bit ending address
+
+	push dword [ebp - 8]
+	call disp_int32
+	add esp, 4
+	push dword [ebp - 4]
+	call disp_int32
+	add esp, 4
+	push _str_delimeter
+	call disp_str32
+	add esp, 4
+	push ebx
+	call disp_int32
+	add esp, 4
+	push edx
+	call disp_int32
+	add esp, 4
+
+	call new_line32
+	loop CONTINUE_ARD_DISP
+
+	pop edx
+	pop ebx
+	pop esi
+	add esp, 32
+	leave
+	ret
+
+; void disp_int32([in] int)
+disp_int32:
+	enter 0, 0
+	push esi
+	push edi
+	push ecx
+	push ebx
+	mov esi, [ebp + 8]
+	mov di, word [_dw_curr_pos]
+	mov ah, 0CH
+	mov cl, 28
+GO_ON_DISP_INT32:	
+	mov ebx, esi
+	shr ebx, cl
+	mov al, bl
+	and al, 0FH
+	cmp al, 0AH
+	jae ADD09
+	add al, 30H
+	jmp DISP_AL
+ADD09:
+	add al, 37H
+DISP_AL:
+	mov [gs:di], ax
+	add di, 2
+	cmp cl, 0
+	jz DISP_INT32_OVER
+	sub cl, 4
+	jmp GO_ON_DISP_INT32
+DISP_INT32_OVER:
+	mov word [_dw_curr_pos], di
+	pop ebx
+	pop ecx
+	pop edi
+	pop esi
+	leave
+	ret
+
+; void new_line32()
+new_line32:
+	enter 0, 0
+	push ebx
+	push edx
+
+	xor edx, edx
+	movzx eax, word [_dw_curr_pos]
+	mov ebx, 160
+	div ebx
+	xor edx, edx
+	add eax, 1
+	mul ebx
+	mov [_dw_curr_pos], ax
+	
+	pop edx
+	pop ebx
+	leave
+	ret
+
+;void disp_str32([in]char *)
+disp_str32:
+	enter 0, 0
+	push edi
+	push esi
+	push ebx
+	push edx
+	xor eax, eax
+	mov ah, 0CH
+	mov esi, [ebp + 8]
+	movzx edi, word [_dw_curr_pos]
+CONTINUE_DISP32:
+	lodsb
+	cmp al, 0
+	jz DISP_OVER32
+	cmp al, 0AH
+	jnz DISP_CHAR
+	; Change a new line
+	mov eax, edi
+	xor edx, edx
+	mov ebx, 160
+	div ebx
+	inc eax
+	xor edx, edx
+	mul ebx
+	mov word [_dw_curr_pos], ax
+	jmp DISP_OVER_RET
+DISP_CHAR:
+	mov [gs:edi], ax
+	add edi, 2
+	jmp CONTINUE_DISP32
+DISP_OVER32:
+	mov word [_dw_curr_pos], di
+DISP_OVER_RET:
+	pop edx
+	pop ebx
+	pop esi
+	pop edi
 	leave
 	ret
 
@@ -370,7 +582,9 @@ str_loading_dot			db ".", 0
 str_loading_failed		db "No kernel.bin found", 0
 str_loading_msg			db "Loading kernel", 0
 str_kernel_name			db "KERNEL  BIN", 0
+str_delimeter			db " - ", 0
 db_odd_index			db 0
+str_mem_table_title		db "e820: ", 0
 db_ard_buffer times 512 db 0 ; 25 ard entries support
 dw_sector_of_rootdir	dw SECTOR_OF_ROOTDIR
 dw_total_rootdir_sec	dw TOTAL_ROOTDIR_SEC
@@ -380,3 +594,9 @@ dw_curr_pos				dw 0
 dw_fat_table_entry		dw 0
 dw_ard_entries			dw 0
 dd_total_mem_size		dd 0
+
+_str_mem_table_title	equ PA_LOADER + str_mem_table_title
+_dw_curr_pos			equ PA_LOADER + dw_curr_pos
+_db_ard_buffer			equ PA_LOADER + db_ard_buffer
+_str_delimeter			equ PA_LOADER + str_delimeter
+_dw_ard_entries			equ PA_LOADER + dw_ard_entries
