@@ -7,8 +7,8 @@
 	%include "loader.inc"
 
 LABEL_GDT:	descriptor 0, 0, 0
-CODE32:		descriptor 0, 0FFFFFH, 409AH 
-DATA:		descriptor 0, 0FFFFFH, 4092H 
+CODE32:		descriptor 0, 0FFFFFH, 0C09AH 
+DATA:		descriptor 0, 0FFFFFH, 0C092H 
 VEDIO:		descriptor 0B8000H, 0FFFFH, 92H
 
 PESUDO_GDT: dw ($ - LABEL_GDT - 1)
@@ -39,6 +39,7 @@ LABEL_START:
 	push word [dw_ard_entries]
 	call get_mem_size
 	add sp, 6
+	mov dword [dd_total_mem_size], eax
 	;----------------------------- Start loading kernel ---------------------------
 	push str_loading_msg
 	call disp_str
@@ -393,7 +394,7 @@ CONTINUE_CALC_MEMSIZE:
 	loop CONTINUE_CALC_MEMSIZE
 	pop cx
 	pop ds
-	pop edi
+	pop di
 	leave
 	ret
 
@@ -405,7 +406,7 @@ LABEL_CODE32_START:
 	mov ds, ax
 	mov es, ax
 	mov ss, ax
-	mov esp, 0100H
+	mov esp, TOP_OF_STACK32
 	mov ax, VEDIO_SEL
 	mov gs, ax
 
@@ -418,15 +419,93 @@ LABEL_CODE32_START:
 	push _db_ard_buffer
 	call disp_mem_mapinfo
 	add esp, 4
+
+	push _str_memsize_msg
+	call disp_str32
+	add esp, 4
 	
+	push dword [_dd_total_mem_size]
+	call disp_int32
+	add esp, 4
+
+	push PA_PT_BASE
+	push PA_PD_BASE
+	push 10000000H
+	call paging_init
+
+	push _str_paging_init
+	call disp_str32
+	add esp, 4
+
 	jmp $
 
+; void paging_init(int memsize, void *pa_pd, void *pa_pt)
+paging_init:
+	enter 8, 0
+	push ebx
+	push edx
+	push ecx
+	push edi
+	; ebp - 4: total page directories
+	; ebp - 8: total page tables
+	xor edx, edx
+	mov eax, [ebp + 8]
+	mov ebx, 400000H
+	div ebx
+	cmp edx, 0
+	jz CALC_PT
+	inc eax
+CALC_PT:
+	mov [ebp - 4], eax
+	xor edx, edx
+	mov ebx, 1024
+	mul ebx
+	mov [ebp - 8], eax
+
+	; Initialize page directories
+	mov eax, [ebp + 16]
+	or eax, PDE_RW | PDE_US | PDE_P 
+	mov edi, [ebp + 12]
+	mov ecx, [ebp - 4]
+CONTINUE_INIT_PDE:
+	stosd
+	add eax, 1000H
+	loop CONTINUE_INIT_PDE
+
+	; Initialize page tables
+	xor eax, eax
+	or eax, PTE_RW | PTE_US | PTE_P
+	mov edi, [ebp + 16]
+	mov ecx, [ebp - 8]
+CONTINUE_INIT_PTE:
+	stosd
+	add eax, 1000H
+	loop CONTINUE_INIT_PTE
+	
+	mov eax, cr3
+	mov eax, PA_PD_BASE
+	mov cr3, eax
+	mov eax, cr0
+	or eax, 80000000H
+	mov cr0, eax
+	jmp PAGING_CLEAR_INSTR_CACHE
+PAGING_CLEAR_INSTR_CACHE:
+	pop edi
+	pop ecx
+	pop edx
+	pop ebx
+	add esp, 8
+	leave
+	ret
+
+	
 ;void disp_mem_mapinfo(void *buffer)	
 disp_mem_mapinfo:
 	enter 32, 0
 	push esi
 	push ebx
 	push edx
+	push ecx
 	; ebp - 4: base address low
 	; ebp - 8: base address high
 	; ebp - 12: length low
@@ -434,7 +513,7 @@ disp_mem_mapinfo:
 	; ebp - 20: type
 	; ebp - 24: alignment fill
 	mov esi, [ebp + 8]
-	mov ecx, [_dw_ard_entries]
+	movzx ecx, word [_dw_ard_entries]
 CONTINUE_ARD_DISP:	
 	lodsd
 	mov [ebp - 4], eax
@@ -470,6 +549,7 @@ CONTINUE_ARD_DISP:
 	call new_line32
 	loop CONTINUE_ARD_DISP
 
+	pop ecx
 	pop edx
 	pop ebx
 	pop esi
@@ -545,7 +625,7 @@ disp_str32:
 	xor eax, eax
 	mov ah, 0CH
 	mov esi, [ebp + 8]
-	movzx edi, word [_dw_curr_pos]
+	mov di, word [_dw_curr_pos]
 CONTINUE_DISP32:
 	lodsb
 	cmp al, 0
@@ -553,21 +633,21 @@ CONTINUE_DISP32:
 	cmp al, 0AH
 	jnz DISP_CHAR
 	; Change a new line
-	mov eax, edi
-	xor edx, edx
-	mov ebx, 160
-	div ebx
-	inc eax
-	xor edx, edx
-	mul ebx
-	mov word [_dw_curr_pos], ax
+	mov ax, di
+	xor dx, dx
+	mov bx, 160
+	div bx
+	inc ax
+	xor dx, dx
+	mul bx
+	mov [_dw_curr_pos], ax
 	jmp DISP_OVER_RET
 DISP_CHAR:
-	mov [gs:edi], ax
-	add edi, 2
+	mov [gs:di], ax
+	add di, 2
 	jmp CONTINUE_DISP32
 DISP_OVER32:
-	mov word [_dw_curr_pos], di
+	mov [_dw_curr_pos], di
 DISP_OVER_RET:
 	pop edx
 	pop ebx
@@ -583,9 +663,12 @@ str_loading_failed		db "No kernel.bin found", 0
 str_loading_msg			db "Loading kernel", 0
 str_kernel_name			db "KERNEL  BIN", 0
 str_delimeter			db " - ", 0
+str_memsize_msg			db "Total memory size: ", 0
+str_paging_init			db "Paing enabled successfully", 0
 db_odd_index			db 0
 str_mem_table_title		db "e820: ", 0
 db_ard_buffer times 512 db 0 ; 25 ard entries support
+align 32
 dw_sector_of_rootdir	dw SECTOR_OF_ROOTDIR
 dw_total_rootdir_sec	dw TOTAL_ROOTDIR_SEC
 dw_direntry_per_sec		dw DIRENTRY_PER_SEC
@@ -600,3 +683,9 @@ _dw_curr_pos			equ PA_LOADER + dw_curr_pos
 _db_ard_buffer			equ PA_LOADER + db_ard_buffer
 _str_delimeter			equ PA_LOADER + str_delimeter
 _dw_ard_entries			equ PA_LOADER + dw_ard_entries
+_str_memsize_msg		equ PA_LOADER + str_memsize_msg
+_dd_total_mem_size		equ PA_LOADER + dd_total_mem_size
+_str_paging_init		equ PA_LOADER + str_paging_init
+
+STACK_SPACE times 1000H db 0
+TOP_OF_STACK32 equ PA_LOADER + $
