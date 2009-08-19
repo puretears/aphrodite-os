@@ -1,3 +1,4 @@
+#labels Loader
 #在加载内核前，Loader要为其进行的准备工作.
 
 = 在加载内核前，需要哪些准备工作 =
@@ -8,6 +9,33 @@
  * 进入保护模式；
  * 开启分页；
  * 将控制权转交内核；
+
+= 代码框架 =
+整个Loader的代码框架可以大体分成GDT，16为初始化代码，32位初始化代码和共用数据四大部分，具体安排如下：
+
+{{{
+    org 0100H
+    jmp CODE_START
+    ; header files here
+
+    ; GDT related definition here
+CODE_START:
+    ; 16-bit initialization here
+    ; Jump to 32-bit initialization code
+    ; 16-bit auxiliary functions here
+
+[section .CODE32]
+[bits 32]
+align 32
+CODE32_START:
+    ; 32-bit initialization here
+    ; Jump to kernel
+    ; 32-bit auxiliary functions here
+
+[section .DATA]
+align 32    
+    ; Data definition here
+}}}
 
 = 清屏 =
 * clear_screen *
