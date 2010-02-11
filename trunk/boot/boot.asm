@@ -63,8 +63,8 @@ DISP_OVER:
 	ret
 
 ; es:bx data buffer
-; push starting sector number
-; push numbers of sectors want to read
+; push [starting sector number]
+; push [numbers of sectors want to read]
 ; call read_sector
 read_sector:
 	enter 6, 0
@@ -150,8 +150,8 @@ GET_ENTRY:
 	ret
 
 ; push [address of file name]
-; push offset of buffer
-; push base of buffer
+; push [offset of buffer]
+; push [base of buffer]
 ; call load_file
 load_file:
 	enter 0, 0
