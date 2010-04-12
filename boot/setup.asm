@@ -99,7 +99,7 @@ init8259A:
 	out 21H, al
 	out 0A1H, al
 	ret
-%include "../display.inc"
+%include "display.inc"
 %include "protect.inc"
 loader		db "Load loader to 0x90200.", 0AH, 0
 curr_pos	dw 160

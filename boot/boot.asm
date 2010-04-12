@@ -117,7 +117,7 @@ kill_motor:
 	pop dx
 	ret
 
-%include "../display.inc"
+%include "display.inc"
 curr_head		db 0
 curr_track		db 0
 boot_copy		db "Copy bootsect to 0x90000.", 0AH, 0
