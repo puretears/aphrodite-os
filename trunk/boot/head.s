@@ -1,26 +1,28 @@
 SECTION .text
 pde:	; Page directory will be stored here
-_startup32:
+global startup32
+
+startup32:
 
 	mov ax, 010H
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
-	mov gs, as
+	mov gs, ax
 
-org 01000H
+times (01000H - ($ - $$)) db 0
 pte0:
 
-org 02000H
+times (02000H - ($ - $$)) db 0
 pte1:
 
-org 03000H
+times (03000H - ($ - $$)) db 0
 pte2:
 
-org 04000H
+times (04000H - ($ - $$)) db 0
 pte3:
 
-org 05000H
+times (05000H - ($ - $$)) db 0
 
 
 _idt:

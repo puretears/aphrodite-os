@@ -1,27 +1,36 @@
 AS = nasm
 CC = gcc
 CXX = g++
-CFLAGS = -mcpu=i386 -Wall -fomit-frame-pointer
+CFLAGS = -march=i386 -Wall -fomit-frame-pointer
 LDFLAGS = -m elf_i386 -Ttext 0 -e startup32
 
 %.o:%.c
 	$(CC) $(CFLAGS) -nostdinc -Iinclude -c $< -o $@
 
-%.bin:%.s
-	$(AS) -f bin -i ./include $< -o $@
-
 all: Image
 
 Image: boot/boot.bin boot/setup.bin tools/system tools/build
-	dd if=/boot/boot.bin of=Image bs=512 conv=notrunc
-	dd if=/boot/setup.bin of=Image bs=512 seek=1 conv=notrunc
-	dd if=/boot/head.bin of Image bs=512 seek=4 conv=notrunc
+	objcopy -O binary -R .note -R .commet tools/system tools/kernel
+	#tools/build boot/boot.bin boot/setup.bin tools/kernel > $@
+
+tools/system: boot/head init/main.o 
+	$(LD) $(LDFLAGS) $^ -o $@
+
+init/main.o: init/main.c
 
 tools/build: tools/build.c
 	$(CC) $(CFLAGS) $< -o $@
 
-boot/boot.bin: boot/boot.s
+boot/boot.bin: boot/boot.asm boot/protect.inc
+	$(AS) -f bin -i ./boot/ $< -o $@
 
-boot/setup.bin: boot/setup.s
+boot/setup.bin: boot/setup.asm boot/protect.inc
+	$(AS) -f bin -i ./boot/ $< -o $@
 
-boot/head.bin: boot/head.s
+boot/head: boot/head.s boot/protect.inc
+	$(AS) -f elf32 -i ./boot/ $< -o $@
+
+.phony: clean
+
+clean:
+	rm -f Image boot/*.bin init/*.o kernel/*.bin
