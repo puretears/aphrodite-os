@@ -10,7 +10,7 @@ LDFLAGS = -m elf_i386 -Ttext 0 -e startup32
 all: Image
 
 Image: boot/boot.bin boot/setup.bin tools/system tools/build
-	objcopy -O binary -R .note -R .commet tools/system tools/kernel
+	objcopy -O binary -R .note -R .comment tools/system tools/kernel
 	#tools/build boot/boot.bin boot/setup.bin tools/kernel > $@
 
 tools/system: boot/head init/main.o 
