@@ -82,29 +82,59 @@ int main(int argc, char **argv) {
 
 	// Check boot.bin
 	struct stat *p_stat = (struct stat *)malloc(sizeof(struct stat));
-
-	if (lstat(bootsect, p_stat) == -1) {
-		die("Cannot get bootsect attribute.");
-	}
-	if (p_stat->st_size != 0x200) {
-		die("Invalid bootsect length.");	
-	}
-
 	int fd = open(bootsect, O_RDONLY);
 
 	if (fd == -1) {
-		printf("Cannot open %s for read.\n", bootsect);
-		exit(-1);
+		die("Cannot open %s for read.\n", bootsect);
+	}
+	if (fstat(fd, p_stat) == -1) {
+		die("Cannot get %s attribute.\n", bootsect);
+	}
+	if (p_stat->st_size != 0x200) {
+		die("Invalid %s length.\n", bootsect);	
 	}
 
-	ssize_t n_read = read(fd, buf, 2);
+	ssize_t n_read = read(fd, buf, 512);
 
-	if (n_read != 2) {
-		printf("Read %s failed.\n", bootsect);
-		exit(-1);
+	if (n_read != 512) {
+		die("Read %s failed.\n", bootsect);
 	}
-	if ((buf[0] != 0x55) || (buf[1] ~= 0xAA))
-	patch_module(setup, SETUP_SIZE, 0, p_stat);
+	if ((buf[510] != 0x55) || (buf[511] != 0xAA)) {
+		die("Invalid %s signature.\n", bootsect);
+	}
+	int n_write = write(STDOUT_FILENO, buf, 512);
+	if (n_write != 512) {
+		die("Write %s to stdout failed.\n", bootsect);
+	}
+	close(fd);
+
+	// Check setup.bin
+	fd = open(setup, O_RDWR);	
+
+	if (fd == -1) {
+		die("Cannot open %s for patch.\n", setup);
+	}
+	if (fstat(fd, p_stat) == -1) {
+		die("Cannot get %s attribute.\n", setup);
+	}
+	if (p_stat->st_size > SETUP_SIZE) {
+		die("Illegal %s size.\n");
+	}
+	for ( ; n_read = read(fd, buf, 1024); ) {
+		if (n_read < 0) {
+			die("Read %s failed.\n", setup);
+		}
+		if (n_read != write(STDOUT_FILENO, buf, n_read)) {
+			die("Write %s to stdout failed.\n");
+		}
+	}
+	// Patch setup.bin
+	int patch_bytes = SETUP_SIZE - p_stat->st_size;
+	memset(buf, 0, sizeof(buf));
+
+	if (patch_bytes > sizeof(buf)) {
+		
+	}
 	patch_module(kernel, KERNEL_SIZE, 'A', p_stat);
 	free(p_stat);
 
