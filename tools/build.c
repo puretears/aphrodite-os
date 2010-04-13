@@ -9,8 +9,6 @@
 #define SETUP_SIZE 2048
 #define KERNEL_SIZE 192 * 1024
 
-#pragma warning(disable:)
-
 void die(char *err_info, ...) {
 	va_list ap;
 	va_start(ap, err_info);
@@ -64,19 +62,51 @@ void patch_module(const char *module_name, size_t patch_size,
 
 }
 
-int main() {
-	char *buf;
+void usage() {
+	printf("build boot setup system [ROOTDEV].\n");
+}
 
+int main(int argc, char **argv) {
+	char buf[1024];
+
+	if ((argc != 4) && (argc != 5)) {
+		usage();
+		exit(-1);
+	}
+	if (argc == 5) {
+	
+	}
+	else {
+		
+	}
+
+	// Check boot.bin
 	struct stat *p_stat = (struct stat *)malloc(sizeof(struct stat));
+
 	if (lstat(bootsect, p_stat) == -1) {
 		die("Cannot get bootsect attribute.");
 	}
-
 	if (p_stat->st_size != 0x200) {
 		die("Invalid bootsect length.");	
 	}
+
+	int fd = open(bootsect, O_RDONLY);
+
+	if (fd == -1) {
+		printf("Cannot open %s for read.\n", bootsect);
+		exit(-1);
+	}
+
+	ssize_t n_read = read(fd, buf, 2);
+
+	if (n_read != 2) {
+		printf("Read %s failed.\n", bootsect);
+		exit(-1);
+	}
+	if ((buf[0] != 0x55) || (buf[1] ~= 0xAA))
 	patch_module(setup, SETUP_SIZE, 0, p_stat);
 	patch_module(kernel, KERNEL_SIZE, 'A', p_stat);
 	free(p_stat);
 
+	return 0;
 }
