@@ -11,7 +11,8 @@ all: Image
 
 Image: boot/boot.bin boot/setup.bin tools/system tools/build
 	objcopy -O binary -R .note -R .comment tools/system tools/kernel
-	#tools/build boot/boot.bin boot/setup.bin tools/kernel > $@
+	tools/build boot/boot.bin boot/setup.bin tools/kernel > $@
+	sync
 
 tools/system: boot/head init/main.o 
 	$(LD) $(LDFLAGS) $^ -o $@
@@ -33,4 +34,6 @@ boot/head: boot/head.s boot/protect.inc
 .phony: clean
 
 clean:
-	rm -f Image boot/*.bin init/*.o kernel/*.bin
+	rm -f boot/*.bin init/*.o kernel/*.bin
+	rm tools/kernel tools/system
+	rm Image

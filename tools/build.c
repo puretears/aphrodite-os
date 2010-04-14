@@ -9,6 +9,10 @@
 #define SETUP_SIZE 2048
 #define KERNEL_SIZE 192 * 1024
 
+const char *bootsect = "boot.bin";
+const char *setup = "setup.bin";
+const char *kernel = "kernel.bin";
+
 void die(char *err_info, ...) {
 	va_list ap;
 	va_start(ap, err_info);
@@ -16,50 +20,6 @@ void die(char *err_info, ...) {
 	va_end(ap);
 	printf("%s", err_info);
 	exit(-1);
-}
-
-const char *bootsect = "boot.bin";
-const char *setup = "setup.bin";
-const char *kernel = "kernel.bin";
-
-void patch_module(const char *module_name, size_t patch_size, 
-		unsigned char patten, struct stat *p_stat) {
-
-	unsigned char *buf = NULL;
-	int nbytes = 0;
-	int fd_module_name = -1;
-	int filler_bytes = 0;
-
-	if (lstat(module_name, p_stat) == -1)
-		die("Cannot get %s attribute.\n", module_name);
-
-	if (p_stat->st_size < patch_size) {
-		fd_module_name = open(module_name, O_RDWR | O_APPEND);
-		if (fd_module_name == -1) {
-			die("Open %s failed.\n", module_name);
-		}
-
-		filler_bytes = patch_size - p_stat->st_size;
-		buf = (unsigned char *)malloc(filler_bytes);
-		if (buf == NULL)
-			die("Allocation buff failed.\n");
-		memset(buf, patten, filler_bytes);
-		nbytes = write(fd_module_name, buf, filler_bytes);
-
-		if (nbytes != filler_bytes)
-			die("Failed to patch %s.\n", module_name);
-		else {
-			printf("%d bytes are patched into %s.\n", filler_bytes, module_name);
-			fsync(fd_module_name);
-			close(fd_module_name);
-		}
-		free(buf);
-	}
-	else if (p_stat->st_size == patch_size)
-		printf("%s doesn't need to be patched.\n", module_name);
-	else
-		die("%s is out of %d.\n", module_name, patch_size);
-
 }
 
 void usage() {
@@ -82,47 +42,47 @@ int main(int argc, char **argv) {
 
 	// Check boot.bin
 	struct stat *p_stat = (struct stat *)malloc(sizeof(struct stat));
-	int fd = open(bootsect, O_RDONLY);
+	int fd = open(argv[1], O_RDONLY);
 
 	if (fd == -1) {
-		die("Cannot open %s for read.\n", bootsect);
+		die("Cannot open %s for read.\n", argv[1]);
 	}
 	if (fstat(fd, p_stat) == -1) {
-		die("Cannot get %s attribute.\n", bootsect);
+		die("Cannot get %s attribute.\n", argv[1]);
 	}
 	if (p_stat->st_size != 0x200) {
-		die("Invalid %s length.\n", bootsect);	
+		die("Invalid %s length.\n", argv[1]);	
 	}
 
 	ssize_t n_read = read(fd, buf, 512);
 
 	if (n_read != 512) {
-		die("Read %s failed.\n", bootsect);
+		die("Read %s failed.\n", argv[1]);
 	}
 	if ((buf[510] != 0x55) || (buf[511] != 0xAA)) {
-		die("Invalid %s signature.\n", bootsect);
+		die("Invalid %s signature.\n", argv[1]);
 	}
 	int n_write = write(STDOUT_FILENO, buf, 512);
 	if (n_write != 512) {
-		die("Write %s to stdout failed.\n", bootsect);
+		die("Write %s to stdout failed.\n", argv[1]);
 	}
 	close(fd);
 
 	// Check setup.bin
-	fd = open(setup, O_RDWR);	
+	fd = open(argv[2], O_RDWR);	
 
 	if (fd == -1) {
-		die("Cannot open %s for patch.\n", setup);
+		die("Cannot open %s for patch.\n", argv[2]);
 	}
 	if (fstat(fd, p_stat) == -1) {
-		die("Cannot get %s attribute.\n", setup);
+		die("Cannot get %s attribute.\n", argv[2]);
 	}
 	if (p_stat->st_size > SETUP_SIZE) {
-		die("Illegal %s size.\n");
+		die("Illegal %s size.\n", argv[2]);
 	}
-	for ( ; n_read = read(fd, buf, 1024); ) {
+	for ( ; (n_read = read(fd, buf, 1024)); ) {
 		if (n_read < 0) {
-			die("Read %s failed.\n", setup);
+			die("Read %s failed.\n", argv[2]);
 		}
 		if (n_read != write(STDOUT_FILENO, buf, n_read)) {
 			die("Write %s to stdout failed.\n");
@@ -131,6 +91,7 @@ int main(int argc, char **argv) {
 	// Patch setup.bin
 	int i = p_stat->st_size;
 	int patch_bytes = 0;
+
 	memset(buf, 0, sizeof(buf));
 	while (i < SETUP_SIZE) {
 		patch_bytes = SETUP_SIZE - i;
@@ -140,9 +101,7 @@ int main(int argc, char **argv) {
 		write(STDOUT_FILENO, buf, patch_bytes);
 		i += patch_bytes;
 	}
-	else {
-		printf("The %s doesn't need to be patched.\n", setup);
-	}
+
 	free(p_stat);
 
 	return 0;
