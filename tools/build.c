@@ -129,13 +129,20 @@ int main(int argc, char **argv) {
 		}
 	}
 	// Patch setup.bin
-	int patch_bytes = SETUP_SIZE - p_stat->st_size;
+	int i = p_stat->st_size;
+	int patch_bytes = 0;
 	memset(buf, 0, sizeof(buf));
-
-	if (patch_bytes > sizeof(buf)) {
-		
+	while (i < SETUP_SIZE) {
+		patch_bytes = SETUP_SIZE - i;
+		if (patch_bytes > sizeof(buf)) {
+			patch_bytes = sizeof(buf);
+		}
+		write(STDOUT_FILENO, buf, patch_bytes);
+		i += patch_bytes;
 	}
-	patch_module(kernel, KERNEL_SIZE, 'A', p_stat);
+	else {
+		printf("The %s doesn't need to be patched.\n", setup);
+	}
 	free(p_stat);
 
 	return 0;
