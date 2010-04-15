@@ -9,10 +9,6 @@
 #define SETUP_SIZE 2048
 #define KERNEL_SIZE 192 * 1024
 
-const char *bootsect = "boot.bin";
-const char *setup = "setup.bin";
-const char *kernel = "kernel.bin";
-
 void die(char *err_info, ...) {
 	va_list ap;
 	va_start(ap, err_info);
@@ -27,7 +23,7 @@ void usage() {
 }
 
 int main(int argc, char **argv) {
-	char buf[1024];
+	unsigned char buf[1024];
 
 	if ((argc != 4) && (argc != 5)) {
 		usage();
@@ -60,7 +56,7 @@ int main(int argc, char **argv) {
 		die("Read %s failed.\n", argv[1]);
 	}
 	if ((buf[510] != 0x55) || (buf[511] != 0xAA)) {
-		die("Invalid %s signature.\n", argv[1]);
+		die("Invalid %s signature %01X%01X.\n", argv[1], buf[1], buf[0]);
 	}
 	int n_write = write(STDOUT_FILENO, buf, 512);
 	if (n_write != 512) {
