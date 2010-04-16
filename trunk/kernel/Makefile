@@ -1,9 +1,21 @@
-include ../Makefile
 
-vpath %.inc ../
-kernel.bin:kernel.asm display.inc
-	$(AS) $^ -o $@ 
+AS = nasm
+LD = ld
+CC = gcc -march=i386
+LDFLAGS = -s -x
+CFLAGS = -Wall -fstrength-reduce -fomit-frame-pointer \
+		  -finline-functions -nostdinc -I../include
+OBJS = sched.o
 
-.PHONY: clean
+%o:%c
+	${CC} ${CFLAGS} -c $^ -o $@
+
+kernel.o: ${OBJS}
+	${LD} -r -o $@ ${OBJS}
+	sync
+
+.phony: clean
+
 clean:
-	rm kernel.bin
+	rm *.o
+

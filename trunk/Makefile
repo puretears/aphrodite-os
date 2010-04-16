@@ -14,10 +14,13 @@ Image: boot/boot.bin boot/setup.bin tools/system tools/build
 	tools/build boot/boot.bin boot/setup.bin tools/kernel > $@
 	sync
 
-tools/system: boot/head init/main.o 
+tools/system: boot/head init/main.o kernel/kernel.o 
 	$(LD) $(LDFLAGS) $^ -o $@
 
 init/main.o: init/main.c
+
+kernel/kernel.o:
+	(cd kernel; make)
 
 tools/build: tools/build.c
 	$(CC) $(CFLAGS) $< -o $@
@@ -34,6 +37,7 @@ boot/head: boot/head.s boot/protect.inc
 .phony: clean
 
 clean:
-	rm -f boot/*.bin init/*.o kernel/*.bin
+	rm -f boot/*.bin init/*.o
+	(cd kernel; make clean)
 	rm tools/kernel tools/system
 	rm Image
