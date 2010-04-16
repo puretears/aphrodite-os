@@ -1,4 +1,8 @@
-SECTION .text
+%include "../boot/protect.inc"
+extern user_stack
+
+[SECTION .text]
+BITS 32
 pde:	; Page directory will be stored here
 global startup32
 
@@ -9,6 +13,10 @@ startup32:
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
+	lds eax, dword 010H:user_stack
+	lss esp, user_stack
+	mov ss, ax
+	mov esp, user_stack
 
 times (01000H - ($ - $$)) db 0
 pte0:
@@ -25,16 +33,16 @@ pte3:
 times (05000H - ($ - $$)) db 0
 
 
+; 256 Interrupt descriptors
 _idt:
 	times 512 dd 0
-
 align 4
 	dw 0
 _idt_pesudo:
 	dw 256 * 8 - 1
 	dd _idt
 
-%include "../boot/protect.inc"
+; 256 GDT entries
 _gdt:
 _dummy: gdt_desc 0, 0, 0
 _code:  gdt_desc 0FFFH, 0, 0C9AH

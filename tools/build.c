@@ -87,17 +87,20 @@ int main(int argc, char **argv) {
 	// Patch setup.bin
 	int i = p_stat->st_size;
 	int patch_bytes = 0;
-
+	int total_patch = 0;
 	memset(buf, 0, sizeof(buf));
 	while (i < SETUP_SIZE) {
 		patch_bytes = SETUP_SIZE - i;
+		total_patch += patch_bytes;
 		if (patch_bytes > sizeof(buf)) {
 			patch_bytes = sizeof(buf);
 		}
 		write(STDOUT_FILENO, buf, patch_bytes);
 		i += patch_bytes;
 	}
-
+	
+	sprintf(buf, "%d bytes are patched into %s.\n", total_patch, argv[1]);
+	perror(buf);
 	free(p_stat);
 
 	return 0;
