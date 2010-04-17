@@ -13,8 +13,6 @@ startup32:
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
-	lds eax, dword 010H:user_stack
-	lss esp, user_stack
 	mov ss, ax
 	mov esp, user_stack
 
