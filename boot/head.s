@@ -15,6 +15,16 @@ startup32:
 	mov gs, ax
 	mov ss, ax
 	mov esp, user_stack
+	call init_idt
+	call init_gdt
+	mov ax, 010H
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	mov ss, ax
+	mov esp, user_stack
+	jmp code_after_pg
 
 times (01000H - ($ - $$)) db 0
 pte0:
@@ -30,17 +40,17 @@ pte3:
 
 times (05000H - ($ - $$)) db 0
 
-
+code_after_pg:
+	call set_up
 init_idt:
 	enter 0, 0
 	push ebx
 	push ecx
 	push edi
 	mov eax, triple_interrupt
-	mov ebx, 010H
-	shl ebx, 16
+	mov ebx, 0800H
 	mov bx, ax	; ebx: selector | low offset(low 15 bits)
-	mov ax, 08700H ; eax: high offset(high 16 bits) | attribute
+	mov ax, 08E00H ; eax: high offset(high 16 bits) | attribute
 	mov ecx, 256
 	mov edi, _idt
 INIT_IDT:
@@ -51,9 +61,13 @@ INIT_IDT:
 	pop edi
 	pop ecx
 	pop ebx
+	lidt _idt_pesudo
 	leave
 	ret
 
+init_gdt:
+	lgdt _gdt
+	ret
 
 int_str db "Ingoring interrupt.", 0AH
 triple_interrupt:
