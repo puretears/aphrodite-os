@@ -31,6 +31,40 @@ pte3:
 times (05000H - ($ - $$)) db 0
 
 
+init_idt:
+	enter 0, 0
+	push ebx
+	push ecx
+	push edi
+	mov eax, triple_interrupt
+	mov ebx, 010H
+	shl ebx, 16
+	mov bx, ax	; ebx: selector | low offset(low 15 bits)
+	mov ax, 08700H ; eax: high offset(high 16 bits) | attribute
+	mov ecx, 256
+	mov edi, _idt
+INIT_IDT:
+	mov [edi], ebx
+	mov [edi + 4], eax
+	add edi, 8
+	loop INIT_IDT
+	pop edi
+	pop ecx
+	pop ebx
+	leave
+	ret
+
+
+int_str db "Ingoring interrupt.", 0AH
+triple_interrupt:
+	push ebp
+	mov ebp, esp
+	mov edi, instr
+	call disp_str32
+	mob esp, ebp
+	pop ebp
+	iret
+
 ; 256 Interrupt descriptors
 _idt:
 	times 512 dd 0
