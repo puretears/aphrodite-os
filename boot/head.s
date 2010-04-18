@@ -41,7 +41,38 @@ pte3:
 times (05000H - ($ - $$)) db 0
 
 code_after_pg:
-	call set_up
+	push 0
+	push 0
+	push 0
+	push HANG_HERE
+	push main
+	call setup_paging
+HANG_HERE:
+	jmp $
+
+setup_paging:
+	enter 0, 0
+	; Initialize PDE entries
+	mov dword [pde], pte0 + 7
+	mov dword [pde + 4], pte1 + 7
+	mov dword [pde + 8], pte2 + 7
+	mov dword [pde + 0CH], pte3 + 7
+	; Initialize PTE entries
+	mov ecx, 4096
+	mov eax, 7
+	mov edi, pte0
+CONTINUE_INIT_PTE:
+	stosd
+	add eax, 1000000H
+	loop CONTINUE_INIT_PTE
+	xor eax, eax
+	mov cr3, eax
+	mov eax, cr0
+	or eax, 80000000H
+	mov cr0, eax
+	leave
+	ret
+
 init_idt:
 	enter 0, 0
 	push ebx
