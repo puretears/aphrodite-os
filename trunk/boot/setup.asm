@@ -56,7 +56,6 @@ COPY_OVER:
 	mov ds, ax
 	mov si, loader
 	call disp_str
-	; jmp KERNEL_ADDR:0
 
 	call enableA20
 	call init8259A

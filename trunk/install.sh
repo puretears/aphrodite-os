@@ -5,25 +5,7 @@ then
 	bximage -fd -size=1.44 -q ./tools/vmlinuz.img > /dev/null
 fi
 
-cd boot
-make all
-cp *.bin ../tools
-
-cd ../kernel
-make
-cp kernel.bin ../tools
-
-cd ../tools
-make
-
-./build
-
-dd if=boot.bin of=vmlinuz.img bs=512 conv=notrunc
-dd if=setup.bin of=vmlinuz.img bs=512 seek=1 conv=notrunc
-dd if=kernel.bin of=vmlinuz.img bs=512 seek=5 conv=notrunc
-
-rm *.bin
-cd ..
+dd if=Image of=vmlinuz.img bs=512 conv=notrunc
 
 if [ ! -d bochs ]
 then
@@ -35,4 +17,4 @@ then
 	rm bochs/vmlinuz.img
 fi
 
-mv ./tools/vmlinuz.img ./bochs
+mv vmlinuz.img  ./bochs
