@@ -1,5 +1,6 @@
 %include "../boot/protect.inc"
 extern user_stack
+extern main
 
 [SECTION .text]
 BITS 32
@@ -13,6 +14,7 @@ startup32:
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
+	lss esp, [user_stack]
 	mov ss, ax
 	mov esp, user_stack
 	call init_idt
@@ -92,21 +94,21 @@ INIT_IDT:
 	pop edi
 	pop ecx
 	pop ebx
-	lidt _idt_pesudo
+	lidt [_idt_pesudo]
 	leave
 	ret
 
 init_gdt:
-	lgdt _gdt
+	lgdt [_gdt]
 	ret
 
 int_str db "Ingoring interrupt.", 0AH
 triple_interrupt:
 	push ebp
 	mov ebp, esp
-	mov edi, instr
-	call disp_str32
-	mob esp, ebp
+	mov edi, int_str
+	;call disp_str32
+	mov esp, ebp
 	pop ebp
 	iret
 
