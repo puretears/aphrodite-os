@@ -1,10 +1,11 @@
 BOOT_ADDR	equ 09000H
-LOADER_ADDR	equ 09020H
+SETUP_ADDR	equ 09020H
+SETUP_LEN	equ 4
 KERNEL_ADDR	equ 01000H
 KERNEL_SIZE equ 03000H
-SETUP_LEN	equ 4
 KERNEL_END	equ KERNEL_ADDR + KERNEL_SIZE
 
+	; Copy itself from 0x7C00 to 0x9000
 	mov ax, 07C0H
 	mov ds, ax
 	mov ax, BOOT_ADDR
@@ -15,6 +16,7 @@ KERNEL_END	equ KERNEL_ADDR + KERNEL_SIZE
 	rep movsw
 	jmp BOOT_ADDR:GO
 
+	; Copy setup code between 0x90200 and 0x90A00
 GO:
 	mov ax, cs
 	mov ds, ax
@@ -24,7 +26,7 @@ GO:
 	mov si, boot_copy
 	call disp_str
 
-	mov ax, LOADER_ADDR
+	mov ax, SETUP_ADDR
 	mov es, ax
 	mov dx, 0
 	mov ch, 0
@@ -34,6 +36,8 @@ GO:
 	xor bx, bx
 	int 13H
 	jc GO
+
+	; Copy system module at 0x10000
 GET_DISK_PARA:
 	xor dl, dl
 	mov ah, 08H
@@ -50,7 +54,8 @@ CONTINUE_READ:
 	jnz CONTINUE_LOAD_KERNEL
 
 	call kill_motor
-	jmp LOADER_ADDR:0
+	jmp SETUP_ADDR:0 ; Jump to the SETUP code!
+
 CONTINUE_LOAD_KERNEL:
 	movzx ax, byte [secs_per_track]
 	sub ax, [total_read_secs]
