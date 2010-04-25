@@ -10,11 +10,12 @@
 #define KERNEL_SIZE 192 * 1024
 
 void die(char *err_info, ...) {
+	char buf[256];
 	va_list ap;
 	va_start(ap, err_info);
-	vprintf(err_info, ap);
+	vsprintf(buf, err_info, ap);
 	va_end(ap);
-	printf("%s", err_info);
+	printf("%s", buf);
 	exit(-1);
 }
 
@@ -23,7 +24,8 @@ void usage() {
 }
 
 int main(int argc, char **argv) {
-	unsigned char buf[1024];
+	char buf[1024];
+	unsigned short boot_sig = 0;
 
 	if ((argc != 4) && (argc != 5)) {
 		usage();
@@ -55,8 +57,9 @@ int main(int argc, char **argv) {
 	if (n_read != 512) {
 		die("Read %s failed.\n", argv[1]);
 	}
-	if ((buf[510] != 0x55) || (buf[511] != 0xAA)) {
-		die("Invalid %s signature %01X%01X.\n", argv[1], buf[1], buf[0]);
+	boot_sig = *((unsigned short*)(&buf[510]));
+	if (boot_sig != 0xAA55) {
+		die("Invalid %s signature %04X.\n", argv[1], boot_sig);
 	}
 	int n_write = write(STDOUT_FILENO, buf, 512);
 	if (n_write != 512) {

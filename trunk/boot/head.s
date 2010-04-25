@@ -14,7 +14,6 @@ startup32:
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
-	lss esp, [user_stack]
 	mov ss, ax
 	mov esp, user_stack
 	call init_idt
@@ -48,7 +47,7 @@ code_after_pg:
 	push 0
 	push HANG_HERE
 	push main
-	call setup_paging
+	jmp setup_paging
 HANG_HERE:
 	jmp $
 
@@ -65,7 +64,7 @@ setup_paging:
 	mov edi, pte0
 CONTINUE_INIT_PTE:
 	stosd
-	add eax, 1000000H
+	add eax, 1000H
 	loop CONTINUE_INIT_PTE
 	xor eax, eax
 	mov cr3, eax
@@ -99,7 +98,7 @@ INIT_IDT:
 	ret
 
 init_gdt:
-	lgdt [_gdt]
+	lgdt [_gdt_pesudo]
 	ret
 
 int_str db "Ingoring interrupt.", 0AH
@@ -124,8 +123,8 @@ _idt_pesudo:
 ; 256 GDT entries
 _gdt:
 _dummy: gdt_desc 0, 0, 0
-_code:  gdt_desc 0FFFH, 0, 0C9AH
-_data:  gdt_desc 0FFFH, 0, 0C92H
+_code:  gdt_desc 0FFFFFH, 0, 0C9AH
+_data:  gdt_desc 0FFFFFH, 0, 0C92H
 _tmp:   gdt_desc 0, 0, 0
 	times 504 dd 0
 

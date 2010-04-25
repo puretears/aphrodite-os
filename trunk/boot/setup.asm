@@ -105,8 +105,8 @@ curr_pos	dw 160
 
 
 gdt: gdt_desc 0, 0, 0
-code: gdt_desc 0799H, 0, 0C09AH	; Code segment
-data: gdt_desc 0799H, 0, 0C092H 
+code: gdt_desc 0FFFFH, 0, 0C09AH	; Code segment
+data: gdt_desc 0FFFFH, 0, 0C092H 
 
 CODE32_SEL equ code - gdt
 
