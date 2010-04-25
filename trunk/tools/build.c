@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 	}
 	close(fd);
 
-	// Check setup.bin
+	// Deal with setup.bin
 	fd = open(argv[2], O_RDWR);	
 
 	if (fd == -1) {
@@ -88,6 +88,7 @@ int main(int argc, char **argv) {
 	int i = p_stat->st_size;
 	int patch_bytes = 0;
 	int total_patch = 0;
+
 	memset(buf, 0, sizeof(buf));
 	while (i < SETUP_SIZE) {
 		patch_bytes = SETUP_SIZE - i;
@@ -101,6 +102,30 @@ int main(int argc, char **argv) {
 	
 	sprintf(buf, "%d bytes are patched into %s.\n", total_patch, argv[1]);
 	perror(buf);
+	close(fd);
+
+	// Deal with system module
+	fd = open(argv[3], O_RDONLY);
+
+	if (fd == -1) {
+		die("Cannot open %s for read.\n", argv[3]);
+	}
+	if (fstat(fd, p_stat) == -1) {
+		die("Cannot get %s attribute.\n", argv[3]);
+	}
+	if (p_stat->st_size > KERNEL_SIZE) {
+		die("Illegal %s size.\n", argv[3]);
+	}
+	for ( ; (n_read = read(fd, buf, 1024)); ) {
+		if (n_read < 0) {
+			die("Read %s failed.\n", argv[3]);
+		}
+		if (n_read != write(STDOUT_FILENO, buf, n_read)) {
+			die("Write %s to stdout failed.\n", argv[3]);
+		}
+
+	}
+	close(fd);
 	free(p_stat);
 
 	return 0;
