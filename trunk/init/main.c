@@ -1,10 +1,10 @@
 #include "asm/io.h"
 #include "time.h"
 
-#define CMOS_READ(addr) ({ \
-	outb_p(addr, 0x70);  \
-	inb_p(0x71); \
-})
+inline unsigned char CMOS_READ(unsigned char addr) {
+	outb_p(addr, 0x70);  
+	return inb_p(0x71); 
+}
 
 #define BCD2DEC(val) ((val) = ((val) & 15) + ((val) >> 4) * 10)
 
@@ -18,7 +18,7 @@ static void time_init() {
 		time.tm_mday = CMOS_READ(7);
 		time.tm_mon = CMOS_READ(8);
 		time.tm_year  =CMOS_READ(9);
-	} while (time.tm_sec != CMOS_READ(0))
+	} while (time.tm_sec != CMOS_READ(0));
 	BCD2DEC(time.tm_sec);
 	BCD2DEC(time.tm_min);
 	BCD2DEC(time.tm_hour);
