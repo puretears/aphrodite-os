@@ -1,7 +1,7 @@
 AS = nasm
 CC = gcc
 CXX = g++
-CFLAGS = -Iinclude -Wall -fomit-frame-pointer
+CFLAGS = -ggdb -Iinclude -Wall -fomit-frame-pointer
 LDFLAGS = -Ttext 0 -e startup32
 
 %.o:%.c
@@ -13,6 +13,7 @@ Image: boot/boot.bin boot/setup.bin tools/system tools/build
 	objcopy -O binary -R .note -R .comment tools/system tools/kernel
 	tools/build boot/boot.bin boot/setup.bin tools/kernel > $@
 	sync
+	./install.sh
 
 tools/system: boot/head init/main.o kernel/sched.o 
 	$(LD) $(LDFLAGS) $^ -o $@
