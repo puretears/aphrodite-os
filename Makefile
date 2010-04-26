@@ -1,11 +1,11 @@
 AS = nasm
 CC = gcc
 CXX = g++
-CFLAGS = -march=i386 -Wall -fomit-frame-pointer
-LDFLAGS = -m elf_i386 -Ttext 0 -e startup32
+CFLAGS = -Iinclude -Wall -fomit-frame-pointer
+LDFLAGS = -Ttext 0 -e startup32
 
 %.o:%.c
-	$(CC) $(CFLAGS) -nostdinc -Iinclude -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 all: Image
 
