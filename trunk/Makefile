@@ -1,7 +1,7 @@
 AS = nasm
 CC = gcc
 CXX = g++
-CFLAGS = -ggdb -Iinclude -Wall -fomit-frame-pointer
+CFLAGS = -ggdb -nostdinc -Iinclude -Wall -fomit-frame-pointer
 LDFLAGS = -Ttext 0 -e startup32
 
 %.o:%.c
@@ -24,7 +24,7 @@ kernel/kernel.o:
 	(cd kernel; make)
 
 tools/build: tools/build.c
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) -Wall -fomit-frame-pointer $< -o $@
 
 boot/boot.bin: boot/boot.asm boot/protect.inc
 	$(AS) -f bin -i ./boot/ $< -o $@
