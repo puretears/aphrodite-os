@@ -50,7 +50,31 @@ struct task_struct {
 		{ 0x9F, 0x00C0F200 }, \
 	}, \
 	{ \ 
-	
+		0, (PAGE_SIZE + &init_task), 0x10, 0, 0, 0, 0, pde, 0, 0, \
+		0, 0, 0, 0, 0, 0, 0, 0, \
+		0x17, 0x17, 0x17, 0x17, 0x17, 0x17, _LDT(0), 0x80000000 \
 	}, \
+}
+
+#define FIRST_TSS_ENTRY 4
+#define FIRST_LDT_ENTRY (FIRST_TSS_ENTRY + 1)
+#define _LDT(n) ((FIRST_TSS_ENTRY << 3) + (n << 4))
+#define _TSS(n) ((FIRST_LDT_ENTRY << 3) + (n << 4))
+
+static inline unsigned int str() {
+	int tss_sel;
+	__asm__("str %%ax\n\t"
+		"subl %2, %%eax\n\t"
+		"shrl $4, %%eax"
+		:"=a(tss_sel)"
+		:"a"(0), "i"(FIRST_TSS_ENTRY << 3));
+	return tss_sel;
+}
+
+static inline void set_tssldt_desc(void *gdt_desc, void *desc, char type) {
+	__asm__("movw $104, %1\n\t"
+		"movw"
+		::"a"(desc), "m"(*(gdt_desc)), "m"(*(gdt_desc + 2)), "m"(*(gdt_desc + 4)),
+		"m"(*(gdt_desc + 5)), "m"(*(gdt_desc + 6)), "m"(*(gdt_desc)));
 }
 #endif
