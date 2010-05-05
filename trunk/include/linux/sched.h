@@ -72,9 +72,21 @@ static inline unsigned int str() {
 }
 
 static inline void set_tssldt_desc(void *gdt_desc, void *desc, char type) {
-	__asm__("movw $104, %1\n\t"
-		"movw"
-		::"a"(desc), "m"(*(gdt_desc)), "m"(*(gdt_desc + 2)), "m"(*(gdt_desc + 4)),
-		"m"(*(gdt_desc + 5)), "m"(*(gdt_desc + 6)), "m"(*(gdt_desc)));
+	__asm__("movw $104, %2\n\t"
+		"movw %%ax, %3\n\t"
+		"shrw $16, %%eax\n\t"
+		"movb %%al, %4\n\t"
+		"movb %%bl, %5\n\t"
+		"movb $0, %6\n\t"
+		"movb %%ah, %7\n\t"
+		::"a"(desc), "b"(type), "m"(*(gdt_desc)), "m"(*(gdt_desc + 2)), "m"(*(gdt_desc + 4)),
+		"m"(*(gdt_desc + 5)), "m"(*(gdt_desc + 6)), "m"(*(gdt_desc + 7)));
+}
+
+static inline void set_tss_desc(void *gdt_desc, void *tss_desc, char type) {
+	set_tss_ldt(gdt_desc, tss_desc, 0x89);
+}
+static inline void set_ldt_desc(void *gdt_desc, void *tss_desc, char type) {
+	set_tss_ldt(gdt_desc, tss_desc, 0x82);
 }
 #endif
