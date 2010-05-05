@@ -61,6 +61,14 @@ struct task_struct {
 #define _LDT(n) ((FIRST_TSS_ENTRY << 3) + (n << 4))
 #define _TSS(n) ((FIRST_LDT_ENTRY << 3) + (n << 4))
 
+static inline void lldt(unsigned int n) {
+	__asm__ {"lldt %%ax"::"a"(_LDT(n))};
+}
+
+static inline void ltr(unsigned int n) {
+	__asm__ {"ltr %%ax"::"a"(_TSS(n))};
+}
+
 static inline unsigned int str() {
 	int tss_sel;
 	__asm__("str %%ax\n\t"
