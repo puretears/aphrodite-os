@@ -2,6 +2,9 @@
 #include "linux/sched.h"
 
 #define PAGE_SIZE 4096
+#define HZ 100
+#define LATCH (1193180 / HZ)
+
 long user_stack[PAGE_SIZE >> 2] = { 0 };
 
 union task_union {
@@ -28,4 +31,14 @@ void sched_init() {
 		p->a = p->b = 0;
 		p++;
 	}
+
+	__asm__ ("pushfl; and 0xFFFFBFFF, (%esp); popfl");
+	ltr(0);
+	ldt(0);
+	outb_p(0x36, 0x43);
+	outb_p(LATCH & 0xFF, 0x40);
+	outb(LATCH >> 16, 0x40);
+	set_intr_gate(0x20, &timer_interrupt);
+	outb_p(inb_p(0x21) & ~0x01, 0x21);
+	set_system_gate(0x80, &system_call);
 }

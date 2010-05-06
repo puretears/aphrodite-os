@@ -97,4 +97,16 @@ static inline void set_tss_desc(void *gdt_desc, void *tss_desc, char type) {
 static inline void set_ldt_desc(void *gdt_desc, void *tss_desc, char type) {
 	set_tss_ldt(gdt_desc, tss_desc, 0x82);
 }
+
+static inline void set_gate(unsigned int gate_addr, 
+							unsigned int type, unsigned dpl,
+							unsigned int addr) {
+	__asm__(""
+			:
+			:"i" (type << $13) + (dpl << $8) + $0x80000,
+			 "o" *((char *)(gate_addr)),
+			 "o" *(((char *)(gate_addr) + $2)),
+			 "d" ((char *)addr),
+			 "a" $0x00080000);
+}
 #endif
