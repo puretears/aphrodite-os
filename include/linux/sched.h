@@ -5,6 +5,7 @@
 #define NR_TASKS 64
 #define FIRST_TASK task[0]
 #define LAST_TASK task[NR_TASKS - 1]
+#define PAGE_SIZE 4096
 
 struct tss_struct {
 	unsigned int back_link;
@@ -42,19 +43,6 @@ struct task_struct {
 };
 
 
-#define INIT_TASK \
-{ 0, \			
-	{ \	
-		{ 0, 0 }, \
-		{ 0x9F, 0x00C0FA00 }, \
-		{ 0x9F, 0x00C0F200 }, \
-	}, \
-	{ \ 
-		0, (PAGE_SIZE + &init_task), 0x10, 0, 0, 0, 0, pde, 0, 0, \
-		0, 0, 0, 0, 0, 0, 0, 0, \
-		0x17, 0x17, 0x17, 0x17, 0x17, 0x17, _LDT(0), 0x80000000 \
-	}, \
-}
 
 #define FIRST_TSS_ENTRY 4
 #define FIRST_LDT_ENTRY (FIRST_TSS_ENTRY + 1)
@@ -62,11 +50,11 @@ struct task_struct {
 #define _TSS(n) ((FIRST_LDT_ENTRY << 3) + (n << 4))
 
 static inline void lldt(unsigned int n) {
-	__asm__ {"lldt %%ax"::"a"(_LDT(n))};
+	__asm__ ("lldt %%ax"::"a"(_LDT(n)));
 }
 
 static inline void ltr(unsigned int n) {
-	__asm__ {"ltr %%ax"::"a"(_TSS(n))};
+	__asm__ ("ltr %%ax"::"a"(_TSS(n)));
 }
 
 static inline unsigned int str() {
@@ -74,39 +62,8 @@ static inline unsigned int str() {
 	__asm__("str %%ax\n\t"
 		"subl %2, %%eax\n\t"
 		"shrl $4, %%eax"
-		:"=a(tss_sel)"
+		:"=a" (tss_sel)
 		:"a"(0), "i"(FIRST_TSS_ENTRY << 3));
 	return tss_sel;
-}
-
-static inline void set_tssldt_desc(void *gdt_desc, void *desc, char type) {
-	__asm__("movw $104, %2\n\t"
-		"movw %%ax, %3\n\t"
-		"shrw $16, %%eax\n\t"
-		"movb %%al, %4\n\t"
-		"movb %%bl, %5\n\t"
-		"movb $0, %6\n\t"
-		"movb %%ah, %7\n\t"
-		::"a"(desc), "b"(type), "m"(*(gdt_desc)), "m"(*(gdt_desc + 2)), "m"(*(gdt_desc + 4)),
-		"m"(*(gdt_desc + 5)), "m"(*(gdt_desc + 6)), "m"(*(gdt_desc + 7)));
-}
-
-static inline void set_tss_desc(void *gdt_desc, void *tss_desc, char type) {
-	set_tss_ldt(gdt_desc, tss_desc, 0x89);
-}
-static inline void set_ldt_desc(void *gdt_desc, void *tss_desc, char type) {
-	set_tss_ldt(gdt_desc, tss_desc, 0x82);
-}
-
-static inline void set_gate(unsigned int gate_addr, 
-							unsigned int type, unsigned dpl,
-							unsigned int addr) {
-	__asm__(""
-			:
-			:"i" (type << $13) + (dpl << $8) + $0x80000,
-			 "o" *((char *)(gate_addr)),
-			 "o" *(((char *)(gate_addr) + $2)),
-			 "d" ((char *)addr),
-			 "a" $0x00080000);
 }
 #endif
