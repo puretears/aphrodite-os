@@ -6,7 +6,9 @@ extern main
 BITS 32
 pde:	; Page directory will be stored here
 global startup32
-
+global _idt
+global _gdt
+global pde
 startup32:
 
 	mov ax, 010H
