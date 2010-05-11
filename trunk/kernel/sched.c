@@ -63,22 +63,20 @@ static inline void set_gate(unsigned char *gate_addr,
 			"movl %%eax, %1\n\t"
 			"movw %0, %%dx\n\t"
 			"movl %%edx, %2"
-			::"i" ((type << 13) + (dpl << 8) + 0x80000),
+			::"i" ((type << 8) + (dpl << 13) + 0x80000),
 			 "o" (*(char *)(gate_addr)),
 			 "o" (*((char *)(gate_addr) + 2)),
 			 "d" ((char *)addr),
 			 "a" (0x00080000));
 }
 
-static inline void set_intr_gate(unsigned int vec_no,
-							unsigned int type, unsigned dpl,
-							unsigned int addr) {
+inline void set_intr_gate(unsigned int vec_no,
+							unsigned int type, unsigned int addr) {
 	set_gate(&(_idt[vec_no * 8]), 14, 0, addr);
 } 
 
-static inline void set_system_gate(unsigned int vec_no,
-							unsigned int type, unsigned dpl,
-							unsigned int addr) {
+inline void set_system_gate(unsigned int vec_no,
+							unsigned int type, unsigned int addr) {
 	set_gate(&(_idt[vec_no * 8]), 15, 3, addr);
 }
 

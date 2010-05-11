@@ -94,6 +94,7 @@ init8259A:
 	mov al, 1
 	out 21H, al
 	out 0A1H, al
+	; Prohibit all interrupts
 	mov al, 0FFH
 	out 21H, al
 	out 0A1H, al
