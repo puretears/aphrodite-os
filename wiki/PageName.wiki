@@ -1,0 +1,21 @@
+#summary One-sentence summary of this page.
+
+= Physical memory of aphrodite os =
+
+The whole physical memory of aphrodite os is divided into three parts:
+0        1MB                4MB                            16MB
++--------+------------------+-------------------------------+
+| KERNEL |     CHCHE        |       MAIN MEMORY             |
++--------+------------------+-------------------------------+
+
+Both cache and main memory are managed by paging system. 
+
+We need 15 * 1024 / 4096 = 3840 page tables to cover cache and main memory.
+
+We use a global byte array to represent physical page status.
+
+{{{
+unsigned char mem_map[PAGING_PAGES] = {0, };
+}}}
+
+0 for idle pages, 100 for used pages.
