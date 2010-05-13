@@ -4,7 +4,7 @@
 
 The whole physical memory of aphrodite os is divided into three parts:
 
-KERNEL: 0 - 1MB
+LOW_MEMORY: 0 - 1MB
 
 CACHE: 1 - 4MB
 
@@ -21,3 +21,11 @@ unsigned char mem_map[PAGING_PAGES] = {0, };
 }}}
 
 0 for idle pages, 100 for used pages.
+
+Given a physical address: addr, we use a function `man_nr` to get `mem_map` index.
+
+{{{
+inline unsigned int map_nr(unsigned int addr) {
+    return ((addr - LOW_MEMORY) >> 12);
+}
+}}}
