@@ -4,8 +4,11 @@
 
 The whole physical memory of aphrodite os is divided into three parts:
 `0        1MB                4MB                            16MB`
+
 `+--------+------------------+-------------------------------+`
+
 `| KERNEL |     CHCHE        |       MAIN MEMORY             |`
+
 `+--------+------------------+-------------------------------+`
 
 Both cache and main memory are managed by paging system. 
