@@ -29,3 +29,11 @@ inline unsigned int map_nr(unsigned int addr) {
     return ((addr - LOW_MEMORY) >> 12);
 }
 }}}
+
+Prototype
+{{{
+void free_page(unsigned int paddr)
+}}}
+
+Perameter
+paddr - physical address of the page frame
