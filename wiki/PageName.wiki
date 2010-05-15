@@ -22,18 +22,31 @@ unsigned char mem_map[PAGING_PAGES] = {0, };
 
 0 for idle pages, 100 for used pages.
 
-Given a physical address: addr, we use a function `man_nr` to get `mem_map` index.
+Given a physical address, we use `man_nr` to get the corresponding `mem_map` index.
 
 {{{
-inline unsigned int map_nr(unsigned int addr) {
+inline unsigned int map_nr(unsigned int paddr) {
     return ((addr - LOW_MEMORY) >> 12);
 }
 }}}
 
-Prototype
+= Interfaces =
+
+*Prototype*
 {{{
 void free_page(unsigned int paddr)
 }}}
 
-Perameter
+*Perameter*
+
 paddr - physical address of the page frame
+
+*Prototype*
+{{{
+void free_page_tables(unsigned int laddr, unsigned size)
+}}}
+
+*Perameter*
+
+laddr - Linear address to be released from.
+size - The number of bytes to be released.
