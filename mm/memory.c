@@ -5,6 +5,7 @@
 
 // Only represent status of cache and main memory
 static unsigned char mem_map[PAGING_PAGES] = {0, };
+static unsigned int HIGH_MEMORY = 0;
 
 inline unsigned int map_nr(unsigned int addr) {
 	return ((addr - LOW_MEMORY) >> 12);
@@ -32,7 +33,22 @@ unsigned int get_free_page() {
 	return __res;
 }
 
+void free_page(unsigned int paddr) {
+	if ((paddr < LOW_MEMORY) || (paddr > HIGH_MEMORY))
+		return; // Kernel and noexisting memory cannot be freed.
+	int index = map_nr(paddr);
+
+	if (mem_map[index]--)
+		return;
+
+	// Execute here, there must be errors occured.
+	mem_map[index] = 0;
+	return;
+
+}
+
 void mem_init(int mm_start, int mm_end) {
+	HIGH_MEMROY = mem_end;
 	int i;
 	for (i = 0; i < PAGING_PAGES; i++) {
 		mem_map[i] = USED:
