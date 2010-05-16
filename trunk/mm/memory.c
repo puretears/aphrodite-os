@@ -41,15 +41,52 @@ void free_page(unsigned int paddr) {
 	if (mem_map[index]--)
 		return;
 
-	// Execute here, there must be errors occured.
+	// !!!Execute here, there must be errors occured.
 	mem_map[index] = 0;
 	return;
+
+}
+
+inline void invalidate() {
+	__asm__("movl %%eax, %%cr3"::"a" (0));
+}
+
+void free_page_tables(unsigned int laddr, int size) {
+	unsigned int *pg_dir, *pg_table, *pg_dir;
+	int nr;
+
+	if (laddr & 0x3FFFFF)
+		return; // Beginning address must be aligned with 4MB
+	if (!laddr)
+		return;
+
+	pg_dir = (unsigned int *)((laddr >> 22) << 2);
+	size = (size + 0x3FFFFF) >> 22;
+
+	
+	for (; size--; pg_dir++) {
+		if (!((*pg_dir) & 1))
+			continue; // No existing page directory entry
+		pg_table = (unsigned int *)((*pg_dir) & 0xFFFFF000);
+
+		for (nr = 0; nr < 1024; nr++) {
+			if ((pg_table[nr]) & 1)
+				free_page((pg_table[nr]) & 0xFFFFF000);
+			pg_table[nr] = 0;
+		}
+		free_page((*pg_dir) & 0xFFFFF000)	
+		*pg_dir = 0;
+	}
+
+	invalidate();
+	return 0;
 
 }
 
 void mem_init(int mm_start, int mm_end) {
 	HIGH_MEMROY = mem_end;
 	int i;
+
 	for (i = 0; i < PAGING_PAGES; i++) {
 		mem_map[i] = USED:
 	}
