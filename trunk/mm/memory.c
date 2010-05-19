@@ -83,6 +83,56 @@ void free_page_tables(unsigned int laddr, int size) {
 
 }
 
+void copy_page_tables(unsigned int from, unsigned int to, unsigned int size) {
+	unsigned int *from_pg_dir;
+	unsigned int *from_pg_table;
+	unsigned int *to_pg_dir;
+	unsigned int *to_pg_table;
+	unsigned int this_page;
+	unsigned int nr = 1024;
+
+	if ((from & 0x3FFFFF) || (to & 0x3FFFFF))
+		return;	// Not 4MB aligned. KERNEL PANIC
+
+	from_pg_dir = (unsigned int *)((from >> 22) << 2);
+	to_pg_dir = (unsigned int *)((to >> 22) << 2);
+	size = (size + 0x3FFFFF) >> 22;
+
+	for (; size-- > 0; from_pg_dir++, to_pg_dir++) {
+		if (1 & (*to_pg_dir))
+			return; // Destination page directory already exist. KERNEL PANIC
+		if (!(1 & (*from_pg_dir)))
+			continue; // A non existing source page directory, continue to next
+
+		to_pg_table = (unsigned int *)get_free_page();
+		if (!to_pg_table)
+			return; // OOM
+
+		from_pg_table = (unsigned int *)((*from_pg_dir) & 0xFFFFF000);
+		*to_pg_dir = (unsigned int)to_pg_table | 7;
+
+		for (; nr-- > 0; from_pg_table++, to_pg_table++) {
+			this_page = *from_pg_table;
+
+			if (!(1 & (this_page)))
+				continue;
+
+			this_page &= ~2;
+			*to_pg_table = this_page;
+
+			if (this_page > LOW_MEMORY) {
+				*from_pg_table = this_page;
+				this_page -= LOW_MEM;
+				this_page >>= 12;
+				mem_map[this_page]++;
+			}
+		}
+	}
+
+	invalidate();
+	return 0;
+}
+
 void mem_init(int mm_start, int mm_end) {
 	HIGH_MEMROY = mem_end;
 	int i;
