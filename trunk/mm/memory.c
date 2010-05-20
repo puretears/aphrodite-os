@@ -149,3 +149,29 @@ void mem_init(int mm_start, int mm_end) {
 
 	return;
 }
+
+void mem_calc() {
+	int free_pages = 0;
+	int i = 0, j = 0, k = 0, m = 0;
+	int pte_addr;
+
+	for (; i < PAGING_PAGES; i++) {
+		if (!mem_map[i])
+			free_pages++;
+	}
+	printf("%d free pages left.\n", free_pages);
+
+	for (j = 4; j < 1024; j++) {
+		if (pde[j] & 1) {
+			pte_addr = pde[j] & 0xFFFFF000;
+			m = 0;
+
+			for (k = 0; k < 1024; k++) {
+				if (pte_addr[k] & 1)
+					m++;
+			}
+			printf("In pde%d, %d pages have been used.\n", j, m);
+		}
+	}
+
+}
