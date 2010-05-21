@@ -1,29 +1,36 @@
+global cur_pos
+
 BOOT_ADDR	equ 09000H
 LOADER_ADDR	equ 09020H
 KERNEL_ADDR equ 01000H
 
 	mov ax, BOOT_ADDR
 	mov ds, ax
+	mov es, ax
+
 	mov ah, 03H
 	xor bh, bh
 	int 10H
 	mov [0], dx			; Save current cursor position at 0x90000
 	
-	mov ah, 088H
-	int 015H
-	mov [2], ax			; Save extend memory(above 1MB) at 0x90002 
+	call get_mem_map
+	mov eax, dword [mem_size_low]
+	mov [4], eax
+	mov eax, dword [mem_size_high]
+	mov [8], eax
 	
+
 	mov ah, 0FH
 	int 10H
-	mov [4], bx			; bh = current page
-	mov [6], ax			; ah = window width, al = video mode
+	mov [12], bx			; bh = current page
+	mov [14], ax			; ah = window width, al = video mode
 
 	mov ah, 12H
 	mov bl, 10H
 	int 10H
-	mov [8], ax
-	mov [0AH], bx		; bh = display mode, bl = display memory
-	mov [0BH], cx		; cx = video card parameter
+	mov [16], ax
+	mov [18], bx		; bh = display mode, bl = display memory
+	mov [20], cx		; cx = video card parameter
 
 	; Load the 1st disk parameter into 0x90080
 	mov ax, 0
@@ -99,6 +106,46 @@ init8259A:
 	out 21H, al
 	out 0A1H, al
 	ret
+
+get_mem_map:
+	enter 0, 0
+	push ebx
+	push ecx
+	push edx
+	push edi
+
+	mov eax, 0E820H
+	mov ebx, 0
+	mov ecx, 512
+	mov edx, "SMAP"
+	lea edi, [_mem_map_buffer]
+INT15H:
+	int 15H
+	jnc CONTINUE_TO_SCAN
+	jmp $		; If error, just hang here just for simplicity.
+CONTINUE_TO_SCAN:
+	cmp ebx, 0
+	jz SCAN_END
+	add edi, ecx
+	mov eax, 0E820H
+	jmp INT15H
+SCAN_END:
+	; Now we have get the whole mem map, EDI points to the last entry.
+	mov eax, dword [edi]
+	mov edx, dword [edi + 4]
+	add eax, dword [edi + 8]
+	add edx, dword [edi + 12]
+	mov dword [mem_size_low], eax
+	mov dword [mem_size_high], edx
+
+	pop edi
+	pop edx
+	pop ecx
+	pop ebx
+	leave
+	ret
+
+
 %include "display.inc"
 %include "protect.inc"
 loader		db "Load loader to 0x90200.", 0AH, 0
@@ -116,3 +163,8 @@ gdt_pesudo dw $ - gdt
 
 idt_pesudo dw 0
            dd 0
+
+
+_mem_map_buffer times 512 db 0
+mem_size_low dd 0
+mem_size_high dd 0

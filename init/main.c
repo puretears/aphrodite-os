@@ -29,6 +29,6 @@ static void time_init() {
 
 int main() {
 	time_init();
-	sched_init();
+	//sched_init();
 	return 0;
 }
