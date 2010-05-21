@@ -15,7 +15,7 @@ Image: boot/boot.bin boot/setup.bin tools/system tools/build
 	sync
 	./install.sh
 
-tools/system: boot/head init/main.o kernel/sched.o 
+tools/system: boot/head init/main.o kernel/kernel.o
 	$(LD) $(LDFLAGS) $^ -o $@
 
 init/main.o: init/main.c

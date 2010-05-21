@@ -36,23 +36,23 @@ long user_stack[PAGE_SIZE >> 2] = { 0 };
 
 
 
-static inline void set_tssldt_desc(unsigned char *gdt_desc, void *desc, char type) {
-	__asm__("movw $104, %2\n\t"
-			"movw %%ax, %3\n\t"
-			"shrw $16, %%eax\n\t"
-			"movb %%al, %4\n\t"
-			"movb %%bl, %5\n\t"
+static inline void set_tssldt_desc(unsigned char *gdt_desc, unsigned int desc, short type) {
+	__asm__(//"movw $104, %2\n\t"
+			//"movw %%ax, %3\n\t"
+			//"shrl $16, %%eax\n\t"
+			//"movb %%al, %4\n\t"
+			//"movb %%bl, %5\n\t"
 			"movb $0, %6\n\t"
-			"movb %%ah, %7"
-			::"a"(desc), "b"(type), "m"(*(gdt_desc)), "m"(*(gdt_desc + 2)), 
-			  "m"(*(gdt_desc + 4)),"m"(*(gdt_desc + 5)), "m"(*(gdt_desc + 6)), 
-			  "m"(*(gdt_desc + 7)));
+			//"movb %%ah, %7"
+			::"a" (desc), "c" (type), "m" (*(gdt_desc)), "m" (*(gdt_desc + 2)), 
+			  "m" (*(gdt_desc + 4)),"m" (*(gdt_desc + 5)), "m" (*(gdt_desc + 6)), 
+			  "m" (*(gdt_desc + 7)));
 }
 
-static inline void set_tss_desc(unsigned char *gdt_desc, void *tss_desc) {
+static inline void set_tss_desc(unsigned char *gdt_desc, unsigned int tss_desc) {
 	set_tssldt_desc(gdt_desc, tss_desc, 0x89);
 }
-static inline void set_ldt_desc(unsigned char *gdt_desc, void *ldt_desc) {
+static inline void set_ldt_desc(unsigned char *gdt_desc, unsigned int ldt_desc) {
 	set_tssldt_desc(gdt_desc, ldt_desc, 0x82);
 }
 
@@ -97,10 +97,10 @@ void sched_init() {
 	__asm__ ("pushfl; andl 0xFFFFBFFF, (%esp); popfl");
 	ltr(0);
 	lldt(0);
-	outb_p(0x36, 0x43);
+	/*outb_p(0x36, 0x43);
 	outb_p(LATCH & 0xFF, 0x40);
 	outb(LATCH >> 16, 0x40);
 	set_intr_gate(0x20, &timer_interrupt);
 	outb_p(inb_p(0x21) & ~0x01, 0x21);
-	set_system_gate(0x80, &system_call);
+	set_system_gate(0x80, &system_call);*/
 }
