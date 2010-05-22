@@ -1,7 +1,11 @@
 #include "asm/io.h"
 #include "time.h"
 
-inline unsigned char CMOS_READ(unsigned char addr) {
+#define CURR_POS 0x90000
+#define TOTAL_MEM 0x90004
+#define DISK_PARAM 0x90080
+
+unsigned char CMOS_READ(unsigned char addr) {
 	outb_p(addr, 0x70);  
 	return inb_p(0x71); 
 }
@@ -29,6 +33,8 @@ static void time_init() {
 
 int main() {
 	time_init();
-	//sched_init();
+	unsigned short curr_pos = *((unsigned short *)CURR_POS);
+	unsigned int total_mem = *((unsigned int *)TOTAL_MEM);
+
 	return 0;
 }
