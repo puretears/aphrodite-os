@@ -1,6 +1,7 @@
 %include "../boot/protect.inc"
 extern user_stack
 extern main
+global pde
 
 [SECTION .text]
 BITS 32
