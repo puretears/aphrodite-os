@@ -6,6 +6,7 @@ KERNEL_ADDR equ 01000H
 
 	mov ax, BOOT_ADDR
 	mov ds, ax
+	mov ax, LOADER_ADDR
 	mov es, ax
 
 	mov ah, 03H
@@ -117,8 +118,8 @@ get_mem_map:
 	mov eax, 0E820H
 	mov ebx, 0
 	mov ecx, 512
-	mov edx, "SMAP"
-	lea edi, [_mem_map_buffer]
+	mov edx, 0534D4150H
+	mov edi, _mem_map_buffer
 INT15H:
 	int 15H
 	jnc CONTINUE_TO_SCAN

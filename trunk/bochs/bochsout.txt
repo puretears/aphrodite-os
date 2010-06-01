@@ -29,14 +29,14 @@
 00000000000i[     ]   SB16 support: no
 00000000000i[     ]   USB support: no
 00000000000i[     ]   VGA extension support: vbe 
-00000000000i[MEM0 ] allocated memory at 0xb50dd008. after alignment, vector=0xb50de000
+00000000000i[MEM0 ] allocated memory at 0xb51bf008. after alignment, vector=0xb51c0000
 00000000000i[MEM0 ] 32.00MB
 00000000000i[MEM0 ] mem block size = 0x00100000, blocks=32
 00000000000i[MEM0 ] rom at 0xfffe0000/131072 ('/usr/local/share/bochs/BIOS-bochs-latest')
 00000000000i[MEM0 ] rom at 0xc0000/40448 ('/usr/local/share/bochs/VGABIOS-lgpl-latest')
 00000000000e[DEV  ] Bochs is not compiled with PCI support
 00000000000i[CMOS ] Using local time for initial clock
-00000000000i[CMOS ] Setting initial clock to: Sat May 22 15:38:07 2010 (time0=1274513887)
+00000000000i[CMOS ] Setting initial clock to: Tue Jun  1 23:58:44 2010 (time0=1275407924)
 00000000000i[DMA  ] channel 4 used by cascade
 00000000000i[DMA  ] channel 2 used by Floppy Drive
 00000000000i[FDD  ] fd0: 'vmlinuz.img' ro=0, h=2,t=80,spt=18
@@ -103,21 +103,21 @@
 00000000000i[XGUI ] [x] Mouse off
 00000000000i[     ] set SIGINT handler to bx_debug_ctrlc_handler
 00000003305i[BIOS ] $Revision: 1.247 $ $Date: 2010/04/04 19:33:50 $
-00000317244i[KBD  ] reset-disable command received
-00000443280i[VBIOS] VGABios $Id: vgabios.c,v 1.69 2009/04/07 18:18:20 vruppert Exp $
-00000443351i[VGA  ] VBE known Display Interface b0c0
-00000443383i[VGA  ] VBE known Display Interface b0c5
-00000446308i[VBIOS] VBE Bios $Id: vbe.c,v 1.62 2009/01/25 15:46:25 vruppert Exp $
-00000758997i[BIOS ] Starting rombios32
-00000759494i[BIOS ] Shutdown flag 0
-00000760175i[BIOS ] ram_size=0x02000000
-00000760653i[BIOS ] ram_end=32MB
+00000317259i[KBD  ] reset-disable command received
+00000443295i[VBIOS] VGABios $Id: vgabios.c,v 1.69 2009/04/07 18:18:20 vruppert Exp $
+00000443366i[VGA  ] VBE known Display Interface b0c0
+00000443398i[VGA  ] VBE known Display Interface b0c5
+00000446323i[VBIOS] VBE Bios $Id: vbe.c,v 1.62 2009/01/25 15:46:25 vruppert Exp $
+00000759012i[BIOS ] Starting rombios32
+00000759509i[BIOS ] Shutdown flag 0
+00000760190i[BIOS ] ram_size=0x02000000
+00000760668i[BIOS ] ram_end=32MB
 00000780000i[XGUI ] charmap update. Font Height is 16
-00000787389i[BIOS ] Found 1 cpu(s)
-00000806658i[BIOS ] bios_table_addr: 0x000fbc18 end=0x000fcc00
-00000819335i[BIOS ] bios_table_cur_addr: 0x000fbc18
-00000831653i[BIOS ] ata0-0: PCHS=60/16/63 translation=none LCHS=60/16/63
-00004712120i[BIOS ] IDE time out
+00000787392i[BIOS ] Found 1 cpu(s)
+00000806661i[BIOS ] bios_table_addr: 0x000fbc18 end=0x000fcc00
+00000819338i[BIOS ] bios_table_cur_addr: 0x000fbc18
+00000831656i[BIOS ] ata0-0: PCHS=60/16/63 translation=none LCHS=60/16/63
+00004712123i[BIOS ] IDE time out
 00012706900i[BIOS ] Booting from 0000:7c00
 00012706961i[     ] dbg: Quit
 00012706961i[CPU0 ] CPU is in real mode (active)
@@ -137,6 +137,6 @@
 00012706961i[CPU0 ] | EIP=00007c00 (00007c00)
 00012706961i[CPU0 ] | CR0=0x60000010 CR2=0x00000000
 00012706961i[CPU0 ] | CR3=0x00000000 CR4=0x00000000
-00012706961i[CMOS ] Last time is 1274513891 (Sat May 22 15:38:11 2010)
+00012706961i[CMOS ] Last time is 1275407928 (Tue Jun  1 23:58:48 2010)
 00012706961i[XGUI ] Exit
 00012706961i[CTRL ] quit_sim called with exit code 0

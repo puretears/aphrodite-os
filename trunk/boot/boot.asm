@@ -1,3 +1,4 @@
+
 BOOT_ADDR	equ 09000H
 SETUP_ADDR	equ 09020H
 SETUP_LEN	equ 4
@@ -5,6 +6,9 @@ KERNEL_ADDR	equ 01000H
 KERNEL_SIZE equ 03000H
 KERNEL_END	equ KERNEL_ADDR + KERNEL_SIZE
 
+	mov eax, [0100H]
+	mov eax, [var1]
+var1 dd 0
 	; Copy itself from 0x7C00 to 0x9000
 	mov ax, 07C0H
 	mov ds, ax
