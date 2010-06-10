@@ -69,7 +69,7 @@ COPY_OVER:
 	call init8259A
 
 	lgdt [gdt_pesudo]
-	lidt [idt_pesudo]
+	;lidt [idt_pesudo]
 	; Jump to protect mode
 	mov eax, cr0
 	or eax, 1
@@ -162,8 +162,8 @@ CODE32_SEL equ code - gdt
 gdt_pesudo dw $ - gdt
 		   dd 090200H + gdt
 
-idt_pesudo dw 0
-           dd 0
+;idt_pesudo dw 0
+;           dd 0
 
 
 _mem_map_buffer times 512 db 0
