@@ -4,6 +4,9 @@ CXX = g++
 CFLAGS = -ggdb -nostdinc -Iinclude -Wall -fomit-frame-pointer
 LDFLAGS = -Ttext 0 -e startup32
 
+%.bin:%.asm
+	$(AS) -f bin -i ./boot/ $< -o $@
+
 %.o:%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -27,10 +30,8 @@ tools/build: tools/build.c
 	$(CC) -Wall -fomit-frame-pointer $< -o $@
 
 boot/boot.bin: boot/boot.asm boot/protect.inc
-	$(AS) -f bin -i ./boot/ $< -o $@
 
 boot/setup.bin: boot/setup.asm boot/protect.inc
-	$(AS) -f bin -i ./boot/ $< -o $@
 
 boot/head: boot/head.s boot/protect.inc
 	$(AS) -f elf32 -i ./boot/ $< -o $@
