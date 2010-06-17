@@ -126,8 +126,8 @@ _idt_pesudo:
 ; 256 GDT entries
 _gdt:
 _dummy: gdt_desc 0, 0, 0
-_code:  gdt_desc 0FFFFFH, 0, 0C9AH
-_data:  gdt_desc 0FFFFFH, 0, 0C92H
+_code:  gdt_desc 0FFFFFH, 0, 0C09AH
+_data:  gdt_desc 0FFFFFH, 0, 0C092H
 _tmp:   gdt_desc 0, 0, 0
 	times 504 dd 0
 
