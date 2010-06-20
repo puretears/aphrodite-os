@@ -14,12 +14,6 @@ KERNEL_ADDR equ 01000H
 	int 10H
 	mov [0], dx			; Save current cursor position at 0x90000
 	
-	call get_mem_map
-	call disp_mem_map
-	mov eax, dword [mem_size_low]
-	mov [4], eax
-	mov eax, dword [mem_size_high]
-	mov [8], eax
 	
 
 	mov ah, 0FH
@@ -43,7 +37,12 @@ KERNEL_ADDR equ 01000H
 	mov di, 080H
 	mov cx, 10H
 	rep movsb
-
+	
+	mov ax, cs
+	mov ds, ax
+	mov es, ax
+	call get_mem_map
+	call disp_mem_map
 	cli
 	cld
 	; Move system module from 0x10000 to 0x00000
@@ -65,6 +64,12 @@ COPY_OVER:
 	mov ds, ax
 	mov si, loader
 	call disp_str
+
+
+;	mov eax, dword [mem_size_low]
+;	mov [4], eax
+;	mov eax, dword [mem_size_high]
+;	mov [8], eax
 
 	call enableA20
 	call init8259A
@@ -126,19 +131,13 @@ INT15H:
 	jnc CONTINUE_TO_SCAN
 	jmp $		; If error, just hang here just for simplicity.
 CONTINUE_TO_SCAN:
+	inc word [_mem_map_count]
 	cmp ebx, 0
 	jz SCAN_END
 	add edi, ecx
 	mov eax, 0E820H
 	jmp INT15H
 SCAN_END:
-	; Now we have get the whole mem map, EDI points to the last entry.
-	; mov eax, dword [edi]
-	; mov edx, dword [edi + 4]
-	; add eax, dword [edi + 8]
-	; add edx, dword [edi + 12]
-	; mov dword [mem_size_low], eax
-	; mov dword [mem_size_high], edx
 
 	pop edi
 	pop edx
@@ -151,17 +150,35 @@ disp_mem_map:
 	enter 0, 0
 	push ds
 	push esi
-	mov ax, LOADER_ADDR
-	mov ds, ax
-	lea esi, [_mem_map_buffer + 40]	
+	push bx
+	push cx
+	push dx
+	mov cx, word [_mem_map_count]
+	xor bx, bx
+DISP_MEM_MAP_BUF:
+	mov dx, 5
+DISP_MEM_BUF_ENTRY:	
+	lea esi, [_mem_map_buffer + bx]	
 	lodsd
 	push eax
 	call disp_int
 	add sp, 4
+	add bx, 4
+	mov al, 32
+	call disp_al
+	dec dx
+	cmp dx, 0
+	jnz DISP_MEM_BUF_ENTRY
+	call disp_newline
+	loop DISP_MEM_MAP_BUF
+	pop dx
+	pop cx
+	pop bx
 	pop esi
 	pop ds
 	leave
 	ret
+
 %include "display.inc"
 %include "protect.inc"
 loader		db "Load loader to 0x90200.", 0AH, 0
@@ -182,5 +199,6 @@ gdt_pesudo dw $ - gdt
 
 
 _mem_map_buffer times 512 db 0
+_mem_map_count dw 0
 mem_size_low dd 0
 mem_size_high dd 0

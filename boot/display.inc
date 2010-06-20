@@ -39,6 +39,24 @@ DISP_OVER:
 	leave 
 	ret
 
+disp_newline:
+	enter 0, 0
+	push dx
+	push di
+	mov ax, [curr_pos]
+	xor dx, dx
+	mov di, 160
+	div di
+	inc ax
+	xor dx, dx
+	mov di, 160
+	mul di
+	mov [curr_pos], ax
+	pop di
+	pop dx
+	leave
+	ret
+
 ; push int
 ; call disp_int
 disp_int:
