@@ -93,10 +93,16 @@ disp_al:
 	add al, 0x30
 	jmp DISP_AL1
 A2F:
+	cmp al, 65
+	jge DISP_AL1
+	cmp al, 32		; 32 = space
+	jz DISP_SPACE
 	add al, 0x37
 DISP_AL1:
 	mov ah, 0CH
-	stosw
+	mov [es:di], ax
+DISP_SPACE:
+	add di, 2
 	mov [curr_pos], di
 	pop bx
 	pop di
