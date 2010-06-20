@@ -39,6 +39,53 @@ DISP_OVER:
 	leave 
 	ret
 
+; push int
+; call disp_int
+disp_int:
+	enter 0, 0
+	push es
+	push ecx
+	mov eax, dword [bp + 4] 
+	xor ecx, ecx
+	mov cx, 32
+DISP_BITS:
+	push eax
+	sub cx, 4
+	shr eax, cl
+	and eax, 0FH
+	call disp_al
+	pop eax
+	cmp cx, 0
+	jnz DISP_BITS
+	pop ecx
+	pop es
+	leave
+	ret
+
+disp_al:
+	enter 0, 0
+	push es
+	push di
+	push bx
+	mov bx, 0B800H
+	mov es, bx
+	mov di, [curr_pos]
+	cmp al, 9
+	jg A2F
+	add al, 0x30
+	jmp DISP_AL1
+A2F:
+	add al, 0x37
+DISP_AL1:
+	mov ah, 0CH
+	stosw
+	mov [curr_pos], di
+	pop bx
+	pop di
+	pop es
+	leave
+	ret
+
 clear_scr:
 	enter 0, 0
 	push es

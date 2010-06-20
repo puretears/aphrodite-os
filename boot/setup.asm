@@ -15,6 +15,7 @@ KERNEL_ADDR equ 01000H
 	mov [0], dx			; Save current cursor position at 0x90000
 	
 	call get_mem_map
+	call disp_mem_map
 	mov eax, dword [mem_size_low]
 	mov [4], eax
 	mov eax, dword [mem_size_high]
@@ -132,12 +133,12 @@ CONTINUE_TO_SCAN:
 	jmp INT15H
 SCAN_END:
 	; Now we have get the whole mem map, EDI points to the last entry.
-	mov eax, dword [edi]
-	mov edx, dword [edi + 4]
-	add eax, dword [edi + 8]
-	add edx, dword [edi + 12]
-	mov dword [mem_size_low], eax
-	mov dword [mem_size_high], edx
+	; mov eax, dword [edi]
+	; mov edx, dword [edi + 4]
+	; add eax, dword [edi + 8]
+	; add edx, dword [edi + 12]
+	; mov dword [mem_size_low], eax
+	; mov dword [mem_size_high], edx
 
 	pop edi
 	pop edx
@@ -146,7 +147,21 @@ SCAN_END:
 	leave
 	ret
 
-
+disp_mem_map:
+	enter 0, 0
+	push ds
+	push esi
+	mov ax, LOADER_ADDR
+	mov ds, ax
+	lea esi, [_mem_map_buffer + 40]	
+	lodsd
+	push eax
+	call disp_int
+	add sp, 4
+	pop esi
+	pop ds
+	leave
+	ret
 %include "display.inc"
 %include "protect.inc"
 loader		db "Load loader to 0x90200.", 0AH, 0
