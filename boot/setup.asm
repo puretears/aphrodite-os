@@ -13,13 +13,11 @@ KERNEL_ADDR equ 01000H
 	xor bh, bh
 	int 10H
 	mov [0], dx			; Save current cursor position at 0x90000
-	
-	
 
 	mov ah, 0FH
 	int 10H
-	mov [12], bx			; bh = current page
-	mov [14], ax			; ah = window width, al = video mode
+	mov [12], bx		; bh = current page
+	mov [14], ax		; ah = window width, al = video mode
 
 	mov ah, 12H
 	mov bl, 10H
@@ -38,11 +36,12 @@ KERNEL_ADDR equ 01000H
 	mov cx, 10H
 	rep movsb
 	
+	; Get memory map
 	mov ax, cs
 	mov ds, ax
 	mov es, ax
 	call get_mem_map
-	call disp_mem_map
+
 	cli
 	cld
 	; Move system module from 0x10000 to 0x00000
@@ -64,12 +63,12 @@ COPY_OVER:
 	mov ds, ax
 	mov si, loader
 	call disp_str
+	mov si, mem_map_hint
+	call disp_str
+	mov si, mem_map_title
+	call disp_str
+	call disp_mem_map
 
-
-;	mov eax, dword [mem_size_low]
-;	mov [4], eax
-;	mov eax, dword [mem_size_high]
-;	mov [8], eax
 
 	call enableA20
 	call init8259A
@@ -164,6 +163,8 @@ DISP_MEM_BUF_ENTRY:
 	call disp_int
 	add sp, 4
 	add bx, 4
+	mov al, 'H'
+	call disp_al
 	mov al, 32
 	call disp_al
 	dec dx
@@ -182,6 +183,8 @@ DISP_MEM_BUF_ENTRY:
 %include "display.inc"
 %include "protect.inc"
 loader		db "Load loader to 0x90200.", 0AH, 0
+mem_map_title db "BaseAddrL BaseAddrH LimitL    LimitH    Type", 0AH, 0
+mem_map_hint db "The memory map: ", 0AH, 0
 curr_pos	dw 160
 
 
