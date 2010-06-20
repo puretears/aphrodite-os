@@ -31,7 +31,7 @@ tools/build: tools/build.c
 
 boot/boot.bin: boot/boot.asm boot/protect.inc
 
-boot/setup.bin: boot/setup.asm boot/protect.inc
+boot/setup.bin: boot/setup.asm boot/protect.inc boot/display.inc
 
 boot/head: boot/head.s boot/protect.inc
 	$(AS) -f elf32 -i ./boot/ $< -o $@
