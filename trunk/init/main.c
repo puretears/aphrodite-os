@@ -35,6 +35,6 @@ int main() {
 	time_init();
 	unsigned short curr_pos = *((unsigned short *)CURR_POS);
 	unsigned int total_mem = *((unsigned int *)TOTAL_MEM);
-
+	while(1) {};
 	return 0;
 }
