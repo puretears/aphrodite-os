@@ -69,6 +69,7 @@ CONTINUE_LOAD_KERNEL:
 	mul cx
 	add ax, bx
 	jnc READ1
+	je READ1
 	xor cx, cx
 	sub cx, bx
 	shr cx, 9

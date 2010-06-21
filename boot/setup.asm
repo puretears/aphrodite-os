@@ -63,13 +63,21 @@ COPY_OVER:
 	mov ds, ax
 	mov si, loader
 	call disp_str
+	mov si, str_kernel_base
+	call disp_str
 	mov si, mem_map_hint
 	call disp_str
 	mov si, mem_map_title
 	call disp_str
 	call disp_mem_map
-
-
+	call calc_phy_mem_size
+	push eax
+	mov si, str_total_mem
+	call disp_str
+	pop eax
+	push eax
+	call disp_int
+	add sp, 4
 	call enableA20
 	call init8259A
 
@@ -180,14 +188,60 @@ DISP_MEM_BUF_ENTRY:
 	leave
 	ret
 
+calc_phy_mem_size:
+	enter 0, 0
+	push ebx
+	push edx
+	push si
+	push di
+	xor dx, dx
+	mov ax, word [_mem_map_count]
+CONTINUE_FIND_LVE:
+	dec ax
+	push ax
+	mov bx, 20
+	mul bx	; We get the last mem_map entry offset here
+	add ax, _mem_map_buffer
+	mov di, ax
+	add ax, 16
+	mov si, ax
+	lodsd
+	cmp eax, 1
+	jz GET_LAST_VALID_ENTRY
+	xor dx, dx
+	pop ax
+	jmp CONTINUE_FIND_LVE
+GET_LAST_VALID_ENTRY:
+	xchg di, si
+	lodsd	; eax = low base addr 
+	mov ebx, eax
+	add si, 4
+	lodsd	; eax = low limit
+	add eax, ebx	; eax = total physical memory
+	xor edx, edx
+	mov ebx, 1024 * 1024
+	div ebx	; eax = Physical memory in MB
+	pop di
+	pop si
+	pop edx
+	pop ebx
+	leave
+	ret
+
 %include "display.inc"
 %include "protect.inc"
 loader		db "Load loader to 0x90200.", 0AH, 0
+str_kernel_base db "Load kernel to 0x00000.", 0AH, 0
 mem_map_title db "BaseAddrL BaseAddrH LimitL    LimitH    Type", 0AH, 0
 mem_map_hint db "The memory map: ", 0AH, 0
+str_total_mem db "The memory size: ", 0
 curr_pos	dw 160
+_mem_map_buffer times 512 db 0
+_mem_map_count dw 0
+mem_size_low dd 0
+mem_size_high dd 0
 
-
+; Temporary GDT
 gdt: gdt_desc 0, 0, 0
 code: gdt_desc 0FFFFH, 0, 0C09AH	; Code segment
 data: gdt_desc 0FFFFH, 0, 0C092H 
@@ -197,11 +251,3 @@ CODE32_SEL equ code - gdt
 gdt_pesudo dw $ - gdt
 		   dd 090200H + gdt
 
-;idt_pesudo dw 0
-;           dd 0
-
-
-_mem_map_buffer times 512 db 0
-_mem_map_count dw 0
-mem_size_low dd 0
-mem_size_high dd 0
