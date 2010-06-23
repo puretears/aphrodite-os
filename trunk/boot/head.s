@@ -22,21 +22,29 @@ startup32:
 
 	; Copy bootup parameters
 	mov esi, 090000H
-	mov edi, empyt_zero_page
+	mov edi, empty_zero_page
 	mov ecx, 512
 	cld
 	rep movsd
 
 	call setup_paging 
+	lidt [_idt_pesudo]
 	lgdt [_gdt_pesudo]
-	;mov ax, KERNEL_DS
-	;mov ds, ax
-	;mov es, ax
-	;mov fs, ax
-	;mov gs, ax
-	;mov ss, ax
-	;mov esp, user_stack
-	;jmp code_after_pg
+	jmp KERNEL_CS:RELOAD_GDT
+RELOAD_GDT:
+	mov ax, KERNEL_DS
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	mov ss, ax
+	mov esp, user_stack
+
+	push 0
+	push 0
+	push 0
+	call main
+	jmp $
 
 times (01000H - ($ - $$)) db 0
 pde:
@@ -55,15 +63,6 @@ empty_zero_page:
 
 times (06000H - ($ - $$)) db 0
 
-code_after_pg:
-	push 0
-	push 0
-	push 0
-	push HANG_HERE
-	push main
-	jmp setup_paging
-HANG_HERE:
-	jmp $
 
 setup_paging:
 	enter 0, 0
@@ -77,15 +76,15 @@ setup_paging:
 	mov dword [pde + 3072], pte0 + 7	; 0xC0000000
 
 	; Iinitialize PTE entries
-	mov edi, pte0 + 4092 + 7
-	mov eax, 3FFFF007H
+	mov edi, pte0 + 4092
+	mov eax, 3FF007H
 	std
 CONTINUE_INIT_PTE:
 	stosd
 	sub eax, 01000H
-	jge CONTINUE_INIT_PAGE
+	jge CONTINUE_INIT_PTE
 
-	xor eax, eax
+	mov eax, pde
 	mov cr3, eax
 	mov eax, cr0
 	or eax, 80000000H
@@ -112,7 +111,6 @@ INIT_IDT:
 	pop edi
 	pop ecx
 	pop ebx
-	lidt [_idt_pesudo]
 	leave
 	ret
 
@@ -149,7 +147,7 @@ r3_code:  gdt_desc 0BFFFFH, 0, 0C0FAH
 r3_data:  gdt_desc 0BFFFFH, 0, 0C0F2H
 	gdt_desc 0, 0, 0
 	gdt_desc 0, 0, 0
-	times (2 * NR_TASKS) dd 0
+	times (2 * 128) dd 0
 
 NR_TASKS	equ 128
 
