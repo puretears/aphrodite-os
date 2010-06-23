@@ -5,6 +5,8 @@
 #define TOTAL_MEM 0x90004
 #define DISK_PARAM 0x90080
 
+unsigned int total_mem = *((unsigned int *)TOTAL_MEM);
+
 unsigned char CMOS_READ(unsigned char addr) {
 	outb_p(addr, 0x70);  
 	return inb_p(0x71); 
@@ -23,6 +25,7 @@ static void time_init() {
 		time.tm_mon = CMOS_READ(8);
 		time.tm_year  =CMOS_READ(9);
 	} while (time.tm_sec != CMOS_READ(0));
+
 	BCD2DEC(time.tm_sec);
 	BCD2DEC(time.tm_min);
 	BCD2DEC(time.tm_hour);
@@ -34,7 +37,7 @@ static void time_init() {
 int main() {
 	time_init();
 	unsigned short curr_pos = *((unsigned short *)CURR_POS);
-	unsigned int total_mem = *((unsigned int *)TOTAL_MEM);
+
 	while(1) {};
 	return 0;
 }

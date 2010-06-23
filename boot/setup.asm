@@ -1,4 +1,5 @@
 global cur_pos
+global total_mem_size
 
 BOOT_ADDR	equ 09000H
 LOADER_ADDR	equ 09020H
@@ -61,16 +62,24 @@ COPY_OVER:
 
 	mov ax, cs
 	mov ds, ax
-	mov si, loader
+	mov si, str_loader_base
 	call disp_str
 	mov si, str_kernel_base
 	call disp_str
-	mov si, mem_map_hint
+	mov si, str_mem_map_hint
 	call disp_str
-	mov si, mem_map_title
+	mov si, str_mem_map_title
 	call disp_str
 	call disp_mem_map
 	call calc_phy_mem_size
+	mov dword [total_mem_size], eax
+	push ds
+	push bx
+	mov bx, BOOT_ADDR 
+	mov ds, bx
+	mov dword [4], eax
+	pop bx
+	pop ds
 	push eax
 	mov si, str_total_mem
 	call disp_str
@@ -82,12 +91,11 @@ COPY_OVER:
 	call init8259A
 
 	lgdt [gdt_pesudo]
-	;lidt [idt_pesudo]
 	; Jump to protect mode
 	mov eax, cr0
 	or eax, 1
 	mov cr0, eax
-	jmp dword CODE32_SEL:0
+	jmp dword KERNEL_CS:0
 
 
 enableA20:
@@ -230,19 +238,20 @@ GET_LAST_VALID_ENTRY:
 
 %include "display.inc"
 %include "protect.inc"
-loader		db "Load loader to 0x90200.", 0AH, 0
-str_kernel_base db "Load kernel to 0x00000.", 0AH, 0
-mem_map_title db "BaseAddrL BaseAddrH LimitL    LimitH    Type", 0AH, 0
-mem_map_hint db "The memory map: ", 0AH, 0
-str_total_mem db "The memory size: ", 0
-curr_pos	dw 160
+
+str_loader_base		db "Load loader to 0x90200.", 0AH, 0
+str_kernel_base		db "Load kernel to 0x00000.", 0AH, 0
+str_mem_map_title	db "BaseAddrL BaseAddrH LimitL    LimitH    Type", 0AH, 0
+str_mem_map_hint	db "The memory map: ", 0AH, 0
+str_total_mem		db "The memory size: ", 0
+curr_pos			dw 160
+_mem_map_count		dw 0
+total_mem_size		dd 0
 _mem_map_buffer times 512 db 0
-_mem_map_count dw 0
-mem_size_low dd 0
-mem_size_high dd 0
 
 ; Temporary GDT
-gdt: gdt_desc 0, 0, 0
+gdt:  gdt_desc 0, 0, 0
+	  gdt_desc 0, 0, 0
 code: gdt_desc 0FFFFH, 0, 0C09AH	; Code segment
 data: gdt_desc 0FFFFH, 0, 0C092H 
 
