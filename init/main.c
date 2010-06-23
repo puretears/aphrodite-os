@@ -5,7 +5,6 @@
 #define TOTAL_MEM 0x90004
 #define DISK_PARAM 0x90080
 
-unsigned int total_mem = *((unsigned int *)TOTAL_MEM);
 
 unsigned char CMOS_READ(unsigned char addr) {
 	outb_p(addr, 0x70);  
@@ -37,6 +36,7 @@ static void time_init() {
 int main() {
 	time_init();
 	unsigned short curr_pos = *((unsigned short *)CURR_POS);
+	unsigned int total_mem = (*(unsigned int *)(TOTAL_MEM));
 
 	while(1) {};
 	return 0;

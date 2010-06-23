@@ -27,8 +27,6 @@ GO:
 	mov ss, ax
 	mov sp, 0FF0H
 	call clear_scr
-	mov si, boot_copy
-	call disp_str
 
 	mov ax, SETUP_ADDR
 	mov es, ax
@@ -126,11 +124,9 @@ kill_motor:
 	out dx, al
 	pop dx
 	ret
-
 %include "display.inc"
 curr_head		db 0
 curr_track		db 0
-boot_copy		db "Copy bootsect to 0x90000.", 0AH, 0
 secs_per_track	db 0
 curr_read_secs	dw 0
 curr_pos		dw 0
