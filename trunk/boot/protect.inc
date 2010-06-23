@@ -14,3 +14,8 @@
 	dw (%3 & 0EE00H) | 0600H
 	dw (%1 >> 16) & 0FFFFH
 %endmacro
+
+KERNEL_CS	equ 010H
+KERNEL_DS	equ 018H
+USER_CS		equ 020H
+USER_DS		equ 028H

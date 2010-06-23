@@ -1,18 +1,17 @@
-%include "../boot/protect.inc"
+%include "protect.inc"
 extern user_stack
 extern main
 global pde
 
 [SECTION .text]
 BITS 32
-pde:	; Page directory will be stored here
 global startup32
 global _idt
 global _gdt
 global pde
 startup32:
 
-	mov ax, 010H
+	mov ax, KERNEL_DS
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
@@ -20,29 +19,41 @@ startup32:
 	mov ss, ax
 	mov esp, user_stack
 	call init_idt
-	call init_gdt
-	mov ax, 010H
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
-	mov ss, ax
-	mov esp, user_stack
-	jmp code_after_pg
+
+	; Copy bootup parameters
+	mov esi, 090000H
+	mov edi, empyt_zero_page
+	mov ecx, 512
+	cld
+	rep movsd
+
+	call setup_paging 
+	lgdt [_gdt_pesudo]
+	;mov ax, KERNEL_DS
+	;mov ds, ax
+	;mov es, ax
+	;mov fs, ax
+	;mov gs, ax
+	;mov ss, ax
+	;mov esp, user_stack
+	;jmp code_after_pg
 
 times (01000H - ($ - $$)) db 0
-pte0:
+pde:
 
 times (02000H - ($ - $$)) db 0
-pte1:
+pte0:
 
 times (03000H - ($ - $$)) db 0
-pte2:
+pte1:
 
 times (04000H - ($ - $$)) db 0
-pte3:
+pte2:
 
 times (05000H - ($ - $$)) db 0
+empty_zero_page:
+
+times (06000H - ($ - $$)) db 0
 
 code_after_pg:
 	push 0
@@ -56,19 +67,24 @@ HANG_HERE:
 
 setup_paging:
 	enter 0, 0
+	mov ecx, 1024 * 2
+	xor eax, eax
+	mov edi, pde
+	repne stosd
+
 	; Initialize PDE entries
-	mov dword [pde], pte0 + 7
-	mov dword [pde + 4], pte1 + 7
-	mov dword [pde + 8], pte2 + 7
-	mov dword [pde + 0CH], pte3 + 7
-	; Initialize PTE entries
-	mov ecx, 4096
-	mov eax, 7
-	mov edi, pte0
+	mov dword [pde], pte0 + 7			; 0x00000000
+	mov dword [pde + 3072], pte0 + 7	; 0xC0000000
+
+	; Iinitialize PTE entries
+	mov edi, pte0 + 4092 + 7
+	mov eax, 3FFFF007H
+	std
 CONTINUE_INIT_PTE:
 	stosd
-	add eax, 1000H
-	loop CONTINUE_INIT_PTE
+	sub eax, 01000H
+	jge CONTINUE_INIT_PAGE
+
 	xor eax, eax
 	mov cr3, eax
 	mov eax, cr0
@@ -84,8 +100,8 @@ init_idt:
 	push edi
 	mov eax, triple_interrupt
 	mov ebx, 0800H
-	mov bx, ax	; ebx: selector | low offset(low 15 bits)
-	mov ax, 08E00H ; eax: high offset(high 16 bits) | attribute
+	mov bx, ax		; ebx: selector | low offset(low 15 bits)
+	mov ax, 08E00H	; eax: high offset(high 16 bits) | attribute
 	mov ecx, 256
 	mov edi, _idt
 INIT_IDT:
@@ -126,13 +142,19 @@ _idt_pesudo:
 ; 256 GDT entries
 _gdt:
 _dummy: gdt_desc 0, 0, 0
-_code:  gdt_desc 0FFFFFH, 0, 0C09AH
-_data:  gdt_desc 0FFFFFH, 0, 0C092H
 _tmp:   gdt_desc 0, 0, 0
-	times 504 dd 0
+r0_code:  gdt_desc 03FFFFH, 0C0000000H, 0C09AH
+r0_data:  gdt_desc 03FFFFH, 0C0000000H, 0C092H
+r3_code:  gdt_desc 0BFFFFH, 0, 0C0FAH
+r3_data:  gdt_desc 0BFFFFH, 0, 0C0F2H
+	gdt_desc 0, 0, 0
+	gdt_desc 0, 0, 0
+	times (2 * NR_TASKS) dd 0
+
+NR_TASKS	equ 128
 
 align 4
 	dw 0
 _gdt_pesudo:
 	dw 256 * 8 - 1
-	dd _gdt
+	dd 0C0000000H + _gdt
