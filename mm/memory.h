@@ -1,5 +1,10 @@
 #ifndef MM_H
 #define MM_H
+#include "linux/types.h"
+
+#ifdef DEBUG
+void no_more_memory();
+#endif
 
 class memory {
 private:
@@ -28,12 +33,21 @@ private:
 			"movl %%eax, %%cr3\n\t"
 			:::"eax");
 	}
+#ifdef DEBUG
+	unsigned int paging_init(unsigned int *p);
+#else
 	unsigned int paging_init();
+#endif
 
 private:
 	unsigned int start_mem; // Beginning address for locating page tables
 	unsigned int end_mem;	// Total memory
 
+public:
+	memory(size_t start = 0, size_t end = 0);
+#ifdef DEBUG
+	bool demo_test();
+#endif
 };
 
 #endif

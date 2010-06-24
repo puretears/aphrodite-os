@@ -1,5 +1,5 @@
 #include "asm/io.h"
-#include "time.h"
+#include "linux/time.h"
 
 #define CURR_POS 0x90000
 #define TOTAL_MEM 0x90004
