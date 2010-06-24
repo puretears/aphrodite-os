@@ -1,6 +1,7 @@
 #include "memory.h"
 #include "linux/types.h"	// for NULL
 #include "linux/head.h"	// for pde definition
+
 #ifdef DEBUG
 #include <iostream>
 #include <new>
@@ -9,15 +10,25 @@
 #include <string.h>
 using namespace std;
 #endif
+
 #ifdef DEBUG
 unsigned int memory::paging_init(unsigned int *p) {
 #else
 unsigned int memory::paging_init() {
 #endif
 	start_mem = PAGE_ALIGN(start_mem);
+#ifdef DEBUG
 	unsigned int *pg_dir = p;
+#else
+	unsigned int *pg_dir = pde;
+#endif
 	unsigned int address = 0;
 	unsigned int tmp = 0;
+
+#ifdef DEBUG
+	unsigned int pg_dir_count = 0;
+#endif
+	unsigned int *pg_table;
 
 	while (address < end_mem) {
 		tmp = *(pg_dir + 768);	
@@ -28,15 +39,20 @@ unsigned int memory::paging_init() {
 			start_mem += PAGE_SIZE;
 		}
 		*pg_dir = tmp;	// Also map it at 0x00000000
+#ifdef DEBUG
+		cout<<"pde["<<pg_dir_count<<"]"<<*pg_dir<<endl;
+#endif
 		pg_dir++;
-
-		unsigned int *pg_table = (unsigned int *)(tmp & PAGE_MASK);
+		pg_table = (unsigned int *)(tmp & PAGE_MASK);
 
 		for (int i = 0; i < 1024; pg_table++, i++) {
 			if (address < end_mem)
 				*pg_table = address | PAGE_TABLE;
 			else
 				*pg_table = 0;
+#ifdef DEBUG
+			cout<<"pg_table["<<i<<"] "<<(*pg_table)<<endl;
+#endif
 			address += PAGE_SIZE;
 		}
 	}
@@ -47,6 +63,7 @@ memory::memory(size_t start, size_t end)
 	:start_mem(start), end_mem(end) {
 	//paging_init();	
 }
+
 #ifdef DEBUG
 void no_more_memory() {
 	cout<<"no more memory!!!"<<endl;
@@ -82,8 +99,6 @@ bool memory::demo_test() {
 		pte0[i] = j | 7;
 		j += 0x1000;
 	}
-
-	
 
 	start_mem = reinterpret_cast<unsigned int>(aligned_mem + 0x100000);
 	end_mem = 0x2000000;
