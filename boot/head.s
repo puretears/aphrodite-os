@@ -2,6 +2,7 @@
 extern user_stack
 extern main
 global pde
+global empty_zero_page
 
 [SECTION .text]
 BITS 32
