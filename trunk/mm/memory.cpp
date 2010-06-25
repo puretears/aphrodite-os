@@ -4,6 +4,7 @@
 
 #ifdef DEBUG
 #include <iostream>
+#include <iomanip>
 #include <new>
 #include <assert.h>
 #include <stdlib.h>
@@ -11,24 +12,31 @@
 using namespace std;
 #endif
 
+extern u_char empty_zero_page[1024];
+extern int edata, end;
+
+static const u_int PARAM = reinterpret_cast<u_int>(empty_zero_page);
+static const u_int TOTAL_MEM = (*(u_int *)(PARAM + 4));
+
+
 #ifdef DEBUG
-unsigned int memory::paging_init(unsigned int *p) {
+void memory::paging_init(u_int *p) {
 #else
-unsigned int memory::paging_init() {
+void memory::paging_init() {
 #endif
 	start_mem = PAGE_ALIGN(start_mem);
 #ifdef DEBUG
-	unsigned int *pg_dir = p;
+	u_int *pg_dir = p;
 #else
-	unsigned int *pg_dir = pde;
+	u_int *pg_dir = pde;
 #endif
-	unsigned int address = 0;
-	unsigned int tmp = 0;
+	u_int address = 0;
+	u_int tmp = 0;
 
 #ifdef DEBUG
-	unsigned int pg_dir_count = 0;
+	u_int pg_dir_count = 0;
 #endif
-	unsigned int *pg_table;
+	u_int *pg_table;
 
 	while (address < end_mem) {
 		tmp = *(pg_dir + 768);	
@@ -40,10 +48,10 @@ unsigned int memory::paging_init() {
 		}
 		*pg_dir = tmp;	// Also map it at 0x00000000
 #ifdef DEBUG
-		cout<<"pde["<<pg_dir_count<<"]"<<*pg_dir<<endl;
+		cout<<"pde["<<pg_dir_count++<<"]"<<*pg_dir<<endl;
 #endif
 		pg_dir++;
-		pg_table = (unsigned int *)(tmp & PAGE_MASK);
+		pg_table = (u_int *)(tmp & PAGE_MASK);
 
 		for (int i = 0; i < 1024; pg_table++, i++) {
 			if (address < end_mem)
@@ -51,17 +59,30 @@ unsigned int memory::paging_init() {
 			else
 				*pg_table = 0;
 #ifdef DEBUG
-			cout<<"pg_table["<<i<<"] "<<(*pg_table)<<endl;
+//			cout<<"pg_table["<<i<<"] "<<(*pg_table)<<endl;
 #endif
 			address += PAGE_SIZE;
 		}
 	}
-	return start_mem;
+	return;
 }
 
-memory::memory(size_t start, size_t end)
-	:start_mem(start), end_mem(end) {
-	//paging_init();	
+void memory::mem_init(u_int low_start_mem, u_int start_mem, u_int end_mem) {	
+}
+
+memory::memory() {
+	end_mem = TOTAL_MEM;
+	end_mem &= PAGE_MASK;
+	
+	if (reinterpret_cast<u_int>(&end) >= (1024 * 1024)) {
+		start_mem = reinterpret_cast<u_int>(&end);
+		low_mem_start = PAGE_SIZE;
+	} else {
+		start_mem = 1024 * 1024;
+		low_mem_start = reinterpret_cast<u_int>(&end);
+	}
+	low_mem_start = PAGE_ALIGN(low_mem_start);
+	paging_init();	
 }
 
 #ifdef DEBUG
@@ -74,36 +95,45 @@ bool memory::demo_test() {
 	set_new_handler(no_more_memory);
 
 	// Allocate a block of mem buf demo (64MB).
-	unsigned char *mem = new unsigned char[0x4000000];
-	unsigned char *aligned_mem = NULL;
+	u_char *mem = new u_char[0x4000000];
+	u_char *aligned_mem = NULL;
 	memset(mem, 0, 0x4000000);
 
-	if ((reinterpret_cast<unsigned int>(mem)) & (PAGE_SIZE - 1)) {
+	if ((reinterpret_cast<u_int>(mem)) & (PAGE_SIZE - 1)) {
 		cout<<"Before align, mem = 0x"
-			<<hex<<reinterpret_cast<unsigned long>(mem)
+			<<hex<<reinterpret_cast<u_long>(mem)
 			<<endl;
-		aligned_mem = reinterpret_cast<unsigned char *>
-				((reinterpret_cast<unsigned int>(mem + PAGE_SIZE - 1)) & PAGE_MASK); 
+		aligned_mem = reinterpret_cast<u_char *>
+				((reinterpret_cast<u_int>(mem + PAGE_SIZE - 1)) & PAGE_MASK); 
 		cout<<"After aligned, mem = 0x"
-			<<hex<<reinterpret_cast<unsigned long>(aligned_mem)
+			<<hex<<reinterpret_cast<u_int>(aligned_mem)
 			<<endl;
 	}
-	unsigned int *_pde = reinterpret_cast<unsigned int *>(aligned_mem + 0x1000);
-	unsigned int *pte0 = reinterpret_cast<unsigned int *>(aligned_mem + 0x2000);
+	u_int *_pde = reinterpret_cast<u_int *>(aligned_mem + 0x1000);
+	u_int *pte0 = reinterpret_cast<u_int *>(aligned_mem + 0x2000);
 
 	// PDE and the 1st PTE are initialized by head.S
-	_pde[0] = reinterpret_cast<unsigned int>(&pte0[0]) + 7;
-	_pde[768] = reinterpret_cast<unsigned int>(&pte0[0]) + 7;
+	_pde[0] = reinterpret_cast<u_int>(&pte0[0]) + 7;
+	_pde[768] = reinterpret_cast<u_int>(&pte0[0]) + 7;
 
 	for (int i = 0, j = 0; i < 1024; i++) {
 		pte0[i] = j | 7;
 		j += 0x1000;
 	}
 
-	start_mem = reinterpret_cast<unsigned int>(aligned_mem + 0x100000);
+	start_mem = reinterpret_cast<u_int>(aligned_mem + 0x100000);
+#ifdef DEBUG
+	cout<<"start_mem: 0x"
+		<<setw(8)<<setfill('0')<<uppercase<<start_mem
+		<<setfill(' ')<<endl;
+#endif
 	end_mem = 0x2000000;
 	paging_init(_pde);
-
+#ifdef DEBUG
+	cout<<"start_mem: 0x"
+		<<setw(8)<<setfill('0')<<uppercase<<start_mem
+		<<setfill(' ')<<endl;
+#endif
 
 	delete[] mem;
 }

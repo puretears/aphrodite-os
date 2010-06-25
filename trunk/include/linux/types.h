@@ -15,4 +15,13 @@ typedef int ssize_t;
 #define NULL ((void *)0)
 #endif
 
+typedef unsigned char u_char;
+typedef unsigned short u_short;
+typedef unsigned int u_int;
+typedef unsigned long u_long;
+
+typedef unsigned char unchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long ulong;
 #endif
