@@ -2,7 +2,7 @@ AS = nasm
 CC = gcc
 CXX = g++
 CFLAGS = -ggdb -nostdinc -I include -I mm -Wall -fomit-frame-pointer
-LDFLAGS = -Ttext 0 -e startup32 -lstdc++
+LDFLAGS = -Ttext 0 -e startup32
 LD = ld
 
 %.bin:%.asm
@@ -22,12 +22,12 @@ Image: boot/boot.bin boot/setup.bin tools/system tools/build
 	sync
 	./install.sh
 
-tools/system: boot/head init/main.o kernel/kernel.o mm/memory.o
+tools/system: boot/head init/main.o kernel/kernel.o 
 	$(LD) $(LDFLAGS) $^ -o $@
 
-init/main.o: init/main.cpp
+init/main.o: init/main.c
 
-mm/memory.o: mm/memory.cpp
+#mm/memory.o: mm/memory.cpp
 
 kernel/kernel.o:
 	(cd kernel; make)
