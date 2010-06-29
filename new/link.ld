@@ -14,7 +14,7 @@ SECTIONS
 	{
 		*(.rodata*)
 		*(.gnu.linkonce.r*)
-		. = ALIGN(4096)
+		. = ALIGN(4096);
 	}
 	.data :
 	{

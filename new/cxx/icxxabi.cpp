@@ -42,6 +42,20 @@ void __cxa_finalize(void *f) {
 	}
 }
 
+void construct() {
+	extern void (*__CTOR_LIST__)();
+
+	void (**p_ctors)() = &__CTOR_LIST__;
+	int total_ctors = *((int *)(p_ctors));
+	++p_ctors;
+
+	while(total_ctors) {
+		(*p_ctors)();
+		total_ctors--;
+		p_ctors++;
+	}
+}
+
 #ifdef __cplusplus
 }
 #endif
