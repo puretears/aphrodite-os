@@ -1,52 +1,36 @@
 AS = nasm
 CC = gcc
 CXX = g++
-CFLAGS = -ggdb -nostdinc -I include -I mm -Wall -fomit-frame-pointer
-LDFLAGS = -Ttext 0 -e startup32
 LD = ld
+vpath %.h include
+CFLAGS = -ggdb -c -fstrength-reduce -fomit-frame-pointer -finline-functions -nostdinc
+CXXFLAGS = -ggdb -c -nostdlib -fno-builtin -nostartfiles -nodefaultlibs -fno-exceptions -fno-rtti -fno-stack-protector
 
-%.bin:%.asm
-	$(AS) -f bin -i ./boot/ $< -o $@
+KRN_OBJS = main.o pic.o
 
-%.o:%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+.s.o:
+	$(AS) -f elf $< -o $@
+.c.o:
+	$(CC) $(CFLAGS) $< -o $@
+.cc.o:
+	$(CXX) $(CXXFLAGS) $< -o $@
 
-%.o:%.cpp
-	$(CXX) $(CFLAGS) -c $< -o $@
+vmlinuz.img: loader.o kernel.o
+	$(LD) -T link.ld $^ -o $@ 
 
-all: Image
+loader.o: boot/loader.s
 
-Image: boot/boot.bin boot/setup.bin tools/system tools/build
-	objcopy -O binary -R .note -R .comment tools/system tools/kernel
-	tools/build boot/boot.bin boot/setup.bin tools/kernel > $@
-	sync
-	./install.sh
+kernel.o: $(KRN_OBJS)
+	$(ld) -r -o $@ $^
 
-tools/system: boot/head init/main.o kernel/kernel.o 
-	$(LD) $(LDFLAGS) $^ -o $@
+pic.o: pic.c io.h
 
-init/main.o: init/main.c
+main.o: kmain.cc
 
-#mm/memory.o: mm/memory.cpp
+.phony: clean install
 
-kernel/kernel.o:
-	(cd kernel; make)
-
-tools/build: tools/build.c
-	$(CC) -Wall -fomit-frame-pointer $< -o $@
-
-boot/boot.bin: boot/boot.asm boot/protect.inc
-
-boot/setup.bin: boot/setup.asm boot/protect.inc boot/display.inc
-
-boot/head: boot/head.s boot/protect.inc
-	$(AS) -f elf32 -i ./boot/ $< -o $@
-
-
-.phony: clean
+install:
 
 clean:
-	rm -f boot/*.bin init/*.o
-	(cd kernel; make clean)
-	rm tools/kernel tools/system
-	rm Image
+	rm *.o
+	rm vmlinuz.img

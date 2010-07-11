@@ -25,7 +25,22 @@ STACKSIZE equ 0x4000
 
 loader:
 	mov esp, stack
+	push eax
+	push ebx
+	call setup_paging
+	lgdt [gdt_pesudo]
+	jmp 1
+1:
+	mov ax, KERNEL_DATA_SEL
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	mov ss, ax
+	mov esp, stack
 	; Possibly set up a stack here: mov esp, stack + STACKSIZE
+	pop ebx
+	pop eax
 	push eax                        ; Multiboot magic number
 	push ebx                        ; Multiboot info structure
 	call kmain
@@ -49,7 +64,6 @@ setup_paging:
 	; Initialize pg0
 	mov edi, pg0 + 4092
 	mov eax, 0x003FF007
-	mov ecx, 1024
 	std 
 1:
 	stdsd
@@ -83,7 +97,11 @@ gdt_kernel:
 	; base = 0x00000000, limit = 0xBFFFF, read /write r3 data
 	data_r3 dq 00CBF2000000FFFFH
 		times NR_TASKS * 2 dq 0
-	
+KERNEL_CODE_SEL equ codr_r0 - gdt_kernel
+KERNEL_DATA_SEL equ data_ro - gdt_kernel
+USER_DATA_SEL   equ data_r3 - gdt_kernel
+USER_DATA_SEL   equ data_r3 - gdt_kernel
+
 	dw 0	; Make pesudo_gdt aligned 4 byte boundary.
 gdt_pesudo:
 	dw $ - gdt_kernel
