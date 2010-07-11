@@ -1,5 +1,5 @@
 global loader
-extern text, end, bss, loader, __cxa_finalize
+extern text, end, bss, __cxa_finalize, kmain
 
 MODULEALIGN equ	1<<0                    ; align loaded modules on page boundaries
 MEMINFO     equ	1<<1                    ; provide memory map
@@ -29,8 +29,8 @@ loader:
 	push ebx
 	call setup_paging
 	lgdt [gdt_pesudo]
-	jmp 1
-1:
+	jmp KERNEL_CODE_SEL:REFRESH_CACHE
+REFRESH_CACHE:
 	mov ax, KERNEL_DATA_SEL
 	mov ds, ax
 	mov es, ax
@@ -58,31 +58,35 @@ setup_paging:
 	cld
 	rep stosd
 
-	mov [swapper_pg_dir], pg0 + 7
-	mov [swapper_pg_dir + 3072], pg0 + 7
+	mov dword [swapper_pg_dir], pg0 + 7
+	mov dword [swapper_pg_dir + 3072], pg0 + 7
 
 	; Initialize pg0
 	mov edi, pg0 + 4092
 	mov eax, 0x003FF007
 	std 
-1:
-	stdsd
+INIT_PG0:
+	stosd
 	sub eax, 01000H
-	jae 1
+	jae INIT_PG0
 
+	; Init cr3
 	mov eax, swapper_pg_dir
 	mov cr3, eax
+
+	; Enable paging
 	mov eax, cr0
-	or cr0, 080000000H
-	mov eax, cr0
-	jmp 2
-2:
+	or eax, 080000000H
+	mov cr0, eax
+
+	jmp AFTER_PAGING
+AFTER_PAGING:
 	leave
 	ret
 
-	times (1000 - $) db 0
+	times (1000 - ($ - $$)) db 0
 swapper_pg_dir:
-	times (2000 - $) db 0
+	times (2000 - ($ - $$)) db 0
 pg0:
 
 align 8
@@ -97,9 +101,9 @@ gdt_kernel:
 	; base = 0x00000000, limit = 0xBFFFF, read /write r3 data
 	data_r3 dq 00CBF2000000FFFFH
 		times NR_TASKS * 2 dq 0
-KERNEL_CODE_SEL equ codr_r0 - gdt_kernel
-KERNEL_DATA_SEL equ data_ro - gdt_kernel
-USER_DATA_SEL   equ data_r3 - gdt_kernel
+KERNEL_CODE_SEL equ code_r0 - gdt_kernel
+KERNEL_DATA_SEL equ data_r0 - gdt_kernel
+USER_CODE_SEL   equ code_r3 - gdt_kernel
 USER_DATA_SEL   equ data_r3 - gdt_kernel
 
 	dw 0	; Make pesudo_gdt aligned 4 byte boundary.

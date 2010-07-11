@@ -2,30 +2,28 @@ AS = nasm
 CC = gcc
 CXX = g++
 LD = ld
-vpath %.h include
-CFLAGS = -ggdb -c -fstrength-reduce -fomit-frame-pointer -finline-functions -nostdinc
+vpath %.h ./include
+
+CFLAGS = -ggdb -c -fstrength-reduce -fomit-frame-pointer -finline-functions -nostdinc -nostdlib -nostartfiles -nodefaultlibs
 CXXFLAGS = -ggdb -c -nostdlib -fno-builtin -nostartfiles -nodefaultlibs -fno-exceptions -fno-rtti -fno-stack-protector
 
-KRN_OBJS = main.o pic.o
+KRN_OBJS = kmain.o pic.o icxxabi.o 
 
-.s.o:
-	$(AS) -f elf $< -o $@
-.c.o:
-	$(CC) $(CFLAGS) $< -o $@
-.cc.o:
-	$(CXX) $(CXXFLAGS) $< -o $@
 
-vmlinuz.img: loader.o kernel.o
+vmlinuz.img: loader.o $(KRN_OBJS)
 	$(LD) -T link.ld $^ -o $@ 
 
 loader.o: boot/loader.s
+	$(AS) -f elf $< -o $@
 
-kernel.o: $(KRN_OBJS)
-	$(ld) -r -o $@ $^
+pic.o: kernel/pic.c io.h
+	$(CC) $(CFLAGS) -I./include $< -o $@
 
-pic.o: pic.c io.h
+kmain.o: kernel/kmain.cc
+	$(CXX) $(CXXFLAGS) $< -o $@
 
-main.o: kmain.cc
+icxxabi.o: cxx/icxxabi.cc icxxabi.h
+	$(CXX) $(CFLAGS) -I./include $< -o $@
 
 .phony: clean install
 

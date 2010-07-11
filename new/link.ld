@@ -2,7 +2,7 @@ ENTRY(loader)
 
 SECTIONS
 {
-	.=0x100000
+	. = 0x100000;
 	.text : 
 	{
 		code = .; text = .;
@@ -28,27 +28,27 @@ SECTIONS
 		LONG((__DTOR_LIST__ - __DTOR_END__) / 4 - 2)
 		*(.dtor)
 		LONG(0)
-		__DTOR_LIST__ = .;
+		__DTOR_END__ = .;
 
 		data = .;
 
 		*(.data*)
 		*(.gnu.linkonce.d*)
 
-		. = ALIGN(4096)
+		. = ALIGN(4096);
 	}
-	.bss
+	.bss :
 	{
 		bss = .;
 		*(.COMMON*)
 		*(.bss*)
 		*(.gnu.linkonce.b*)
-		. = ALIGN(4096)
+		. = ALIGN(4096);
 	}
 
-	end = .
+	end = .;
 
-	/DISCARD/:
+	/DISCARD/ :
 	{
 		*(.comment)
 		*(.eh_frame)
