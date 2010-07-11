@@ -13,7 +13,7 @@ struct atexit_func_entry_t {
 	void (*destructor)(void *);
 	void *para_ptr;
 	void *dso_handle;
-}
+};
 
 int __cxa_atexit(void (*f)(void *), void *para, void *dso);
 void __cxa_finalize(void *f);

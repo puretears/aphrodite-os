@@ -1,5 +1,8 @@
 
 #define MAGIC_NUMBER 0x2BADB002
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void kmain(void *pmb_info, unsigned int magic) {
 	if (magic != MAGIC_NUMBER) {
@@ -9,3 +12,7 @@ void kmain(void *pmb_info, unsigned int magic) {
 	int a = 0;
 	return;
 }
+
+#ifdef __cplusplus
+}
+#endif
