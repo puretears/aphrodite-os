@@ -1,10 +1,10 @@
-
+#include "mbinfo.h"
 #define MAGIC_NUMBER 0x2BADB002
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void kmain(void *pmb_info, unsigned int magic) {
+void kmain(mbinfo *pmb_info, unsigned int magic) {
 	if (magic != MAGIC_NUMBER) {
 		// Something wrong here.
 	}
