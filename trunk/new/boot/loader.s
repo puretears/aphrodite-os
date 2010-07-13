@@ -30,6 +30,7 @@ loader:
 	call setup_paging
 	lgdt [gdt_pesudo]
 	jmp KERNEL_CODE_SEL:REFRESH_CACHE
+
 REFRESH_CACHE:
 	mov ax, KERNEL_DATA_SEL
 	mov ds, ax
@@ -38,6 +39,7 @@ REFRESH_CACHE:
 	mov gs, ax
 	mov ss, ax
 	mov esp, stack
+
 	; Possibly set up a stack here: mov esp, stack + STACKSIZE
 	pop ebx
 	pop eax
@@ -84,10 +86,11 @@ AFTER_PAGING:
 	leave
 	ret
 
-	times (1000 - ($ - $$)) db 0
+	times (1000H - ($ - $$)) db 0
 swapper_pg_dir:
-	times (2000 - ($ - $$)) db 0
+	times (2000H - ($ - $$)) db 0
 pg0:
+	times (3000H - ($ - $$)) db 0
 
 align 8
 gdt_kernel:
@@ -109,7 +112,7 @@ USER_DATA_SEL   equ data_r3 - gdt_kernel
 	dw 0	; Make pesudo_gdt aligned 4 byte boundary.
 gdt_pesudo:
 	dw $ - gdt_kernel
-	dd KERNEL_BASE + gdt_kernel
+	dd gdt_kernel
 	
 section .bss
 align 4
