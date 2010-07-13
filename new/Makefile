@@ -10,7 +10,7 @@ CXXFLAGS = -ggdb -c -nostdlib -fno-builtin -nostartfiles -nodefaultlibs -fno-exc
 KRN_OBJS = kmain.o pic.o icxxabi.o 
 
 
-vmlinuz.img: loader.o $(KRN_OBJS)
+vmlinuz: loader.o $(KRN_OBJS)
 	$(LD) -T link.ld $^ -o $@ 
 
 loader.o: boot/loader.s
@@ -28,7 +28,10 @@ icxxabi.o: cxx/icxxabi.cc icxxabi.h
 .phony: clean install
 
 install:
+	sudo mount -o loop ./bochs.new/boot.img /mnt/fd
+	sudo cp vmlinuz /mnt/fd/boot/
+	sudo umount /mnt/fd
 
 clean:
 	rm *.o
-	rm vmlinuz.img
+	rm vmlinuz
