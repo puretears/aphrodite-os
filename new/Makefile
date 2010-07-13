@@ -23,7 +23,7 @@ kmain.o: kernel/kmain.cc
 	$(CXX) $(CXXFLAGS) $< -o $@
 
 icxxabi.o: cxx/icxxabi.cc icxxabi.h
-	$(CXX) $(CFLAGS) -I./include $< -o $@
+	$(CXX) $(CXXFLAGS) -I./include $< -o $@
 
 .phony: clean install
 
