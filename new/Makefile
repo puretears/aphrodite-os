@@ -19,7 +19,7 @@ loader.o: boot/loader.s
 pic.o: kernel/pic.c io.h
 	$(CC) $(CFLAGS) -I./include $< -o $@
 
-kmain.o: kernel/kmain.cc
+kmain.o: init/kmain.cc mbinfo.h
 	$(CXX) $(CXXFLAGS) $< -o $@
 
 icxxabi.o: cxx/icxxabi.cc icxxabi.h
