@@ -15,8 +15,9 @@ static volatile u_char *p_vedio;
 
 void cls() {
 	u_char *p = (u_char *)VEDIO_ADDR;
+	int i = 0;
 
-	for (int i = 0;  i < (COLUMNS * ROWS); i++) {
+	for (;  i < (COLUMNS * ROWS); i++) {
 		*(p + i) = 0;
 	}
 
@@ -58,7 +59,7 @@ void itoa(u_char *buf, int base, int num) {
 	}
 }
 
-void putchar(int c) {
+void putchar(char c) {
 	if ((c == '\n') || (c == '\r')) {
 	newline:
 		x_pos = 0;
@@ -69,8 +70,8 @@ void putchar(int c) {
 		return;
 	}		
 
-	*(VEDIO_ADDR + (x_pos + y_pos * COLUMNS) * 2) = c & 0xFF;
-	*(VEDIO_ADDR + (x_pos + y_pos * COLUMNS) * 2 + 1) = ATTRIBUTE;
+	*((char *)(VEDIO_ADDR + (x_pos + y_pos * COLUMNS) * 2)) = c & 0xFF;
+	*((char *)(VEDIO_ADDR + (x_pos + y_pos * COLUMNS) * 2 + 1)) = ATTRIBUTE;
 	
 	x_pos++;
 
@@ -80,7 +81,6 @@ void putchar(int c) {
 }
 
 void printk(const char *format, ...) {
-	char *p = format;
 	char *p1;
 	char buf[32];
 
@@ -89,12 +89,12 @@ void printk(const char *format, ...) {
 
 	char c;
 	
-	while (c = *p++) {
+	while (c = *format++) {
 		if (c != '%') {
 			putchar(c);
 		}
 		else {
-			c = *p++;
+			c = *format++;
 			switch(c) {
 				case 'd':
 				case 'x':
@@ -112,7 +112,7 @@ void printk(const char *format, ...) {
 					DISP_STRING:
 
 					while (p1 != NULL) {
-						putchar(p1);
+						putchar(*p1++);
 					}
 					break;
 				default:
