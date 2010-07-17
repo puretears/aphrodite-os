@@ -7,6 +7,8 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 		printk("Invalid kernel image.\n");
 	}
 
+	cls();
+
 	print("Kernel load successful.\n");
 	return;
 }
