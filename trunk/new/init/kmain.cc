@@ -1,6 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "mbinfo.h"
 #include "print.h"
 #define MAGIC_NUM 0x2BADB002
+
 
 void kmain(mbinfo *pmb, u_int magic_num) {
 	if (magic_num != MAGIC_NUM) {
@@ -9,6 +14,10 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 
 	cls();
 
-	print("Kernel load successful.\n");
+	printk("Kernel load successful.\n");
 	return;
 }
+
+#ifdef __cplusplus
+}
+#endif
