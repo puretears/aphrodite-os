@@ -1,4 +1,4 @@
-#ifndef TYPDE_H
+#ifndef TYPE_H
 #define TYPE_H
 
 #define NULL 0
