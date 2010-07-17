@@ -31,9 +31,9 @@ icxxabi.o: cxx/icxxabi.cc icxxabi.h
 .phony: clean install
 
 install:
-	sudo mount -o loop ./bochs.new/boot.img /mnt/fd
-	sudo cp vmlinuz /mnt/fd/boot/
-	sudo umount /mnt/fd
+	mount -o loop ./bochs.new/boot.img /mnt/fd
+	cp vmlinuz /mnt/fd/boot/
+	umount /mnt/fd
 
 clean:
 	rm *.o
