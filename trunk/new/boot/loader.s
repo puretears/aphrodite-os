@@ -38,7 +38,7 @@ REFRESH_CACHE:
 	mov fs, ax
 	mov gs, ax
 	mov ss, ax
-	mov esp, stack
+;	mov esp, stack
 
 	; Possibly set up a stack here: mov esp, stack + STACKSIZE
 	pop ebx

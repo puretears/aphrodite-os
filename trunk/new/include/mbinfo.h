@@ -4,10 +4,9 @@
 #include "type.h"
 
 struct mmap {
-	u_int base_low;
-	u_int base_high;
-	u_int limit_low;
-	u_int limit_high;
+	u_int size;
+	u_int64 base;
+	u_int64 limit;
 	u_int type;
 };
 

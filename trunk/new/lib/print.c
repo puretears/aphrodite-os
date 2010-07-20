@@ -35,6 +35,7 @@ void itoa(u_char *buf, int base, int num) {
 	if ((num < 0) && (base == 'd')) {
 		unum = -num;	
 		*p++ = '-';
+		buf++;
 		p1 = p;
 	}
 	else if (base == 'x') {
@@ -49,6 +50,7 @@ void itoa(u_char *buf, int base, int num) {
 	}while (unum /= divisor);
 
 	// Reverse the buf
+	p1 = buf;
 	p2 = p - 1;
 	char tmp;
 
@@ -56,6 +58,8 @@ void itoa(u_char *buf, int base, int num) {
 		tmp = *p1;
 		*p1 = *p2;
 		*p2 = tmp;
+		p1++;
+		p2--;
 	}
 }
 
@@ -70,8 +74,8 @@ void putchar(char c) {
 		return;
 	}		
 
-	*((char *)(VEDIO_ADDR + (x_pos + y_pos * COLUMNS) * 2)) = c & 0xFF;
-	*((char *)(VEDIO_ADDR + (x_pos + y_pos * COLUMNS) * 2 + 1)) = ATTRIBUTE;
+	*((u_char *)(VEDIO_ADDR + (x_pos + y_pos * COLUMNS) * 2)) = c & 0xFF;
+	*((u_char *)(VEDIO_ADDR + (x_pos + y_pos * COLUMNS) * 2 + 1)) = ATTRIBUTE;
 	
 	x_pos++;
 
@@ -99,7 +103,7 @@ void printk(const char *format, ...) {
 				case 'd':
 				case 'x':
 				case 'u':
-					itoa(buf, c, *((int *)(*multi_char++)));
+					itoa(buf, c, *((int *)(multi_char++)));
 					p1 = buf;
 					goto DISP_STRING;
 					break;
