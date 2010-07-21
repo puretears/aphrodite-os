@@ -97,13 +97,13 @@ void printk(const char *format, ...) {
 	char *p1;
 	char buf[32];
 
-	void *multi_char = (&format);
+	char **multi_char = (char **)(&format);
 	multi_char++; // multi_char points the next parameter of format
 
 	char c;
 	int *pn = 0;
 
-	while (c = *format++) {
+	while ((c = *format++) != 0) {
 		if (c != '%') {
 			putchar(c);
 		}
@@ -113,14 +113,14 @@ void printk(const char *format, ...) {
 				case 'd':
 				case 'x':
 				case 'u':
-					pn = (int *)(void *)multi_char;
+					pn = (int *)multi_char;
 					multi_char++;
 					itoa(buf, c, *pn);
 					p1 = buf;
 					goto DISP_STRING;
 					break;
 				case 's':
-					p1 = (char *)multi_char;
+					p1 = *multi_char;
 					multi_char++;
 
 					if (!p1) {
