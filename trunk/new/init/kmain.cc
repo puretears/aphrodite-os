@@ -23,9 +23,10 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 				pmb->mmap_addr->base >> 32, pmb->mmap_addr->base,
 				pmb->mmap_addr->limit >> 32, pmb->mmap_addr->limit,
 				pmb->mmap_addr->type);	*/
-
-		printk("%x%x\n", pmb->mmap_addr->limit, pmb->mmap_addr->limit);	
-		printk("%x\n", pmb->mmap_addr->limit);	
+		//printk("%x%s\n", pmb->mmap_addr->limit, "string1");
+		//printk("%s%x\n", "string1", pmb->mmap_addr->limit);
+		printk("%x%x\n", (u_int)pmb->mmap_addr->limit, (u_int)pmb->mmap_addr->limit);	
+		//printk("%x\n", pmb->mmap_addr->limit);	
 	//	p_mmap = (mmap *)(p_mmap + sizeof(p_mmap->size) + p_mmap->size);
 	//}
 	return;
