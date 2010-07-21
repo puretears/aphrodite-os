@@ -4,7 +4,7 @@ CXX = g++
 LD = ld
 vpath %.h ./include
 
-CFLAGS = -ggdb -c -fstrength-reduce -fomit-frame-pointer -finline-functions -nostdinc -nostdlib -nostartfiles -nodefaultlibs -fno-builtin
+CFLAGS = -ggdb -c -fstrength-reduce -finline-functions -nostdinc -nostdlib -nostartfiles -nodefaultlibs -fno-builtin
 CXXFLAGS = -ggdb -c -nostdlib -fno-builtin -nostartfiles -nodefaultlibs -fno-exceptions -fno-rtti -fno-stack-protector
 
 KRN_OBJS = kmain.o pic.o icxxabi.o print.o 

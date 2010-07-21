@@ -52,6 +52,7 @@ void itoa(u_char *buf, int base, int num) {
 	// Reverse the buf
 	p1 = buf;
 	p2 = p - 1;
+	*p = 0;
 	char tmp;
 
 	while (p1 < p2) {
@@ -62,6 +63,14 @@ void itoa(u_char *buf, int base, int num) {
 		p2--;
 	}
 }
+
+/*int main() {
+	char buf[32];
+	itoa(buf, 'x', 0x12345678);
+	printf("%s, %x\n", buf, 0x12345678);
+
+	return 0;
+}*/
 
 void putchar(char c) {
 	if ((c == '\n') || (c == '\r')) {
@@ -88,11 +97,12 @@ void printk(const char *format, ...) {
 	char *p1;
 	char buf[32];
 
-	char **multi_char = (char **)(&format);
+	void *multi_char = (&format);
 	multi_char++; // multi_char points the next parameter of format
 
 	char c;
-	
+	int *pn = 0;
+
 	while (c = *format++) {
 		if (c != '%') {
 			putchar(c);
@@ -103,24 +113,27 @@ void printk(const char *format, ...) {
 				case 'd':
 				case 'x':
 				case 'u':
-					itoa(buf, c, *((int *)(multi_char++)));
+					pn = (int *)(void *)multi_char;
+					multi_char++;
+					itoa(buf, c, *pn);
 					p1 = buf;
 					goto DISP_STRING;
 					break;
 				case 's':
-					p1 = *multi_char++;
+					p1 = (char *)multi_char;
+					multi_char++;
 
 					if (!p1) {
 						p1 = "NULL";
 					}
 					DISP_STRING:
 
-					while (p1 != NULL) {
+					while (*p1 != NULL) {
 						putchar(*p1++);
 					}
 					break;
 				default:
-					*multi_char++;
+					multi_char++;
 					break;
 			}
 		}
