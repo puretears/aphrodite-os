@@ -19,7 +19,7 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 	
 	for(; p_mmap < (pmb->mmap_addr + pmb->mmap_length); ) {
 
-		printk("0x%x%x limit = %x%x type = %d.\n",
+		printk("base = 0x%x%x limit = %x%x type = %d.\n",
 				(int)(p_mmap->base >> 32), 
 				(int)(p_mmap->base),
 				(int)(p_mmap->limit >> 32), 
