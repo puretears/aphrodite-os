@@ -17,7 +17,7 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 
 	mmap *p_mmap = pmb->mmap_addr;
 	
-	for(; p_mmap < (pmb->mmap_addr + pmb->mmap_length); ) {
+	for(; p_mmap < (pmb->mmap_addr + pmb->mmap_length / sizeof(mmap)); ) {
 
 		printk("base = 0x%x%x limit = %x%x type = %d.\n",
 				(int)(p_mmap->base >> 32), 
@@ -26,7 +26,7 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 				(int)(p_mmap->limit),
 				(int)(p_mmap->type));
 
-		p_mmap = (mmap *)(p_mmap + sizeof(p_mmap->size) + p_mmap->size);
+		p_mmap = (mmap *)((char *)p_mmap + sizeof(p_mmap->size) + p_mmap->size);
 	}
 	return;
 }
