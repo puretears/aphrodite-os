@@ -1,0 +1,92 @@
+global entry_addr,display
+extern load_addr, load_end_addr, bss_end_addr, kmain
+LOADE_ADDR equ 0100000h
+	MAGIC	equ 1BADB002H
+	FLAG_ALIGNED		equ	 1<<0
+	FLAG_MEMINFO	equ	1<<1
+	FLAG	equ	(FLAG_ALIGNED | FLAG_MEMINFO)
+	CHECKSUM	equ	-(MAGIC + FLAG)
+	section .text
+	align 4
+	multiboot:
+		dd	MAGIC
+		dd	FLAG
+		dd	CHECKSUM
+		dd	multiboot
+		dd	load_addr
+		dd	load_end_addr
+		dd	bss_end_addr
+		dd	entry_addr
+;	mov esp, stack
+
+
+entry_addr:
+; 加载 GDTR
+lgdt	[GdtPtr]
+
+; 关中断
+cli
+
+; 打开地址线A20
+in	al, 92h
+or	al, 00000010b
+out	92h, al
+
+; 准备切换到保护模式
+mov	eax, cr0
+or	eax, 1
+mov	cr0, eax
+
+; 真正进入保护模式
+jmp	dword SelectorFlatC:LABEL_PM_START 
+
+LABEL_PM_START:		
+	mov ax, SelectorVideo
+	mov gs, ax
+	mov ax, SelectorFlatRW
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov ax, SelectorStac
+	mov ss, ax
+	mov esp, topofstack
+
+	mov	ah, 0Fh				; 0000: 黑底    1111: 白字
+	mov	al, 'P'
+	mov	[gs:((80 * 0 + 39) * 2)], ax
+	;push str1
+	;call display
+
+	push eax
+	push ebx
+	call kmain
+	hlt
+
+%include "lib32.inc"
+%include "protect.inc"
+dummy	dq	0000000000000000H
+code_r0	dq	0C0C39A000000FFFFH
+data_r0 dq	0C0C392000000FFFFH
+code_r3	dq	00CBFA0000000FFFFH
+data_r0	dq	00CBF20000000FFFFH
+LABEL_DESC_FLAT_C: Descriptor 0, 0fffffh, DA_CR  | DA_32 | DA_LIMIT_4K
+LABEL_DESC_VIDEO: Descriptor 0B8000H, 0ffffh, DA_DRW	
+GdtLen	equ	$ - LABEL_GDT
+GdtPtr	dw	GdtLen - 1				; 段界限
+		dd	LABEL_GDT		; 基地址
+
+SelectorFlatC		equ	LABEL_DESC_FLAT_C	- LABEL_GDT
+SelectorFlatRW		equ	LABEL_DESC_FLAT_RW	- LABEL_GDT
+SelectorStac		equ	LABEL_DESC_FLAT_S	- LABEL_GDT
+SelectorVideo		equ	LABEL_DESC_VIDEO	- LABEL_GDT
+
+; 下面准备跳入保护模式 -------------------------------------------
+
+disppos:	dd	 (80 * 1 + 12 ) * 2
+str1:  db	"AAAAAAAAA"
+
+topofstack equ 0x100000 +  $
+section .bss
+align	4
+stack:
+	resb 0x4000
