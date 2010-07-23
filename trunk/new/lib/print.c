@@ -1,5 +1,6 @@
 #include "type.h"
 #include "print.h"
+#include "string.h"
 
 #define COLUMNS 80
 #define ROWS    25
@@ -102,6 +103,7 @@ void printk(const char *format, ...) {
 
 	char c;
 	int *pn = 0;
+	int bit = 8; // 8 byte default
 
 	while ((c = *format++) != 0) {
 		if (c != '%') {
@@ -110,9 +112,22 @@ void printk(const char *format, ...) {
 		else {
 			c = *format++;
 			switch(c) {
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					bit = c - '0';
+					break;
 				case 'd':
 				case 'x':
 				case 'u':
+					DISP_NUM:
 					pn = (int *)multi_char;
 					multi_char++;
 					itoa(buf, c, *pn);
@@ -127,6 +142,87 @@ void printk(const char *format, ...) {
 						p1 = "NULL";
 					}
 					DISP_STRING:
+
+					while (*p1 != NULL) {
+						putchar(*p1++);
+					}
+					break;
+				default:
+					multi_char++;
+					break;
+			}
+		}
+	}
+}
+
+void printk_new(const char *format, ...) {
+	char *p1;
+	char buf[32];
+
+	char **multi_char = (char **)(&format);
+	multi_char++; // multi_char points the next parameter of format
+
+	char c;
+	int *pn = 0;
+	int bit = 8; // 8 byte default
+	int str_len = 0;
+	int fill = 0;
+
+	while ((c = *format++) != 0) {
+		if (c != '%') {
+			putchar(c);
+		}
+		else {
+			c = *format++;
+
+			switch(c) {
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					bit = c - '0';
+					c = *format++;
+					break;
+				default:
+					c = *format++;
+					break;
+			}
+
+			switch(c) {
+				case 'd':
+				case 'x':
+				case 'u':
+					DISP_NUM:
+					pn = (int *)multi_char;
+					multi_char++;
+
+					itoa(buf, c, *pn);
+
+					str_len = strlen(buf);
+
+					if (str_len < bit)
+						fill = bit - str_len;
+
+					p1 = buf;
+					goto DISP_STRING;
+					break;
+				case 's':
+					p1 = *multi_char;
+					multi_char++;
+
+					if (!p1) {
+						p1 = "NULL";
+					}
+					DISP_STRING:
+
+					while (fill--) {
+						putchar('0');
+					}
 
 					while (*p1 != NULL) {
 						putchar(*p1++);
