@@ -94,7 +94,7 @@ void putchar(char c) {
 	}
 }
 
-void printk(const char *format, ...) {
+/*void printk(const char *format, ...) {
 	char *p1;
 	char buf[32];
 
@@ -103,7 +103,6 @@ void printk(const char *format, ...) {
 
 	char c;
 	int *pn = 0;
-	int bit = 8; // 8 byte default
 
 	while ((c = *format++) != 0) {
 		if (c != '%') {
@@ -112,18 +111,6 @@ void printk(const char *format, ...) {
 		else {
 			c = *format++;
 			switch(c) {
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-					bit = c - '0';
-					break;
 				case 'd':
 				case 'x':
 				case 'u':
@@ -153,7 +140,7 @@ void printk(const char *format, ...) {
 			}
 		}
 	}
-}
+}*/
 
 void printk_new(const char *format, ...) {
 	char *p1;
@@ -189,7 +176,6 @@ void printk_new(const char *format, ...) {
 					c = *format++;
 					break;
 				default:
-					c = *format++;
 					break;
 			}
 
