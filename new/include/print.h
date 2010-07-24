@@ -13,6 +13,7 @@ void itoa(u_char *buf, int base, int num);
 void putchar(char c);
 
 // A C lib look-like print function.
-void printk(const char *format, ...);
+//void printk(const char *format, ...);
+void printk_new(const char *format, ...);
 
 #endif
