@@ -161,7 +161,7 @@ void printk_new(const char *format, ...) {
 		}
 		else {
 			c = *format++;
-
+			fill = 0;
 			switch(c) {
 				case '1':
 				case '2':

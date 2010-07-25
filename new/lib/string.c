@@ -7,6 +7,7 @@ int strlen(const char *str) {
 	int ilen = 0;
 	__asm__ (
 		"xorb %%al, %%al\n\t"
+		"cld\n\t"
 		"1:\n\t"
 		"scasb\n\t"
 		"jz 1f\n\t"
