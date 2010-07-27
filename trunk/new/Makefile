@@ -7,7 +7,7 @@ vpath %.h ./include
 CFLAGS = -ggdb -c -fstrength-reduce -finline-functions -nostdinc -nostdlib -nostartfiles -nodefaultlibs -fno-builtin
 CXXFLAGS = -ggdb -c -nostdlib -fno-builtin -nostartfiles -nodefaultlibs -fno-exceptions -fno-rtti -fno-stack-protector
 
-KRN_OBJS = kmain.o pic.o icxxabi.o print.o string.o 
+KRN_OBJS = kmain.o pic.o icxxabi.o print.o string.o memory.o
 
 
 vmlinuz: loader.o $(KRN_OBJS)
@@ -26,6 +26,9 @@ print.o: lib/print.c print.h
 	$(CC) $(CFLAGS) -I./include $< -o $@
 
 string.o: lib/string.c string.h
+	$(CC) $(CFLAGS) -I./include $< -o $@
+
+memory.o: mm/memory.c include/page.h include/mm.h include/type.h include/head.h
 	$(CC) $(CFLAGS) -I./include $< -o $@
 
 icxxabi.o: cxx/icxxabi.cc icxxabi.h

@@ -1,4 +1,5 @@
 global loader
+global swapper_pg_dir
 extern text, end, bss, __cxa_finalize, kmain
 
 MODULEALIGN equ	1<<0                    ; align loaded modules on page boundaries
