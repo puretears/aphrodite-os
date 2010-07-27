@@ -1,6 +1,7 @@
 global entry_addr,display
 extern load_addr, load_end_addr, bss_end_addr, kmain
 LOADE_ADDR equ 0100000h
+NR_TASKS	equ 128
 	MAGIC	equ 1BADB002H
 	FLAG_ALIGNED		equ	 1<<0
 	FLAG_MEMINFO	equ	1<<1
@@ -30,24 +31,12 @@ entry_addr:
 	jmp KERNEL_CODE_SEL:LABEL_PM_START 
 
 LABEL_PM_START:		
-	mov ax, SelectorVideo
-	mov gs, ax
-	mov ax, SelectorFlatRW
+	mov ax, KERNEL_DATA_SEL
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
-	mov ax, SelectorStac
 	mov ss, ax
-	mov esp, topofstack
-
-	mov	ah, 0Fh				; 0000: 黑底    1111: 白字
-	mov	al, 'P'
-	mov	[gs:((80 * 0 + 39) * 2)], ax
-	;push str1
-	;call display
-
-	push eax
-	push ebx
+	
 	call kmain
 	hlt
 
@@ -74,7 +63,7 @@ INIT_PG0:
 	mov cr3, eax
 
 	mov eax, cr0
-	or eax, 0800000000H
+	or eax, 080000000H
 	mov cr0, eax
 
 	jmp AFRER_PAGING
@@ -82,7 +71,7 @@ AFRER_PAGING:
 	leave
 	ret
 
-	times (1000H) - ($ -$$)) db 0
+	times (1000H - ($ -$$)) db 0
 
 swapper_pg_dir:	times (2000H - ($ - $$)) db 0
 pg0:			times (3000H - ($ - $$)) db 0
@@ -93,20 +82,16 @@ dummy	dq	0000000000000000H
 code_r0	dq	0C0C39A000000FFFFH
 data_r0 dq	0C0C392000000FFFFH
 code_r3	dq	00CBFA0000000FFFFH
-data_r0	dq	00CBF20000000FFFFH
-times NR_TASKS *2 dq 0
+data_r3	dq	00CBF20000000FFFFH
+	times NR_TASKS *2 dq 0
 KERNEL_CODE_SEL	equ code_r0 - gdt_kernel
 KERNEL_DATA_SEL	equ	data_r0 - gdt_kernel
 USER_CODE_SEL	equ	code_r3 - gdt_kernel + 3
-USER_DATA_SEL	equ	data_r3 - gdt_kernel
+USER_DATA_SEL	equ	data_r3 - gdt_kernel + 3
 
-gdt _pesudo:
+gdt_pesudo:
 	dw $ - gdt_kernel
 	dd gdt_kernel
-
-
-; 下面准备跳入保护模式 -------------------------------------------
-
 
 section .bss
 align	4
