@@ -9,6 +9,7 @@ extern "C" {
 #define MAGIC_NUM 0x2BADB002
 
 extern char end;
+int paging_init(int, int);
 
 void kmain(mbinfo *pmb, u_int magic_num) {
 	if (magic_num != MAGIC_NUM) {
@@ -41,7 +42,8 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 	printk_new("Total memory size: %d.\n", memory_end/1024/1024);
 	int memory_start = (int)&end;
 	int low_memory_start = PAGE_SIZE;
-	//memory_start = paging_init(memory_start, memory_end);
+	memory_start = paging_init(memory_start, memory_end);
+	printk_new("memory start at 0x%8x.\n", memory_start);
 	return;
 }
 

@@ -79,7 +79,7 @@ void putchar(char c) {
 		x_pos = 0;
 		y_pos++;
 		
-		if (y_pos >= COLUMNS)
+		if (y_pos >= ROWS)
 			y_pos = 0;
 		return;
 	}		

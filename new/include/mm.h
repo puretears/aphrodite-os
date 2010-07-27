@@ -11,4 +11,7 @@
 #define PAGE_TABLE (PAGE_ACCESSED | PAGE_US | PAGE_RW | PAGE_P)
 #define PAGE_SHARED (PAGE_ACCESSED | PAGE_US | PAGE_RW | PAGE_P)
 
+#define invalidate() \
+	__asm__ __volatile__ ("movl %%cr3, %%eax\n\tmovl %%eax, %%cr3":::"eax")
+
 #endif
