@@ -5,6 +5,7 @@ extern "C" {
 #include "mbinfo.h"
 #include "print.h"
 #include "type.h"
+#include "page.h"
 #define MAGIC_NUM 0x2BADB002
 
 extern char end;
@@ -32,7 +33,7 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 				(int)(p_mmap->limit >> 32),
 				(int)(p_mmap->type));
 		if (p_mmap->type == 1) {
-			memory_end = (int)(p_mmap->base + pmmap->limit);
+			memory_end = (int)(p_mmap->base + p_mmap->limit);
 		}
 		p_mmap = (mmap *)((u_int)p_mmap + sizeof(p_mmap->size) + p_mmap->size);
 	}
@@ -40,7 +41,7 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 	printk_new("Total memory size: %d.\n", memory_end/1024/1024);
 	int memory_start = (int)&end;
 	int low_memory_start = PAGE_SIZE;
-	memory_start = paging_init(memory_start, memory_end);
+	//memory_start = paging_init(memory_start, memory_end);
 	return;
 }
 
