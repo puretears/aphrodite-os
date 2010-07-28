@@ -44,6 +44,7 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 	int low_memory_start = PAGE_SIZE;
 	memory_start = paging_init(memory_start, memory_end);
 	printk_new("memory start at 0x%8x.\n", memory_start);
+
 	return;
 }
 
