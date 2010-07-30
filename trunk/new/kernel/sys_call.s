@@ -46,7 +46,7 @@ _EFLAGS  equ 38H
 _OLD_ESP equ 3CH
 _OLD_SS  equ 40H
 
-%macro RESTORE_ALL
+%macro RESTORE_ALL 0
 	pop ebx
 	pop ecx
 	pop edx

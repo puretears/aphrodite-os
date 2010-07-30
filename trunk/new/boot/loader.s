@@ -94,8 +94,9 @@ pg0:
 	times (3000H - ($ - $$)) db 0
 
 align 8
-gdt_kernel:
+gdt:
 	dummy   dq 0000000000000000H
+	dummy1  dq 0000000000000000H
 	; base = 0xC0000000, limit = 0x3FFFF, execute / read r0 code
 	code_r0 dq 0C0C39A000000FFFFH
 	; base = 0xC0000000, limit = 0x3FFFF, read / write r0 data
@@ -105,16 +106,24 @@ gdt_kernel:
 	; base = 0x00000000, limit = 0xBFFFF, read /write r3 data
 	data_r3 dq 00CBF2000000FFFFH
 		times NR_TASKS * 2 dq 0
-KERNEL_CODE_SEL equ code_r0 - gdt_kernel
-KERNEL_DATA_SEL equ data_r0 - gdt_kernel
-USER_CODE_SEL   equ code_r3 - gdt_kernel
-USER_DATA_SEL   equ data_r3 - gdt_kernel
+
+KERNEL_CODE_SEL equ code_r0 - gdt
+KERNEL_DATA_SEL equ data_r0 - gdt
+USER_CODE_SEL   equ code_r3 - gdt + 3
+USER_DATA_SEL   equ data_r3 - gdt + 3
 
 	dw 0	; Make pesudo_gdt aligned 4 byte boundary.
 gdt_pesudo:
-	dw $ - gdt_kernel
-	dd gdt_kernel
+	dw $ - gdt - 1
+	dd 0C0000000H + gdt
 	
+idt:
+	times 256 dq 0
+
+idt_pesudo:
+	dw 256 * 8 - 1
+	dd 0C000000H + idt
+
 section .bss
 align 4
 stack:
