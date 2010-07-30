@@ -17,10 +17,16 @@ print.o: ./lib/print.c ./include/print.h
 string.o: ./lib/string.c ./include/string.h
 	$(CC) $(CFLAGS) -I./include $< -o $@
 
-kernel.o:./kernel/kernel.c 
+kernel.o: kernel/kernel.c include/multiboot.h include/print.h include/type.h
 	$(CC) $(CFLAGS) -I./include $< -o $@
 
-.phony:clean
+.phony: clean install
 clean:
 	rm *.o
 	rm *.bin
+
+install:
+	mount -o loop ./vmlinuz.img /mnt/
+	cp ../boot_new/kernel.bin /mnt/
+	sync
+	umount /mnt
