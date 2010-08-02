@@ -1,6 +1,8 @@
 extern do_divide_error
+extern do_reserved
 global ret_from_system_call
 global divide_error
+global reserved
 
 section .text
 ; Stack layout in 'ret_from_system_call'
@@ -110,3 +112,8 @@ error_code:
 	add esp, 8
 	jmp ret_from_system_call
 
+align 4
+reserved:
+	push 0
+	push do_reserved
+	jmp error_code
