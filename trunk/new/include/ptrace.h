@@ -1,7 +1,7 @@
 #ifndef PTRACE_H
 #define PTRACE_H
 
-#include "types.h"
+#include "type.h"
 
 struct pt_regs {
 	int ebx;

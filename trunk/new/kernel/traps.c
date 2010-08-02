@@ -4,15 +4,13 @@
 #include "segment.h"
 
 // Definite in sys_call.s
-asmlinkage void divide_error();
+void divide_error();
 
 // Interrupt and exception handling template
 #define DO_ERROR(trap_no, err_str, name) \
-asmlinkage void do##name(struct pt_regs *p_regs, int err_no) { \
-	die_if_kernel(err_str, p_regs, err_no) \
+void do_##name(struct pt_regs *p_regs, int err_no) { \
+	die_if_kernel(err_str, p_regs, err_no); \
 }
-
-DO_ERROR(0, "Divide error", divide_error)
 
 // Do nothing if we get here from Ring3.
 // Dump system and die if we get here from Ring0.
@@ -21,7 +19,7 @@ void die_if_kernel(const char *err_str, struct pt_regs *p_regs, int err_no) {
 		return;
 	}
 
-	int ss = KERNEL_DS, esp = &p_regs->old_esp;
+	int ss = KERNEL_DS, esp = (int)&p_regs->old_esp;
 
 	if (p_regs->cs & 3) { // Ring1 or 2
 		ss = p_regs->ss;
@@ -34,10 +32,12 @@ void die_if_kernel(const char *err_str, struct pt_regs *p_regs, int err_no) {
 			p_regs->eax, p_regs->ebx, p_regs->ecx, p_regs->edx);
 	printk_new("esi: %8x    edi: %8x    ebp: %8x    esp: %8x\n", 
 			p_regs->esi, p_regs->edi, p_regs->ebp, esp);
-	printk_new("ds: %4x    es:%4x    fs:%4x    gs:%4x\n"
+	printk_new("ds: %4x    es:%4x    fs:%4x    gs:%4x\n",
 			p_regs->ds, p_regs->es, p_regs->fs, p_regs->gs);
 	printk_new("\n");
 	/*TODO: 
 	 * We should get task index here to dump CURRENT process stack and code.*/
-	return 0;
+	return;
 }
+
+DO_ERROR(0, "Divide error", divide_error)
