@@ -19,7 +19,7 @@ loader.o: boot/loader.s
 pic.o: kernel/pic.c io.h
 	$(CC) $(CFLAGS) -I./include $< -o $@
 
-traps.o: kernel/traps.c
+traps.o: kernel/traps.c include/type.h
 	$(CC) $(CFLAGS) -I./include $< -o $@
 
 sys_call.o: kernel/sys_call.s
