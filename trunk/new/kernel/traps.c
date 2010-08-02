@@ -1,10 +1,12 @@
 #include "type.h"
 #include "ptrace.h"
 #include "print.h"
+#include "system.h"
 #include "segment.h"
 
 // Definite in sys_call.s
 void divide_error();
+void reserved();
 
 // Interrupt and exception handling template
 #define DO_ERROR(trap_no, err_str, name) \
@@ -41,3 +43,13 @@ void die_if_kernel(const char *err_str, struct pt_regs *p_regs, int err_no) {
 }
 
 DO_ERROR(0, "Divide error", divide_error)
+DO_ERROR(15, "Reserved", reserved)
+
+void trap_init() {
+	int i;
+	set_trap_gate(0, &do_divide_error);
+
+	for (i = 1; i < 50; i++) {
+		set_trap_gate(i, &reserved);
+	}
+}
