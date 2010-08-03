@@ -47,7 +47,7 @@ DO_ERROR(15, "Reserved", reserved)
 
 void trap_init() {
 	int i;
-	set_trap_gate(0, &do_divide_error);
+	set_trap_gate(0, &divide_error);
 
 	for (i = 1; i < 50; i++) {
 		set_trap_gate(i, &reserved);
