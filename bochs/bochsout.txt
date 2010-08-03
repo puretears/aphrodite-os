@@ -29,17 +29,17 @@
 00000000000i[     ]   SB16 support: no
 00000000000i[     ]   USB support: no
 00000000000i[     ]   VGA extension support: vbe 
-00000000000i[MEM0 ] allocated memory at 0xb51fe008. after alignment, vector=0xb51ff000
+00000000000i[MEM0 ] allocated memory at 0xb52b4008. after alignment, vector=0xb52b5000
 00000000000i[MEM0 ] 32.00MB
 00000000000i[MEM0 ] mem block size = 0x00100000, blocks=32
 00000000000i[MEM0 ] rom at 0xfffe0000/131072 ('/usr/local/share/bochs/BIOS-bochs-latest')
 00000000000i[MEM0 ] rom at 0xc0000/40448 ('/usr/local/share/bochs/VGABIOS-lgpl-latest')
 00000000000e[DEV  ] Bochs is not compiled with PCI support
 00000000000i[CMOS ] Using local time for initial clock
-00000000000i[CMOS ] Setting initial clock to: Thu Jun 24 10:52:59 2010 (time0=1277347979)
+00000000000i[CMOS ] Setting initial clock to: Tue Aug  3 22:50:52 2010 (time0=1280847052)
 00000000000i[DMA  ] channel 4 used by cascade
 00000000000i[DMA  ] channel 2 used by Floppy Drive
-00000000000i[FDD  ] fd0: 'vmlinuz.img' ro=0, h=2,t=80,spt=18
+00000000000i[FDD  ] fd0: 'boot.img' ro=0, h=2,t=80,spt=18
 00000000000i[VGA  ] interval=300000
 00000000000i[MEM0 ] Register memory access handlers: 0x000a0000 - 0x000bffff
 00000000000i[XGUI ] test_alloc_colors: 16 colors available out of 16 colors tried
@@ -119,24 +119,68 @@
 00000831656i[BIOS ] ata0-0: PCHS=60/16/63 translation=none LCHS=60/16/63
 00004712123i[BIOS ] IDE time out
 00012706900i[BIOS ] Booting from 0000:7c00
-00024430477i[     ] dbg: Quit
-00024430477i[CPU0 ] CPU is in protected mode (active)
-00024430477i[CPU0 ] CS.d_b = 32 bit
-00024430477i[CPU0 ] SS.d_b = 32 bit
-00024430477i[CPU0 ] | EAX=e0000011  EBX=00030000  ECX=00000000  EDX=120002f9
-00024430477i[CPU0 ] | ESP=00008120  EBP=00000000  ESI=00090800  EDI=00001ffc
-00024430477i[CPU0 ] | IOPL=0 id vip vif ac vm rf nt of DF if tf SF zf af PF cf
-00024430477i[CPU0 ] | SEG selector     base    limit G D
-00024430477i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
-00024430477i[CPU0 ] |  CS:0010( 0002| 0|  0) c0000000 ffffffff 1 1
-00024430477i[CPU0 ] |  DS:0018( 0003| 0|  0) 00000000 ffffffff 1 1
-00024430477i[CPU0 ] |  SS:0018( 0003| 0|  0) 00000000 ffffffff 1 1
-00024430477i[CPU0 ] |  ES:0018( 0003| 0|  0) 00000000 ffffffff 1 1
-00024430477i[CPU0 ] |  FS:0018( 0003| 0|  0) 00000000 ffffffff 1 1
-00024430477i[CPU0 ] |  GS:0018( 0003| 0|  0) 00000000 ffffffff 1 1
-00024430477i[CPU0 ] | EIP=00000044 (00000044)
-00024430477i[CPU0 ] | CR0=0xe0000011 CR2=0x00000000
-00024430477i[CPU0 ] | CR3=0x00001000 CR4=0x00000000
-00024430477i[CMOS ] Last time is 1277347988 (Thu Jun 24 10:53:08 2010)
-00024430477i[XGUI ] Exit
-00024430477i[CTRL ] quit_sim called with exit code 0
+00018732583i[BIOS ] int13_harddisk: function 41, unmapped device for ELDL=81
+00018737364i[BIOS ] int13_harddisk: function 08, unmapped device for ELDL=81
+00018742015i[BIOS ] *** int 15h function AX=00c0, BX=0000 not yet supported!
+00098737482i[CPU0 ] CPU is in protected mode (active)
+00098737482i[CPU0 ] CS.d_b = 32 bit
+00098737482i[CPU0 ] SS.d_b = 32 bit
+00098737482i[CPU0 ] | EAX=0010509b  EBX=00040000  ECX=00000002  EDX=00000000
+00098737482i[CPU0 ] | ESP=00106f84  EBP=00106ff0  ESI=00000000  EDI=00000002
+00098737482i[CPU0 ] | IOPL=0 id vip vif ac vm RF nt of df IF tf sf ZF af PF cf
+00098737482i[CPU0 ] | SEG selector     base    limit G D
+00098737482i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
+00098737482i[CPU0 ] |  CS:0010( 0002| 0|  0) c0000000 3fffffff 1 1
+00098737482i[CPU0 ] |  DS:0018( 0003| 0|  0) c0000000 3fffffff 1 1
+00098737482i[CPU0 ] |  SS:0018( 0003| 0|  0) c0000000 3fffffff 1 1
+00098737482i[CPU0 ] |  ES:0018( 0003| 0|  0) c0000000 3fffffff 1 1
+00098737482i[CPU0 ] |  FS:0018( 0003| 0|  0) c0000000 3fffffff 1 1
+00098737482i[CPU0 ] |  GS:0018( 0003| 0|  0) c0000000 3fffffff 1 1
+00098737482i[CPU0 ] | EIP=00104b40 (00104b40)
+00098737482i[CPU0 ] | CR0=0xe0000011 CR2=0x0c103878
+00098737482i[CPU0 ] | CR3=0x00101000 CR4=0x00000000
+00098737482e[CPU0 ] exception(): 3rd (14) exception with no resolution, shutdown status is 00h, resetting
+00098737482i[SYS  ] bx_pc_system_c::Reset(HARDWARE) called
+00098737482i[CPU0 ] cpu hardware reset
+00098737482i[APIC0] allocate APIC id=0 (MMIO enabled) to 0xfee00000
+00098737482i[CPU0 ] CPUID[0x00000000]: 00000003 756e6547 6c65746e 49656e69
+00098737482i[CPU0 ] CPUID[0x00000001]: 00000f00 00000800 00000000 078bfbff
+00098737482i[CPU0 ] CPUID[0x00000002]: 00410601 00000000 00000000 00000000
+00098737482i[CPU0 ] CPUID[0x00000003]: 00000000 00000000 00000000 00000000
+00098737482i[CPU0 ] CPUID[0x00000004]: 00000000 00000000 00000000 00000000
+00098737482i[CPU0 ] CPUID[0x80000000]: 80000004 00000000 00000000 00000000
+00098737482i[CPU0 ] CPUID[0x80000001]: 00000000 00000000 00000000 00000000
+00098737482i[CPU0 ] CPUID[0x80000002]: 20202020 20202020 20202020 6e492020
+00098737482i[CPU0 ] CPUID[0x80000003]: 286c6574 50202952 69746e65 52286d75
+00098737482i[CPU0 ] CPUID[0x80000004]: 20342029 20555043 20202020 00202020
+00098737482i[     ] reset of 'unmapped' plugin device by virtual method
+00098737482i[     ] reset of 'biosdev' plugin device by virtual method
+00098737482i[     ] reset of 'speaker' plugin device by virtual method
+00098737482i[     ] reset of 'extfpuirq' plugin device by virtual method
+00098737482i[     ] reset of 'iodebug' plugin device by virtual method
+00098737482i[     ] reset of 'ioapic' plugin device by virtual method
+00098737482i[     ] reset of 'keyboard' plugin device by virtual method
+00098737482i[     ] reset of 'harddrv' plugin device by virtual method
+00098737482i[     ] reset of 'serial' plugin device by virtual method
+00098737482i[     ] reset of 'parallel' plugin device by virtual method
+00098737483i[     ] dbg: Quit
+00098737483i[CPU0 ] CPU is in real mode (active)
+00098737483i[CPU0 ] CS.d_b = 16 bit
+00098737483i[CPU0 ] SS.d_b = 16 bit
+00098737483i[CPU0 ] | EAX=00000000  EBX=00000000  ECX=00000000  EDX=00000f00
+00098737483i[CPU0 ] | ESP=00000000  EBP=00000000  ESI=00000000  EDI=00000000
+00098737483i[CPU0 ] | IOPL=0 id vip vif ac vm rf nt of df if tf sf zf af pf cf
+00098737483i[CPU0 ] | SEG selector     base    limit G D
+00098737483i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
+00098737483i[CPU0 ] |  CS:f000( 1e00| 0|  0) ffff0000 0000ffff 0 0
+00098737483i[CPU0 ] |  DS:0000( 0000| 0|  0) 00000000 0000ffff 0 0
+00098737483i[CPU0 ] |  SS:0000( 0000| 0|  0) 00000000 0000ffff 0 0
+00098737483i[CPU0 ] |  ES:0000( 0000| 0|  0) 00000000 0000ffff 0 0
+00098737483i[CPU0 ] |  FS:0000( 0000| 0|  0) 00000000 0000ffff 0 0
+00098737483i[CPU0 ] |  GS:0000( 0000| 0|  0) 00000000 0000ffff 0 0
+00098737483i[CPU0 ] | EIP=0000fff0 (0000fff0)
+00098737483i[CPU0 ] | CR0=0x60000010 CR2=0x00000000
+00098737483i[CPU0 ] | CR3=0x00000000 CR4=0x00000000
+00098737483i[CMOS ] Last time is 1280847089 (Tue Aug  3 22:51:29 2010)
+00098737483i[XGUI ] Exit
+00098737483i[CTRL ] quit_sim called with exit code 0
