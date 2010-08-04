@@ -31,6 +31,7 @@ loader:
 	push ebx
 	call setup_paging
 	lgdt [gdt_pesudo]
+	lidt [idt_pesudo]
 	jmp KERNEL_CODE_SEL:REFRESH_CACHE
 
 REFRESH_CACHE:
@@ -117,13 +118,14 @@ USER_DATA_SEL   equ data_r3 - gdt + 3
 gdt_pesudo:
 	dw $ - gdt - 1
 	dd 0C0000000H + gdt
-	
+
+align 8
 idt:
 	times 256 dq 0
 
 idt_pesudo:
 	dw 256 * 8 - 1
-	dd 0C000000H + idt
+	dd 0C0000000H + idt
 
 section .bss
 align 4
