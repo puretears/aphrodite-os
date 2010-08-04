@@ -14,7 +14,7 @@ int paging_init(int start_mem, int end_mem) {
 
 	while (address < end_mem) {
 		tmp = *(pg_dir + 768);
-		printk_new("pg%1d: %8x.\n", pg_count++, pg_dir);
+		//printk_new("pg%1d: %8x.\n", pg_count++, pg_dir);
 		if (!tmp) { // A NULL page directory.
 			tmp = start_mem | PAGE_TABLE;
 			*(pg_dir + 768) = tmp;
@@ -23,7 +23,7 @@ int paging_init(int start_mem, int end_mem) {
 
 		*pg_dir++ = tmp; // Also map it at 0x00000000
 		pg_table = (u_int *)(tmp & PAGE_MASK);
-		printk_new("pt%1d: %8x.\n", pte_count++, pg_table);
+		//printk_new("pt%1d: %8x.\n", pte_count++, pg_table);
 
 		for (tmp = 0; tmp < PTES_PER_PAGE; tmp++, pg_table++) {
 			if (address < end_mem)
