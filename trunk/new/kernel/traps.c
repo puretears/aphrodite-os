@@ -14,6 +14,10 @@ void do_##name(struct pt_regs *p_regs, int err_no) { \
 	die_if_kernel(err_str, p_regs, err_no); \
 }
 
+#define DO__INT_ERROR(trap_no, err_str, name) \
+void do_##name(struct pt_reps *p_regs, int err_no) { \
+	die_if_kernel(err_str, p_regs, err_no); \
+}
 // Do nothing if we get here from Ring3.
 // Dump system and die if we get here from Ring0.
 void die_if_kernel(const char *err_str, struct pt_regs *p_regs, int err_no) {
@@ -43,13 +47,14 @@ void die_if_kernel(const char *err_str, struct pt_regs *p_regs, int err_no) {
 }
 
 DO_ERROR(0, "Divide error", divide_error)
+DO_ERROR(3, "Break point", breakpoint)
 DO_ERROR(15, "Reserved", reserved)
 
 void trap_init() {
 	int i;
 	set_trap_gate(0, &divide_error);
 
-	for (i = 1; i < 50; i++) {
+	for (i = 4; i < 50; i++) {
 		set_trap_gate(i, &reserved);
 	}
 }

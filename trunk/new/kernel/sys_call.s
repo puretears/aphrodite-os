@@ -1,5 +1,6 @@
 extern do_divide_error
 extern do_reserved
+extern do_breakpoint
 global ret_from_system_call
 global divide_error
 global reserved
@@ -77,8 +78,8 @@ align 4
 divide_error:
 	push 0 ; 0 means no error code
 	push do_divide_error
-	nop ; Patch align 4
-align 4
+	;nop ; Patch align 4
+;align 4
 error_code:
 	push fs
 	push es
@@ -116,4 +117,10 @@ align 4
 reserved:
 	push 0
 	push do_reserved
+	jmp error_code
+
+align 4
+breakpoint:
+	push 0
+	push do_breakpoint
 	jmp error_code
