@@ -18,4 +18,8 @@ inline void set_gate(int *gate_addr, int dpl, int type, handler offset) {
 inline void set_trap_gate(int vector, handler offset) {
 	set_gate((int *)&idt[vector], 0, 15, offset);
 }
+
+inline void set_interrupt_gate(int vector, handler offset) {
+	set_gate((int *)&idt[vector], 0, 14, offset);
+}
 #endif
