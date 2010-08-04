@@ -4,6 +4,7 @@ extern do_breakpoint
 global ret_from_system_call
 global divide_error
 global reserved
+global breakpoint
 
 section .text
 ; Stack layout in 'ret_from_system_call'
