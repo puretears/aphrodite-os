@@ -164,6 +164,12 @@ nmi: ; interrupt
 	jmp error_code
 
 align 4
+int3:
+	push 0
+	push do_int3
+	jmp error_code
+
+align 4
 breakpoint: ; Trap
 	push 0
 	push do_breakpoint
