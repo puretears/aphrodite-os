@@ -44,8 +44,19 @@ void die_if_kernel(const char *err_str, struct pt_regs *p_regs, int err_no) {
 }
 
 DO_ERROR(0, "Divide error", divide_error)
-DO_ERROR(3, "Break point", breakpoint)
+DO_ERROR(3, "INT 3", int3)
+DO_ERROR(4, "Overflow", overflow)
+DO_ERROR(5, "Bound_range_exceeded", bound_range_exceeded)
+DO_ERROR(6, "Invalid opcode", invalid_opcode)
+DO_ERROR(7, "Device_not_available", device_not_available)
+DO_ERROR(8, "Double fault", double_fault)
+DO_ERROR(9, "Coprocessor segment overrun", coprocessor_error)
+DO_ERROR(10, "Invalid TSS", invalid_tss)
+DO_ERROR(11, "Segment not present", segment_not_present)
+DO_ERROR(12, "Stack segment fault", stack_segment_fault)
+DO_ERROR(13, "General protection", general_protection)
 DO_ERROR(15, "Reserved", reserved)
+DO_ERROR(17, "Alignment check", alignment_check)
 
 void trap_init() {
 	int i;
