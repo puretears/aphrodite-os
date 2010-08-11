@@ -1,14 +1,12 @@
 extern do_divide_error
-extern do_debug
 extern do_nmi
 extern do_int3
-extern do_breakpoint
 extern do_overflow
 extern do_bound_range_exceeded
 extern do_invalid_opcode
 extern do_device_not_available
 extern do_double_fault
-extern do_coprocessor_error
+extern do_coprocessor_segment_overrun
 extern do_invalid_tss
 extern do_segment_not_present
 extern do_stack_segment_fault
@@ -22,16 +20,14 @@ extern do_reserved
 
 global ret_from_system_call
 global divide_error
-global debug
 global nmi
 global int3
-global breakpoint
 global overflow
 global bound_range_exceeded
 global invalid_opcode
 global device_not_available
 global double_fault
-global coprocessor_error
+global coprocessor_segment_overrun
 global invalid_tss
 global segment_not_present
 global stack_segment_fault
@@ -151,11 +147,6 @@ error_code:
 	add esp, 8
 	jmp ret_from_system_call
 
-align 4
-debug:
-	push 0
-	push do_debug
-	jmp error_code
 
 align 4
 reserved: ; Fault / Trap
@@ -173,12 +164,6 @@ align 4
 int3:
 	push 0
 	push do_int3
-	jmp error_code
-
-align 4
-breakpoint: ; Trap
-	push 0
-	push do_breakpoint
 	jmp error_code
 
 align 4
@@ -211,9 +196,9 @@ double_fault: ; Abort
 	jmp error_code
 
 align 4
-coprocessor_error: ; Fault
+coprocessor_segment_overrun: ; Fault
 	push 0
-	push do_coprocessor_error
+	push do_coprocessor_segment_overrun
 	jmp error_code
 
 align 4
@@ -252,14 +237,14 @@ alignment_check: ; Fault
 	push do_alignment_check
 	jmp error_code
 
-align 4
-machine_check: ; Abort
-	push 0
-	push do_alignment_check
-	jmp error_code
+;align 4
+;machine_check: ; Abort
+;	push 0
+;	push do_alignment_check
+;	jmp error_code
 
-align 4
-smid_exception: ; Fault
-	push 0
-	push do_smid_exception
-	jmp error_code
+;align 4
+;smid_exception: ; Fault
+;	push 0
+;	push do_smid_exception
+;	jmp error_code
