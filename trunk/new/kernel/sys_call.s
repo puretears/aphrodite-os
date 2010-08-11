@@ -1,5 +1,7 @@
 extern do_divide_error
 extern do_debug
+extern do_nmi
+extern do_int3
 extern do_breakpoint
 extern do_overflow
 extern do_bound_range_exceeded
@@ -16,10 +18,13 @@ extern do_x87_error
 extern do_alignment_check
 extern do_machine_check
 extern do_smid_exception
+extern do_reserved
 
 global ret_from_system_call
 global divide_error
 global debug
+global nmi
+global int3
 global breakpoint
 global overflow
 global bound_range_exceeded
@@ -36,6 +41,7 @@ global x87_error
 global alignment_check
 global machine_check
 global smid_exception
+global reserved
 
 section .text
 ; Stack layout in 'ret_from_system_call'
@@ -194,9 +200,9 @@ invalid_opcode: ; Fault
 	jmp error_code
 
 align 4
-device_not_avail: ; Fault
+device_not_available: ; Fault
 	push 0
-	push do_device_not_avail
+	push do_device_not_available
 	jmp error_code
 
 align 4
