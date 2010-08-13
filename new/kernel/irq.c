@@ -1,4 +1,27 @@
+#include "system.h"
+#include "irq.h"
 
+/* Interrupt vector 0x20 - 0x2F*/
+static hw_irq_controller i8259A_irq_type = {
+	"IA32_PIC",
+	startup_8259A_irq,
+	shutdown_8259A_irq,
+	enable_8259A_irq,
+	disable_8259A_irq,
+	mask_and_ack_8259A,
+	end_8259A_irq
+};
+
+/* Interrupt vector 0x30 - 0xFF*/
+static hw_irq_controller no_irq_type = {
+	"None_PIC",
+	startup_none,
+	shutdown_none,
+	enable_none,
+	disable_none,
+	ack_none,
+	end_none
+};
 #define SYMBOL_NAME_STR(x) x
 
 #define IRQ(x, y) \
@@ -49,7 +72,20 @@ void do_IRQ() {
 
 };
 
-#define SAVE_ALL
+#define SAVE_ALL \
+	cld \
+	pushl %es; \
+	pushl %ds; \
+	pushl %eax; \
+	pushl %ebp; \
+	pushl %edi; \
+	pushl %esi; \
+	pushl %edx; \
+	pushl %ecx; \
+	pushl %ebx; \
+	movl $(KERNEL_DS), %edx; \
+	movw %dx, %ds; \
+	movw %dx, %es;
 
 BUILD_16_IRQS(0x0)
 BUILD_COMMON_IRQ()
@@ -60,3 +96,91 @@ __asm__("ret_from_intr:");
 #undef IRQ
 #undef IRQLIST_16
 
+#define FIRST_EXTERNAL_VECTOR 0x20
+#define SYSCALL_VECTOR 0x80
+
+irq_desc_t irq_desc_table[NR_IRQS] __cacheline_aligned = {
+	[0 ... (NR_IRQS - 1)] = { 0, &no_irq_type }
+};
+
+#define __byte(x, y) (((unsigned char *)&(y))[x])
+#define cached_21 (__byte(0, cached_irq_mask))
+#define cached_A1 (__byte(1, cached_irq_mask))
+
+static unsigned int cached_irq_mask = 0xFFFF;
+
+void __init init_8259A(int auto_eoi) {
+	outb(0x21, 0xFF);
+	outb(0xA1, 0xFF);
+	
+	// 8259A Master Init
+	// ICW1: need ICW4, cascade mode, edge trigged mode
+	outb(0x20, 0x11);
+	io_wait();
+	// ICW2: vector from 0x20, 0x27
+	outb(0x21, 0x20);
+	io_wait();
+	// ICW3: slave has on IR2
+	outb(0x21, 0x4);
+	io_wait();
+	// ICW4:
+	if (auto_eoi)
+		outb(0x21, 0x03); // 8086mode, auto eoi
+	else
+		outb(0x21, 0x01); // 8086mode, normal eoi
+	io_wait();
+
+	// 8259A Slave Init
+	outb(0xA0, 0x11);
+	io_wait();
+	outb(0xA1, 0x28);
+	io_wait();
+	outb(0xA1, 0x2);
+	io_wait();
+	outb(0xA1, 0x01);
+	io_wait();
+
+	if (auto_eoi)
+		i8259_irq_type.ack = disable_i8259A_irq;
+	else
+		i8259_irq_type.ack = mask_and_ack_i8259A_irq;
+
+	io_wait();
+	io_wait();
+	io_wait();
+	io_wait();
+
+	outb(0x21, cached_21);
+	outb(0xA1, cached_A1);
+}
+
+void __init init_ISA_irqs() {
+	init_8259A(0);
+
+	int i = 0;
+	for(; i < NR_IRQS; i++) {
+		irq_desc_table[i].status = IRQ_DISABLED;
+		if (i < 16) {
+			irq_desc_table[i].handler = &i8259A_irq_type; 
+		}	
+		else {
+			irq_desc_table[i].handler = &no_irq_type;
+		}
+	}
+}
+
+void __init init_IRQ(void) {
+	int i = 0, vector = 0;
+
+	init_ISA_irqs();
+	/* Initialize IDT 0x20 ~ 0xFF*/
+	for(; i < NR_IRQS; i++) {
+		vector = FIRST_EXTERNAL_VECTOR + i;
+		if (vector != SYSCALL_VECTOR) {
+			set_interrupt_gate(vector, interrupt[i]);
+		}
+	}
+	/*TODO:
+	 * System clock and FPU intr have not been initialized.
+	 * */
+}
