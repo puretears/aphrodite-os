@@ -22,6 +22,7 @@ inline void set_trap_gate(int vector, handler offset) {
 inline void set_system_gate(int vector, handler offset) {
 	set_gate((int *)&idt[vector], 3, 15, offset);
 }
+
 inline void set_interrupt_gate(int vector, handler offset) {
 	set_gate((int *)&idt[vector], 0, 14, offset);
 }
