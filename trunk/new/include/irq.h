@@ -4,7 +4,7 @@
 struct hw_interrupt_type {
 	const char *pic_name;
 	unsigned int (*startup)(unsigned int irq);
-	unsigned int (*shutdown)(unsigned int irq);
+	void (*shutdown)(unsigned int irq);
 	void (*enable)(unsigned int irq);
 	void (*disable)(unsigned int irq);
 	void (*ack)(unsigned int irq);

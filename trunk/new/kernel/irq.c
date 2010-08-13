@@ -184,3 +184,41 @@ void __init init_IRQ(void) {
 	 * System clock and FPU intr have not been initialized.
 	 * */
 }
+
+void enable_8259A_irq(unsigned int irq) {
+	unsigned int mask = ~(1 << irq);
+
+	//TODO: The following operation should be atomic.
+	cached_irq_mask &= mask;
+	if (irq & 8)
+		outb(0xA1, cached_A1);
+	else
+		outb(0x21, cached_21);
+}
+
+void disable_8259A_irq(unsigned int irq) {
+	unsigned int mask = (1 << irq);
+
+	//TODO: The following operation should be atomic.
+	cached_irq_mask |= mask;
+	if (irq & 8)
+		outb(0xA1, cached_A1);
+	else
+		outb(0x21, cached_21);
+}
+
+#define shutdown_8259A_irq disable_8259A_irq
+
+unsigned int startup_8259A_irq(unsigned int irq) {
+	enable_8259A_irq(irq);
+	return 0;
+}
+
+void end_8259A_irq(unsigned int irq) {
+	if(!(irq_desc_table[irq].status & (IRQ_DISABLED | IRQ_INPROGRESS)))	{
+		enable_8259A_irq(irq);
+	}
+}
+
+/*TODO:
+ * Mask and ACK 8259A request.*/
