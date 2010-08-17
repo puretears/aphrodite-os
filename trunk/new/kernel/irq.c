@@ -222,4 +222,72 @@ void end_8259A_irq(unsigned int irq) {
 
 /*TODO:
  * Mask and ACK 8259A request.*/
+unsigned int irq_err_count = 0;
 
+void mask_and_ack_8259A(unsigned int irq) {
+	unsigned int irqmask = 1 << irq;
+
+	if (cached_irq_mask & irqmask)
+		goto spurious_8259A_irq;
+
+	cached_irq_mask |= irqmask;
+
+handle_real_irq:
+	if (irq & 8) {
+		outb(0xA1, cached_A1);
+		outb(0xA0, 0x60 + (irq & 7));
+		outb(0xA0, 0x62);
+	}
+	else {
+		outb(0x21, cached_21);
+		outb(0x20, 0x60 + irq);
+	}
+
+	return;
+
+spurious_8259A_irq:
+	if (i8259A_irq_real(irq))
+		goto handle_real_irq;
+
+	static int spurious_irq_mask;
+
+	if (!(spurious_irq_mask & irqmask)) {
+		printk_new("Spurious 8259A interrupt: IRQ%4d.\n", irq);
+		spurious_irq_mask |= irqmask;
+	}
+
+	irq_err_count++;
+	goto handle_real_irq;
+}
+
+static int i8259A_irq_real(unsigned int irq) {
+	int isr_val = 0;
+	int irqmask = 1 << irq;
+
+	if (irq < 8) { // From master
+		outb(0x20, 0x0B);
+		isr_val = inb(0x20) & irqmask;
+		outb(0x20, 0x0A);
+	}
+	else {
+		outb(0xA0, 0x0B);
+		isr_val = inb(0xA0) & (irqmask >> 8);
+		outb(0xA0, 0x0A);
+	}
+	
+	return isr_val;
+}
+
+int i8259A_irq_pending(unsigned int irq) {
+	unsigned int irqmask = 1 << irq;
+	int irr_val;
+
+	if (irq < 8) {
+		irr_val = inb(0x20) & irqmask;
+	}
+	else {
+		irr_val = inb(0xA0) & (irqmask >> 8)
+	}
+
+	return irr_val;
+}
