@@ -13,7 +13,7 @@ struct hw_interrupt_type {
 
 typedef struct hw_interrupt_type hw_irq_controller;
 
-struct __cacheline_aligned irq_desc {
+struct irq_desc {
 	unsigned int status;
 	hw_irq_controller *handler;
 };

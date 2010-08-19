@@ -3,6 +3,7 @@
 
 #include "head.h"
 #include "segment.h"
+#include "ptrace.h"
 
 typedef void (* handler)(struct pt_regs *, int);
 

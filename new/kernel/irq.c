@@ -1,6 +1,13 @@
 #include "system.h"
 #include "irq.h"
 
+unsigned int startup_8259A_irq(unsigned int);
+void shutdown_8259A_irq(unsigned int);
+void enable_8259A_irq(unsigned int);
+void disable_8259A_irq(unsigned int);
+void mask_and_ack_8259A(unsigned int);
+void end_8259A_irq(unsigned int);
+
 /* Interrupt vector 0x20 - 0x2F*/
 static hw_irq_controller i8259A_irq_type = {
 	"IA32_PIC",
@@ -13,7 +20,7 @@ static hw_irq_controller i8259A_irq_type = {
 };
 
 /* Interrupt vector 0x30 - 0xFF*/
-static hw_irq_controller no_irq_type = {
+/*static hw_irq_controller no_irq_type = {
 	"None_PIC",
 	startup_none,
 	shutdown_none,
@@ -21,7 +28,7 @@ static hw_irq_controller no_irq_type = {
 	disable_none,
 	ack_none,
 	end_none
-};
+};*/
 #define SYMBOL_NAME_STR(x) x
 
 #define IRQ(x, y) \
@@ -73,8 +80,8 @@ void do_IRQ() {
 };
 
 #define SAVE_ALL \
-	cld \
-	pushl %es; \
+	"cld\n\t" \
+	"pushl %es\n\t" \
 	pushl %ds; \
 	pushl %eax; \
 	pushl %ebp; \
