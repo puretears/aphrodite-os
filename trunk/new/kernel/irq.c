@@ -1,12 +1,14 @@
 #include "system.h"
+#include "segment.h"
 #include "irq.h"
+#include "io.h"
 
 unsigned int startup_8259A_irq(unsigned int);
-void shutdown_8259A_irq(unsigned int);
 void enable_8259A_irq(unsigned int);
 void disable_8259A_irq(unsigned int);
-void mask_and_ack_8259A(unsigned int);
+void mask_and_ack_8259A_irq(unsigned int);
 void end_8259A_irq(unsigned int);
+#define shutdown_8259A_irq disable_8259A_irq
 
 /* Interrupt vector 0x20 - 0x2F*/
 static hw_irq_controller i8259A_irq_type = {
@@ -15,12 +17,19 @@ static hw_irq_controller i8259A_irq_type = {
 	shutdown_8259A_irq,
 	enable_8259A_irq,
 	disable_8259A_irq,
-	mask_and_ack_8259A,
+	mask_and_ack_8259A_irq,
 	end_8259A_irq
 };
 
+unsigned int startup_none(unsigned int i) { };
+void shutdown_none(unsigned int i) {};
+void enable_none(unsigned int i) {};
+void disable_none(unsigned int i) {};
+void ack_none(unsigned int i) {};
+void end_none(unsigned int i) {};
+
 /* Interrupt vector 0x30 - 0xFF*/
-/*static hw_irq_controller no_irq_type = {
+static hw_irq_controller no_irq_type = {
 	"None_PIC",
 	startup_none,
 	shutdown_none,
@@ -28,7 +37,7 @@ static hw_irq_controller i8259A_irq_type = {
 	disable_none,
 	ack_none,
 	end_none
-};*/
+};
 #define SYMBOL_NAME_STR(x) x
 
 #define IRQ(x, y) \
@@ -76,23 +85,23 @@ static hw_irq_controller i8259A_irq_type = {
 		"jmp do_IRQ");
 
 void do_IRQ() {
-
+	int i = KERNEL_DS;
 };
 
 #define SAVE_ALL \
 	"cld\n\t" \
 	"pushl %es\n\t" \
-	pushl %ds; \
-	pushl %eax; \
-	pushl %ebp; \
-	pushl %edi; \
-	pushl %esi; \
-	pushl %edx; \
-	pushl %ecx; \
-	pushl %ebx; \
-	movl $(KERNEL_DS), %edx; \
-	movw %dx, %ds; \
-	movw %dx, %es;
+	"pushl %ds\n\t" \
+	"pushl %eax\n\t" \
+	"pushl %ebp\n\t" \
+	"pushl %edi\n\t" \
+	"pushl %esi\n\t" \
+	"pushl %edx\n\t" \
+	"pushl %ecx\n\t" \
+	"pushl %ebx\n\t" \
+	"movl $0x18, %edx\n\t" \
+	"movw %dx, %ds\n\t" \
+	"movw %dx, %es\n\t"
 
 BUILD_16_IRQS(0x0)
 BUILD_COMMON_IRQ()
@@ -106,7 +115,7 @@ __asm__("ret_from_intr:");
 #define FIRST_EXTERNAL_VECTOR 0x20
 #define SYSCALL_VECTOR 0x80
 
-irq_desc_t irq_desc_table[NR_IRQS] __cacheline_aligned = {
+irq_desc_t irq_desc_table[NR_IRQS] = {
 	[0 ... (NR_IRQS - 1)] = { 0, &no_irq_type }
 };
 
@@ -116,7 +125,7 @@ irq_desc_t irq_desc_table[NR_IRQS] __cacheline_aligned = {
 
 static unsigned int cached_irq_mask = 0xFFFF;
 
-void __init init_8259A(int auto_eoi) {
+void init_8259A(int auto_eoi) {
 	outb(0x21, 0xFF);
 	outb(0xA1, 0xFF);
 	
@@ -148,9 +157,9 @@ void __init init_8259A(int auto_eoi) {
 	io_wait();
 
 	if (auto_eoi)
-		i8259_irq_type.ack = disable_i8259A_irq;
+		i8259A_irq_type.ack = disable_8259A_irq;
 	else
-		i8259_irq_type.ack = mask_and_ack_i8259A_irq;
+		i8259A_irq_type.ack = mask_and_ack_8259A_irq;
 
 	io_wait();
 	io_wait();
@@ -161,7 +170,10 @@ void __init init_8259A(int auto_eoi) {
 	outb(0xA1, cached_A1);
 }
 
-void __init init_ISA_irqs() {
+#define IRQ_DISABLED 0
+#define IRQ_INPROGRESS 1
+
+void init_ISA_irqs() {
 	init_8259A(0);
 
 	int i = 0;
@@ -176,7 +188,7 @@ void __init init_ISA_irqs() {
 	}
 }
 
-void __init init_IRQ(void) {
+void init_IRQ(void) {
 	int i = 0, vector = 0;
 
 	init_ISA_irqs();
@@ -214,7 +226,6 @@ void disable_8259A_irq(unsigned int irq) {
 		outb(0x21, cached_21);
 }
 
-#define shutdown_8259A_irq disable_8259A_irq
 
 unsigned int startup_8259A_irq(unsigned int irq) {
 	enable_8259A_irq(irq);
@@ -231,7 +242,7 @@ void end_8259A_irq(unsigned int irq) {
  * Mask and ACK 8259A request.*/
 unsigned int irq_err_count = 0;
 
-void mask_and_ack_8259A(unsigned int irq) {
+void mask_and_ack_8259A_irq(unsigned int irq) {
 	unsigned int irqmask = 1 << irq;
 
 	if (cached_irq_mask & irqmask)
@@ -267,7 +278,7 @@ spurious_8259A_irq:
 	goto handle_real_irq;
 }
 
-static int i8259A_irq_real(unsigned int irq) {
+int i8259A_irq_real(unsigned int irq) {
 	int isr_val = 0;
 	int irqmask = 1 << irq;
 
@@ -293,7 +304,7 @@ int i8259A_irq_pending(unsigned int irq) {
 		irr_val = inb(0x20) & irqmask;
 	}
 	else {
-		irr_val = inb(0xA0) & (irqmask >> 8)
+		irr_val = inb(0xA0) & (irqmask >> 8);
 	}
 
 	return irr_val;

@@ -17,7 +17,7 @@
 #define ICW4_BUFF_MASTER 0x0C
 #define ICW4_SFNM 0x10
 
-void init_8259A(u_short m_intr, u_short s_intr) {
+/*void init_8259A(u_short m_intr, u_short s_intr) {
 	// Save masks
 	u_char a1 = inb(PIC1_DATA);
 	u_char a2 = inb(PIC2_DATA);
@@ -44,5 +44,5 @@ void init_8259A(u_short m_intr, u_short s_intr) {
 	// Restore saved masks
 	outb(PIC1_DATA, a1);
 	outb(PIC2_DATA, a2);
-}
+}*/
 

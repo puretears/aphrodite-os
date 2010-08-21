@@ -23,7 +23,8 @@ traps.o: kernel/traps.c include/type.h
 	$(CC) $(CFLAGS) -I./include $< -o $@
 
 irq.o: kernel/irq.c include/system.h include/head.h include/type.h \
-	 include/segment.h include/irq.h
+	 include/segment.h include/ptrace.h include/segment.h include/irq.h \
+	  include/io.h
 	$(CC) $(CFLAGS) -I./include $< -o $@
 
 sys_call.o: kernel/sys_call.s
