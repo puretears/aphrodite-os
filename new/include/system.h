@@ -8,7 +8,7 @@
 typedef void (* handler)(struct pt_regs *, int);
 typedef void (* intr_handler)(void);
 
-static inline void set_gate(int *gate_addr, int dpl, int type, handler offset) {
+static inline void set_gate(int *gate_addr, int dpl, int type, handler *offset) {
 	__asm__ __volatile__("movw %%dx, %%ax\n\t"
 		"movw %%bx, %%dx\n\t"
 		"movl %%eax, %0\n\t"
