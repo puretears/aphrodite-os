@@ -15,6 +15,7 @@ struct pt_regs {
 	short es, _esu;
 	short fs, _fsu;
 	short gs, _gsu;
+	int orig_eax;
 	int eip;
 	int cs;
 	int eflags;
