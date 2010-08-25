@@ -13,8 +13,6 @@ struct pt_regs {
 	int eax;
 	short ds, _dsu;
 	short es, _esu;
-	short fs, _fsu;
-	short gs, _gsu;
 	int orig_eax;
 	int eip;
 	int cs;

@@ -47,10 +47,10 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 	printk_new("memory start at 0x%8x.\n", memory_start);
 	trap_init();
 //	__asm__("int $0");
-	__asm__("sti");	
+//	__asm__("sti");	
 	//__asm__("int $0x3");
 	//int i_test = 3 / 0;
-	__asm__("int $0x10");
+	__asm__("int $0x4");
 	
 //	__asm__("int $0x0F");
 	return;
