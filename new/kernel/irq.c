@@ -3,6 +3,10 @@
 #include "irq.h"
 #include "io.h"
 
+static inline void set_interrupt_gate(int vector, void *offset) {
+	set_gate(&idt[vector], 0, 14, offset);
+}
+
 unsigned int startup_8259A_irq(unsigned int);
 void enable_8259A_irq(unsigned int);
 void disable_8259A_irq(unsigned int);

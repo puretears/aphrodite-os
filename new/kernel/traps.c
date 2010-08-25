@@ -4,10 +4,18 @@
 #include "system.h"
 #include "segment.h"
 
+void set_trap_gate(int vector, void *offset) {
+	set_gate(&idt[vector], 0, 15, offset);
+}
+
+void set_system_gate(int vector, void *offset) {
+	set_gate(&idt[vector], 3, 15, offset);
+}
+
 // Definite in sys_call.s
 void divide_error();
 void nmi();
-void int3();
+void _int3();
 void overflow();
 void bound_range_exceeded();
 void invalid_opcode();
@@ -51,8 +59,7 @@ void die_if_kernel(const char *err_str, struct pt_regs *p_regs, int err_no) {
 			p_regs->eax, p_regs->ebx, p_regs->ecx, p_regs->edx);
 	printk_new("esi: %8x    edi: %8x    ebp: %8x    esp: %8x\n", 
 			p_regs->esi, p_regs->edi, p_regs->ebp, esp);
-	printk_new("ds: %4x    es:%4x    fs:%4x    gs:%4x\n",
-			p_regs->ds, p_regs->es, p_regs->fs, p_regs->gs);
+	printk_new("ds: %4x    es:%4x\n", p_regs->ds, p_regs->es);
 	printk_new("\n");
 	/*TODO: 
 	 * We should get task index here to dump CURRENT process stack and code.*/
@@ -85,13 +92,14 @@ void do_nmi(struct pt_regs *p, int error_no) {
 void do_x87_error(struct pt_regs *p, int error_no) {
 	
 }
+
 void trap_init() {
 	int i;
 	set_trap_gate(0, &divide_error);
 	set_trap_gate(1, &reserved);
 	set_trap_gate(2, &nmi);
 	/*int 3 - 5 can be called from ring3*/
-	set_system_gate(3, &int3);
+	set_system_gate(3, &_int3);
 	set_system_gate(4, &overflow);
 	set_system_gate(5, &bound_range_exceeded);
 	set_trap_gate(6, &invalid_opcode);
