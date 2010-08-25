@@ -1,0 +1,23 @@
+1.How to unify interrupt and exception handling process 
+
+For exceptions without error code:
+	push 0
+	SAVE_ALL
+	push handler_addr
+	jmp err_code
+
+For exceptions with errcode:
+	SAVE_ALL
+	push handler_addr
+	jmp err_code
+
+For external interrupt:
+	push vec_no
+	jmp common_interrupt
+	common_interrupt:
+	SAVE_ALL
+	push ret_addr
+	jmp do_IRQ
+
+2. 
+	
