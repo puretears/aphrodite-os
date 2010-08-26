@@ -3,6 +3,8 @@
 #include "irq.h"
 #include "io.h"
 
+#define NR_IRQS 224 // 256 - 32 = 224. 0~31 is reserved by Intel
+
 static inline void set_interrupt_gate(int vector, void *offset) {
 	set_gate(&idt[vector], 0, 14, offset);
 }
@@ -42,6 +44,10 @@ static hw_irq_controller no_irq_type = {
 	ack_none,
 	end_none
 };
+
+irq_desc_t irq_desc_table[NR_IRQS] = {
+	[0 ... (NR_IRQS - 1)] = { 0, &no_irq_type }
+};
 #define SYMBOL_NAME_STR(x) x
 
 #define IRQ(x, y) \
@@ -53,7 +59,6 @@ static hw_irq_controller no_irq_type = {
 	IRQ(x, 8), IRQ(x, 9), IRQ(x, a), IRQ(x, b), \
 	IRQ(x, c), IRQ(x, d), IRQ(x, e), IRQ(x, f)
 
-#define NR_IRQS 224 // 256 - 32 = 224. 0~31 is reserved by Intel
 
 
 #define BI(x, y) BUILD_IRQ(x##y)
@@ -88,8 +93,11 @@ static hw_irq_controller no_irq_type = {
 		"call_do_IRQ:\n\t" \
 		"jmp do_IRQ");
 
-void do_IRQ() {
-	int i = KERNEL_DS;
+unsigned int do_IRQ(struct pt_regs regs) {
+	int irq_no = regs.orig_eax & 0xFF;
+	irq_desc_t *desc = &irq_desc_table[irq_no];
+
+	desc->handler->ack(irq_no);
 };
 
 #define SAVE_ALL \
@@ -119,15 +127,14 @@ __asm__("ret_from_intr:");
 #define FIRST_EXTERNAL_VECTOR 0x20
 #define SYSCALL_VECTOR 0x80
 
-irq_desc_t irq_desc_table[NR_IRQS] = {
-	[0 ... (NR_IRQS - 1)] = { 0, &no_irq_type }
-};
 
 #define __byte(x, y) (((unsigned char *)&(y))[x])
 #define cached_21 (__byte(0, cached_irq_mask))
 #define cached_A1 (__byte(1, cached_irq_mask))
 
 static unsigned int cached_irq_mask = 0xFFFF;
+
+
 
 void init_8259A(int auto_eoi) {
 	outb(0x21, 0xFF);
