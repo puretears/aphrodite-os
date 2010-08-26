@@ -19,7 +19,8 @@ string.o: ./lib/string.c ./include/string.h
 
 kernel.o: kernel/kernel.c include/multiboot.h include/print.h include/type.h
 	$(CC) $(CFLAGS) -I./include $< -o $@
-
+memory.o:mm/memory.c include/page.h include/mm.h include/type.h include/head.h
+	$(CC) $(CFLAGS) -I./include $< -o $@
 .phony: clean install
 clean:
 	rm *.o
