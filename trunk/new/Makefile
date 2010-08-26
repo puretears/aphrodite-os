@@ -7,7 +7,7 @@ vpath %.h ./include
 CFLAGS = -ggdb -c -fstrength-reduce -finline-functions -nostdinc -nostdlib -nostartfiles -nodefaultlibs -fno-builtin
 CXXFLAGS = -ggdb -c -nostdlib -fno-builtin -nostartfiles -nodefaultlibs -fno-exceptions -fno-rtti -fno-stack-protector
 
-KRN_OBJS = kmain.o pic.o icxxabi.o print.o string.o memory.o traps.o sys_call.o irq.o
+KRN_OBJS = kmain.o pic.o icxxabi.o print.o string.o memory.o traps.o sys_call.o irq.o spinlock.o
 
 
 vmlinuz: loader.o $(KRN_OBJS)
@@ -22,10 +22,15 @@ pic.o: kernel/pic.c io.h
 traps.o: kernel/traps.c include/type.h
 	$(CC) $(CFLAGS) -I./include $< -o $@
 
-irq.o: kernel/irq.c include/system.h include/head.h include/type.h \
+#irq.o: kernel/irq.c include/system.h include/head.h include/type.h \
 	 include/segment.h include/ptrace.h include/segment.h include/irq.h \
 	  include/io.h
-	$(CC) $(CFLAGS) -I./include $< -o $@
+#	$(CC) $(CFLAGS) -I./include $< -o $@
+
+irq.o: kernel/irq.cc include/ print.h include/system.h include/head.h include/type.h \
+	 include/segment.h include/ptrace.h include/segment.h include/irq.h \
+	  include/io.h
+	$(CXX) $(CXXFLAGS) -I./include $< -o $@
 
 sys_call.o: kernel/sys_call.s
 	$(AS) -f elf $< -o $@
@@ -43,6 +48,9 @@ memory.o: mm/memory.c include/page.h include/mm.h include/type.h include/head.h
 	$(CC) $(CFLAGS) -I./include $< -o $@
 
 icxxabi.o: cxx/icxxabi.cc icxxabi.h
+	$(CXX) $(CXXFLAGS) -I./include $< -o $@
+
+spinlock.o: kernel/spinlock.cc include/spinlock.h
 	$(CXX) $(CXXFLAGS) -I./include $< -o $@
 
 .phony: clean install

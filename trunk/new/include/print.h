@@ -3,6 +3,10 @@
 
 #include "type.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Clear screen
 void cls();
 
@@ -15,5 +19,9 @@ void putchar(char c);
 // A C lib look-like print function.
 //void printk(const char *format, ...);
 void printk_new(const char *format, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

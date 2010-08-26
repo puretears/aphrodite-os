@@ -11,6 +11,7 @@ extern "C" {
 extern char end;
 void trap_init();
 int paging_init(int, int);
+void init_IRQ(void);
 
 void kmain(mbinfo *pmb, u_int magic_num) {
 	if (magic_num != MAGIC_NUM) {
@@ -46,6 +47,7 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 	memory_start = paging_init(memory_start, memory_end);
 	printk_new("memory start at 0x%8x.\n", memory_start);
 	trap_init();
+	init_IRQ();
 //	__asm__("int $0");
 //	__asm__("sti");	
 	//__asm__("int $0x3");
