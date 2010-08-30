@@ -195,8 +195,6 @@ void init_8259A(int auto_eoi) {
 	i8259A.spin_unlock_irqrestore(flags);
 }
 
-#define IRQ_DISABLED 0
-#define IRQ_INPROGRESS 1
 
 void init_ISA_irqs() {
 	init_8259A(0);
@@ -229,8 +227,13 @@ extern "C" void init_IRQ(void) {
 	 * */
 }
 
+spin_lock_t i8259A_lock;
+
 void enable_8259A_irq(unsigned int irq) {
 	unsigned int mask = ~(1 << irq);
+	unsigned int flags;
+
+	i8259A_lock.spin_lock_irqsave(&flags);
 
 	//TODO: The following operation should be atomic.
 	cached_irq_mask &= mask;
@@ -238,17 +241,22 @@ void enable_8259A_irq(unsigned int irq) {
 		outb(0xA1, cached_A1);
 	else
 		outb(0x21, cached_21);
+
+	i8259A_lock.spin_unlock_irqrestore(flags);
 }
 
 void disable_8259A_irq(unsigned int irq) {
 	unsigned int mask = (1 << irq);
+	unsigned int flags;
 
+	i8259A_lock.spin_lock_irqsave(&flags);
 	//TODO: The following operation should be atomic.
 	cached_irq_mask |= mask;
 	if (irq & 8)
 		outb(0xA1, cached_A1);
 	else
 		outb(0x21, cached_21);
+	i8259A_lock.spin_unlock_irqrestore(flags);
 }
 
 
