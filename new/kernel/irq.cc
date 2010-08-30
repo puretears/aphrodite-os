@@ -279,6 +279,9 @@ int i8259A_irq_real(unsigned int irq);
 
 void mask_and_ack_8259A_irq(unsigned int irq) {
 	unsigned int irqmask = 1 << irq;
+	unsigned int flags;
+
+	i8259A.spin_lock_irqsave(&flags);
 
 	if (cached_irq_mask & irqmask)
 		goto spurious_8259A_irq;
@@ -295,7 +298,7 @@ handle_real_irq:
 		outb(0x21, cached_21);
 		outb(0x20, 0x60 + irq);
 	}
-
+	i8259A.spin_unlock_irqrestore(flags);
 	return;
 
 spurious_8259A_irq:
@@ -310,7 +313,9 @@ spurious_8259A_irq:
 	}
 
 	irq_err_count++;
-	goto handle_real_irq;
+	// If errors, return directly.
+	i8259A.spin_unlock_irqrestore(flags);
+	return;
 }
 
 int i8259A_irq_real(unsigned int irq) {
