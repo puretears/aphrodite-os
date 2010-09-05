@@ -1,15 +1,16 @@
 extern do_divide_error
+extern do_debug
 extern do_nmi
 extern do_int3
 extern do_overflow
-extern do_bound_range_exceeded
-extern do_invalid_opcode
+extern do_bounds
+extern do_invalid_op
 extern do_device_not_available
 extern do_double_fault
 extern do_coprocessor_segment_overrun
 extern do_invalid_tss
 extern do_segment_not_present
-extern do_stack_segment_fault
+extern do_stack_segment
 extern do_general_protection
 extern do_page_fault
 extern do_x87_error
@@ -20,17 +21,18 @@ extern do_reserved
 
 global ret_from_system_call
 global divide_error
+global debug
 global nmi
 global _int3
 global overflow
-global bound_range_exceeded
-global invalid_opcode
+global bounds
+global invalid_op
 global device_not_available
 global double_fault
 global coprocessor_segment_overrun
 global invalid_tss
 global segment_not_present
-global stack_segment_fault
+global stack_segment
 global general_protection
 global page_fault
 global x87_error
@@ -143,7 +145,7 @@ error_code:
 
 
 align 4
-reserved: ; Fault / Trap
+debug: ; Fault / Trap
 	push 0
 	SAVE_ALL
 	push do_reserved
@@ -171,14 +173,14 @@ overflow: ; Trap
 	jmp error_code
 
 align 4
-bound_range_exceeded: ; Fault
+bounds: ; Fault
 	push  0
 	SAVE_ALL
-	push do_bound_range_exceeded
+	push do_bounds
 	jmp error_code
 
 align 4
-invalid_opcode: ; Fault
+invalid_op: ; Fault
 	push 0
 	SAVE_ALL
 	push do_invalid_opcode
@@ -217,9 +219,9 @@ segment_not_present: ; Fault
 	jmp error_code
 
 align 4
-stack_segment_fault: ; Fault
+stack_segment: ; Fault
 	SAVE_ALL
-	push do_stack_segment_fault
+	push do_stack_segment
 	jmp error_code
 
 align 4
