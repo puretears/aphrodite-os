@@ -18,6 +18,7 @@ extern do_alignment_check
 extern do_machine_check
 extern do_smid_exception
 extern do_reserved
+extern do_system_call
 
 global ret_from_system_call
 global divide_error
@@ -40,6 +41,7 @@ global alignment_check
 global machine_check
 global smid_exception
 global reserved
+global system_call
 
 section .text
 ; Stack layout in 'ret_from_system_call'
@@ -249,14 +251,20 @@ alignment_check: ; Fault
 	push do_alignment_check
 	jmp error_code
 
-;align 4
-;machine_check: ; Abort
-;	push 0
-;	push do_alignment_check
-;	jmp error_code
+align 4
+machine_check: ; Abort
+	push 0
+	push do_alignment_check
+	jmp error_code
 
-;align 4
-;smid_exception: ; Fault
-;	push 0
-;	push do_smid_exception
-;	jmp error_code
+align 4
+smid_exception: ; Fault
+	push 0
+	push do_smid_exception
+	jmp error_code
+
+align 4
+system_call: ; Fault
+	push 0
+	push do_system_call
+	jmp error_code
