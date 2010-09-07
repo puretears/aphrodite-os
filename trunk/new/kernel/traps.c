@@ -12,6 +12,13 @@ void set_system_gate(int vector, void *offset) {
 	set_gate(&idt[vector], 3, 15, offset);
 }
 
+void set_system_intr_gate(int vector, void *offset) {
+	set_gate(&idt[vector], 3, 14, offset);
+}
+
+void set_task_gate(int vector, void *offset) {
+	set_gate(&idt[vector], 0, 3, 0);
+}
 // Definite in sys_call.s
 void divide_error();
 void debug();
@@ -19,13 +26,13 @@ void nmi();
 void _int3();
 void overflow();
 void bounds();
-void invalid_opcode();
+void invalid_op();
 void device_not_available();
 void double_fault();
 void coprocessor_segment_overrun();
 void invalid_tss();
 void segment_not_present();
-void stack_segment_fault();
+void stack_segment();
 void general_protection();
 void page_fault();
 void x87_error();
@@ -33,6 +40,7 @@ void alignment_check();
 void machine_check();
 void smid_exception();
 void reserved();
+void system_call();
 
 // Interrupt and exception handling template
 #define DO_ERROR(trap_no, err_str, name) \
@@ -85,6 +93,8 @@ DO_ERROR(15, "Reserved", reserved)
 // Vector 16 is implemented seperately.
 DO_ERROR(17, "Alignment check", alignment_check)
 DO_ERROR(18, "Machine check", machine_check)
+DO_ERROR(19, "Smid exception", smid_exception)
+DO_ERROR(128, "System call", system_call)
 /*TODO:
  * machine_check and smid_exception not implemented yet.
  * */
@@ -100,26 +110,30 @@ void do_x87_error(struct pt_regs *p, int error_no) {
 void trap_init() {
 	int i;
 	set_trap_gate(0, &divide_error);
-	set_trap_gate(1, &reserved);
+	set_trap_gate(1, &debug);
 	set_trap_gate(2, &nmi);
 	/*int 3 - 5 can be called from ring3*/
-	set_system_gate(3, &_int3);
+	set_system_intr_gate(3, &_int3);
 	set_system_gate(4, &overflow);
-	set_system_gate(5, &bound_range_exceeded);
-	set_trap_gate(6, &invalid_opcode);
+	set_system_gate(5, &bounds);
+	set_trap_gate(6, &invalid_op);
 	set_trap_gate(7, &device_not_available);
-	set_trap_gate(8, &double_fault);
+	set_task_gate(8, &double_fault);
 	set_trap_gate(9, &coprocessor_segment_overrun); // Processor after 386 don't generate this exception
 	set_trap_gate(10, &invalid_tss);
 	set_trap_gate(11, &segment_not_present);
-	set_trap_gate(12, &stack_segment_fault);
+	set_trap_gate(12, &stack_segment);
 	set_trap_gate(13, &general_protection);
 	set_trap_gate(14, &page_fault);
 	set_trap_gate(15, &reserved);
 	set_trap_gate(16, &x87_error);
 	set_trap_gate(17, &alignment_check);
+	set_trap_gate(18, &machine_check);
+	set_trap_gate(19, &smid_exception);
 
-	for (i = 18; i < 50; i++) {
+	for (i = 20; i < 256; i++) {
 		set_trap_gate(i, &reserved);
 	}
+
+	set_system_gate(128, &system_call);
 }
