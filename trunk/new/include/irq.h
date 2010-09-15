@@ -32,9 +32,20 @@ struct irqaction {
 };
 
 struct irq_desc {
+	// A set of flags describing the IRQ line status.
 	unsigned int status;
+	// Pointer to PIC object.
 	hw_irq_controller *handler;
+	// Pointer to data used by the PIC.
+	void *handler_data;
+	// Identify the interrupt service routine.
 	irqaction *action;
+	// Show 0 if the IRQ line is enabled and a positive value if
+	// it has been disabled at least once.
+	unsigned int depth;
+	// For diagnostic only
+	unsigned int irq_count;
+	unsigned int irqs_unhandled;
 	spinlock_t lock;
 };
 
