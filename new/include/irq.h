@@ -28,10 +28,10 @@ typedef struct hw_interrupt_type hw_irq_controller;
 #define IRQ_REPLAY     8
 
 struct irqaction {
-
+	
 };
 
-struct irq_desc {
+struct irq_desc_t {
 	// A set of flags describing the IRQ line status.
 	unsigned int status;
 	// Pointer to PIC object.
@@ -49,5 +49,6 @@ struct irq_desc {
 	spinlock_t lock;
 };
 
-typedef struct irq_desc irq_desc_t;
+
+
 #endif
