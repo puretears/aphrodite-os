@@ -2,6 +2,7 @@
 #include "print.h"
 #include "mm.h"
 int page_init(int,int);
+void trap_init();
 extern char load_end_addr;
 int kmain (unsigned int * pmb, unsigned int magic){
 	if (magic != 0x2BADB002){
@@ -17,7 +18,6 @@ int kmain (unsigned int * pmb, unsigned int magic){
 	int mem_end = 0;
 
 	printk_new("meminfo \n");
-	printk_new("magic number is %8x\n", magic);
 	printk_new("mmap_len is %x\n",multiinfo->mmap_length);
 	printk_new("mmap_addr is %x\n",multiinfo->mmap_addr);
 
@@ -39,7 +39,8 @@ int kmain (unsigned int * pmb, unsigned int magic){
 	}
 	printk_new("Total memory size: %dM\n",mem_end/1024/1024);
 	int mem_start=(int)&load_end_addr;
-	page_init(int mem_start,int mem_end);
+	mem_start = page_init(mem_start,mem_end);
 	printk_new("mem_start is %8x",mem_start);
+	trap_init();
 	return 0;
 }

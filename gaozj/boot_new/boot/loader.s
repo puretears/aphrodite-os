@@ -1,4 +1,4 @@
-global entry_addr,display
+global entry_addr,display,swapper_pg_dir
 extern load_addr, load_end_addr, bss_end_addr, kmain
 LOADE_ADDR equ 0100000h
 NR_TASKS	equ 128

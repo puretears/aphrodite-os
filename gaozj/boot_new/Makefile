@@ -4,24 +4,29 @@ CXX = g++
 LD = ld
 CFLAGS = -ggdb -c -fstrength-reduce -finline-functions -nostdinc -nostdlib -nostartfiles -nodefaultlibs -fno-builtin
 
-all: kernel.bin
+vpath %.h include/
+vpath %.c ./kernel:lib/:mm/
 
-kernel.bin:loader.o kernel.o print.o string.o
+c_object = kernel.o print.o string.o memory.o traps.o sys_call.o
+
+kernel.bin:loader.o $(c_object)
 	${LD} -T link.ld -o $@ $^
 
-loader.o:./boot/loader.s
-	${AS} -f elf	-o $@ $<
-print.o: ./lib/print.c ./include/print.h
-	$(CC) $(CFLAGS) -I./include $< -o $@
+sys_call.o: kernel/sys_call.s
+	$(AS) -f elf boot/loader.s  -o $@
 
-string.o: ./lib/string.c ./include/string.h
-	$(CC) $(CFLAGS) -I./include $< -o $@
+loader.o: boot/loader.s 
+	$(AS) -f elf boot/loader.s  -o $@
 
-kernel.o: kernel/kernel.c include/multiboot.h include/print.h include/type.h
+$(c_object): %.o: %.c
 	$(CC) $(CFLAGS) -I./include $< -o $@
-memory.o:mm/memory.c include/page.h include/mm.h include/type.h include/head.h
-	$(CC) $(CFLAGS) -I./include $< -o $@
-.phony: clean install
+kernel.o: kernel/kernel.c include/multiboot.h include/print.h include/type.h include/mm.h
+print.o: lib/print.c include/type.h include/print.h include/type.h include/string.h
+string.o: lib/string.c include/string.h include/type.h include/type.h
+memory.o: mm/memory.c include/type.h include/mm.h include/type.h include/page.h include/head.h
+traps.o: kernel/traps.c include/ptrace.h include/type.h include/type.h include/system.h include/head.h
+#-------------------------------------------------------------------
+.phony: clean install all
 clean:
 	rm *.o
 	rm *.bin
