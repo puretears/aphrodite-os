@@ -2,6 +2,7 @@
 #define IRQ_H
 
 #include "spinlock.h"
+#include "ptrace.h"
 
 struct hw_interrupt_type {
 	const char *pic_name;
@@ -28,7 +29,19 @@ typedef struct hw_interrupt_type hw_irq_controller;
 #define IRQ_REPLAY     8
 
 struct irqaction {
-	
+	// Points to the ISR for an I/O device.
+	int (*irqaction) (int, void *, pt_regs *);
+	// Describe the relationships between the IRQ line and I/O device
+	unsigned long flags;
+	// The name of I/O device.
+	const char *name;
+	// A private field for the I/O device. Whether identifies the device
+	// itself or device's driver data.
+	void *dev_id;
+	// Points to the next element of a list of irqaction descriptors.
+	irqaction *next;
+	// IRQ line.
+	int irq;
 };
 
 struct irq_desc_t {
