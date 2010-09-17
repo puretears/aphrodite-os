@@ -94,9 +94,10 @@ irq_desc_t irq_desc_table[NR_IRQS] = {
 		".align 16\n" \
 		"common_interrupt:\n\t" \
 		SAVE_ALL \
-		"pushl $ret_from_intr\n\t" \
-		"call_do_IRQ:\n\t" \
-		"jmp do_IRQ");
+		"movl %%esp, %%eax\n\t" \
+		"call do_IRQ \n\t" \
+		"jmp $ret_from_intr\n\t" \
+		"call_do_IRQ:");
 
 
 #define SAVE_ALL \
