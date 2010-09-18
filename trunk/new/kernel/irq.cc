@@ -123,12 +123,51 @@ extern "C" {
 	void (*interrupt[NR_IRQS])(void) = { IRQLIST_16(0x0), };
 }
 
-unsigned int do_IRQ(struct pt_regs regs) {
+__attribute__ ((regparm(3))) unsigned int do_IRQ(struct pt_regs regs) {
 	int irq_no = regs.orig_eax & 0xFF;
-	irq_desc_t *desc = &irq_desc_table[irq_no];
-
-	desc->handler->ack(irq_no);
+	irq_enter();
+	__do_IRQ(regs, irq_no);
+	irq_leave();
+	return 1;
 };
+
+void __do_IRQ(pt_regs *reg, unsigned int irq) {
+	irq_desc_t *p_desc = &irq_desc_table[irq];
+	irqaction *action;
+	unsigned int status;
+
+	p_desc->handler->ack(irq);
+	status = p_desc->status & ~(IRQ_REPLAY);
+	status |= IRQ_PENDING; /* We want to handle it.*/
+
+	action = NULL;
+
+	if (!(status & (IRQ_DISABLED | IRQ_INPROGRESS))) {
+		action = p_desc->action;
+		status &= ~IRQ_PENDING;
+		status |= IRQ_INPROGRESS;
+	}
+	p_desc->status = status;
+
+	if (action == NULL)
+		goto out;
+
+	for (;;) {
+		int action_ret;
+
+		action_ret = handle_IRQ_event(irq_no, regs, action);
+
+		if (!(p_desc->status & IRQ_PENDING))
+			break;
+		p_desc->status &= ~IRQ_PENDING;
+	}
+	p_desc->status &= ~IRQ_INPROGRESS;
+out:
+	p_desc->handler->end(irq);
+
+	return 1;
+}
+
 __asm__("ret_from_intr:");
 #undef IRQ
 #undef IRQLIST_16
