@@ -129,7 +129,31 @@ __attribute__ ((regparm(3))) unsigned int do_IRQ(struct pt_regs regs) {
 	__do_IRQ(regs, irq_no);
 	irq_leave();
 	return 1;
-};
+}
+
+#define local_irq_enable() __asm__ __volatile__ ("sti": : :"memory")
+#define local_irq_disable() __asm__ __volatile__("cli": : :"memory")
+
+int handle_IRQ_event(unsigned int irq, pt_regs *reg, irqaction *action) {
+	int ret, retval = 0, status = 0;
+
+	if (!(action->flags & SA_INTERRUPT)) {
+		local_irq_enable();
+	}	
+
+	do {
+		ret = action->handler(irq, action->dev_id, reg);
+		if (ret == IRQ_HANDLED)
+			status |= action->flags;
+		retval |= ret;
+		action = action->next;
+	} while(action);
+
+	local_irq_disable();
+
+	return retval;
+}
+
 
 void __do_IRQ(pt_regs *reg, unsigned int irq) {
 	irq_desc_t *p_desc = &irq_desc_table[irq];
@@ -242,6 +266,8 @@ void init_ISA_irqs() {
 	int i = 0;
 	for(; i < NR_IRQS; i++) {
 		irq_desc_table[i].status = IRQ_DISABLED;
+		irq_desc_table[i].depth = 1;
+		irq_desc_table[i].action = NULL;
 		if (i < 16) {
 			irq_desc_table[i].handler = &i8259A_irq_type; 
 		}	
