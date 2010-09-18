@@ -30,7 +30,7 @@ typedef struct hw_interrupt_type hw_irq_controller;
 
 struct irqaction {
 	// Points to the ISR for an I/O device.
-	int (*irqaction) (int, void *, pt_regs *);
+	int (*handler) (int, void *, pt_regs *);
 	// Describe the relationships between the IRQ line and I/O device
 	unsigned long flags;
 	// The name of I/O device.
