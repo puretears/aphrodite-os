@@ -150,7 +150,7 @@ align 4
 debug: ; Fault / Trap
 	push 0
 	SAVE_ALL
-	push do_reserved
+	push do_debug
 	jmp error_code
 
 align 4
@@ -185,7 +185,7 @@ align 4
 invalid_op: ; Fault
 	push 0
 	SAVE_ALL
-	push do_invalid_opcode
+	push do_invalid_op
 	jmp error_code
 
 align 4
