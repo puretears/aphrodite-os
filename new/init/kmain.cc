@@ -52,9 +52,10 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 //	__asm__("sti");	
 	//__asm__("int $0x3");
 	//int i_test = 3 / 0;
-	__asm__("int $0x4");
+//	__asm__("int $0x4");
 	
 //	__asm__("int $0x0F");
+//
 	return;
 }
 

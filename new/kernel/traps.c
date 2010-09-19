@@ -19,6 +19,7 @@ void set_system_intr_gate(int vector, void *offset) {
 void set_task_gate(int vector, void *offset) {
 	set_gate(&idt[vector], 0, 3, 0);
 }
+
 // Definite in sys_call.s
 void divide_error();
 void debug();
@@ -125,14 +126,14 @@ void trap_init() {
 	set_trap_gate(12, &stack_segment);
 	set_trap_gate(13, &general_protection);
 	set_trap_gate(14, &page_fault);
-	set_trap_gate(15, &reserved);
+	//set_trap_gate(15, &reserved);
 	set_trap_gate(16, &x87_error);
 	set_trap_gate(17, &alignment_check);
 	set_trap_gate(18, &machine_check);
 	set_trap_gate(19, &smid_exception);
 
 	for (i = 20; i < 256; i++) {
-		set_trap_gate(i, &reserved);
+		//set_trap_gate(i, &reserved);
 	}
 
 	set_system_gate(128, &system_call);

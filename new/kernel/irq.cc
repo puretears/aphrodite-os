@@ -6,7 +6,9 @@
 #include "spinlock.h"
 #include "io.h"
 
-#define NR_IRQS 224 // 256 - 32 = 224. 0~31 is reserved by Intel
+#define NR_IRQS 16
+#define SA_INTERRUPT 1
+#define IRQ_HANDLED 1
 
 static inline void set_interrupt_gate(int vector, void *offset) {
 	set_gate(&idt[vector], 0, 14, offset);
@@ -94,9 +96,9 @@ irq_desc_t irq_desc_table[NR_IRQS] = {
 		".align 16\n" \
 		"common_interrupt:\n\t" \
 		SAVE_ALL \
-		"movl %%esp, %%eax\n\t" \
+		"movl %esp, %eax\n\t" \
 		"call do_IRQ \n\t" \
-		"jmp $ret_from_intr\n\t" \
+		"jmp ret_from_intr\n\t" \
 		"call_do_IRQ:");
 
 
@@ -116,20 +118,26 @@ irq_desc_t irq_desc_table[NR_IRQS] = {
 	"movw %dx, %es\n\t"
 
 extern "C" {
-	unsigned int do_IRQ(pt_regs regs);
+	unsigned int do_IRQ(pt_regs *regs);
 	BUILD_16_IRQS(0x0)
 	BUILD_COMMON_IRQ()
 
 	void (*interrupt[NR_IRQS])(void) = { IRQLIST_16(0x0), };
-}
 
-__attribute__ ((regparm(3))) unsigned int do_IRQ(struct pt_regs regs) {
-	int irq_no = regs.orig_eax & 0xFF;
+
+void irq_enter() {}
+void irq_leave() {}
+
+int __do_IRQ(struct pt_regs *, unsigned int);
+
+__attribute__ ((regparm(3))) unsigned int do_IRQ(struct pt_regs *regs) {
+	int irq_no = regs->orig_eax & 0xFF;
 	irq_enter();
 	__do_IRQ(regs, irq_no);
 	irq_leave();
 	return 1;
 }
+
 
 #define local_irq_enable() __asm__ __volatile__ ("sti": : :"memory")
 #define local_irq_disable() __asm__ __volatile__("cli": : :"memory")
@@ -155,7 +163,7 @@ int handle_IRQ_event(unsigned int irq, pt_regs *reg, irqaction *action) {
 }
 
 
-void __do_IRQ(pt_regs *reg, unsigned int irq) {
+int __do_IRQ(pt_regs *reg, unsigned int irq) {
 	irq_desc_t *p_desc = &irq_desc_table[irq];
 	irqaction *action;
 	unsigned int status;
@@ -179,7 +187,7 @@ void __do_IRQ(pt_regs *reg, unsigned int irq) {
 	for (;;) {
 		int action_ret;
 
-		action_ret = handle_IRQ_event(irq_no, regs, action);
+		action_ret = handle_IRQ_event(irq, reg, action);
 
 		if (!(p_desc->status & IRQ_PENDING))
 			break;
@@ -193,6 +201,9 @@ out:
 }
 
 __asm__("ret_from_intr:");
+
+} // End extern "C"
+
 #undef IRQ
 #undef IRQLIST_16
 
@@ -293,7 +304,7 @@ extern "C" void init_IRQ(void) {
 	 * */
 }
 
-spin_lock_t i8259A_lock;
+spinlock_t i8259A_lock;
 
 void enable_8259A_irq(unsigned int irq) {
 	unsigned int mask = ~(1 << irq);
