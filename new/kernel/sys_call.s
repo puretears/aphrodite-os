@@ -120,6 +120,10 @@ ret_from_intr:
 	test eax, 00020003H
 	jnz resume_userspace
 	jmp resume_kernel
+resume_kernel:
+	RESTORE_ALL
+
+resume_userspace:
 	RESTORE_ALL
 
 align 4
