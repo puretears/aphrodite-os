@@ -55,13 +55,15 @@ READ:
 	jnz CONTINU_LOAD_KERNEL
 	
 	call kill_motor
+	mov si, read_kernel
+	call disp_str
 	jmp SETUP_ADDR:0
 	;Copy system module at 0x10000
 
 CONTINU_LOAD_KERNEL:
 	movzx ax, byte [secs_per_track]	;ax 高位为0填充
-	sub ax, [total_read_secs]
-	mov [curr_read_secs], ax
+	sub ax, [total_read_secs]	;一共有多少扇区要读
+	mov [curr_read_secs], ax	;当前读的扇区
 	xor dx, dx
 	mov cx, 512
 	mul cx
@@ -94,7 +96,7 @@ READ2:
 	add bx, cx
 	jnc READ
 	mov ax, es
-	add ax, 0100H
+	add ax, 01000H
 	mov es, ax
 	xor bx, bx
 	jmp READ
@@ -120,7 +122,6 @@ read_track:
 	mov dh, [curr_head]	;磁头
 	mov dl, 0
 	int 13H 
-	jc $	;error
 	popa
 	leave
 	ret
@@ -128,6 +129,7 @@ read_track:
 %include 	"head.inc"
 boot_copy	db "copy bootsect to 0x90000", 0AH, 0
 copy_error	db "copy bootsect to 0x90000 error", 0AH, 0
+read_kernel	db "read kernel"
 secs_per_track	db 0
 total_read_secs dw 5
 curr_read_secs	dw 0
