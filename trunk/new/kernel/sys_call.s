@@ -43,6 +43,8 @@ global smid_exception
 global reserved
 global system_call
 
+__USER_DS equ 2BH
+
 section .text
 ; Stack layout in 'ret_from_system_call'
 ; +38 - old_ss
@@ -177,7 +179,7 @@ error_code:
 	mov [esp + _ES], ecx
 	mov ecx, __USER_DS
 	mov ds, cx
-	mov es, cs
+	mov es, cx
 	mov eax, esp
 	; Fast call parameter: eax pt_regs, edx error code
 	call edi

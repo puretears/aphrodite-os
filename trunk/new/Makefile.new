@@ -55,6 +55,7 @@ pic.o: kernel/pic.c include/io.h include/type.h
 traps.o: kernel/traps.c include/type.h include/ptrace.h include/type.h \
 	 include/print.h include/system.h include/head.h include/segment.h \
 	  include/ptrace.h include/segment.h
+
 # Memory modules
 memory.o: mm/memory.c include/page.h include/mm.h include/type.h \
 	 include/head.h
