@@ -1,0 +1,68 @@
+AS = nasm
+CC = gcc
+CXX = g++
+LD = ld
+vpath %.h ./include
+
+CFLAGS = -ggdb -c -fstrength-reduce -finline-functions -nostdinc -nostdlib -nostartfiles -nodefaultlibs -fno-builtin
+CXXFLAGS = -ggdb -c -nostdlib -fno-builtin -nostartfiles -nodefaultlibs -fno-exceptions -fno-rtti -fno-stack-protector
+
+KRN_OBJS = kmain.o pic.o icxxabi.o print.o string.o memory.o traps.o sys_call.o irq.o spinlock.o
+
+%.o:%.c
+	$(CC) $(CFLAGS) $< -o $@
+%.o:%.cc
+	$(CXX) $(CXXFLAGS) $< -o $@
+%.o:%.s
+	$(AS) -f elf $< -o $@
+
+vmlinuz: loader.o $(KRN_OBJS)
+	$(LD) -T link.ld $^ -o $@ 
+
+.phony: clean install
+
+install:
+	mount -o loop ./bochs.new/30M.img /mnt/
+	cp vmlinuz /mnt/boot/
+	umount /mnt/
+
+clean:
+	rm *.o
+	rm vmlinuz
+
+#-------------------------------------------------------------------------------
+# File dependencies
+#
+# Boot
+loader.o: boot/loader.s
+
+# Init modules
+kmain.o: init/kmain.cc include/mbinfo.h include/type.h include/print.h \
+	 include/type.h include/page.h
+
+# Kernel modules
+sys_call.o: kernel/sys_call.s
+
+irq.o: kernel/irq.cc include/system.h include/head.h include/type.h \
+	 include/segment.h include/ptrace.h include/segment.h include/irq.h \
+	  include/spinlock.h include/print.h include/ptrace.h include/spinlock.h \
+	   include/io.h
+
+spinlock.o: kernel/spinlock.cc include/spinlock.h
+
+pic.o: kernel/pic.c include/io.h include/type.h
+
+traps.o: kernel/traps.c include/type.h include/ptrace.h include/type.h \
+	 include/print.h include/system.h include/head.h include/segment.h \
+	  include/ptrace.h include/segment.h
+# Memory modules
+memory.o: mm/memory.c include/page.h include/mm.h include/type.h \
+	 include/head.h
+
+# Libs
+print.o: lib/print.c include/type.h include/print.h include/type.h \
+	 include/string.h
+
+string.o: lib/string.c include/string.h include/type.h include/type.h
+
+icxxabi.o: cxx/icxxabi.cc include/icxxabi.h
