@@ -140,6 +140,19 @@ divide_error: ; Fault
 
 align 4
 error_code:
+	push ds
+	push eax
+	xor eax, eax
+	push ebp
+	push edi
+	push esi
+	push edx
+	dec eax	; eax = -1
+	push ecx
+	push ebx
+	cld
+	push es
+
 	; Disable hardware debugging...
 	;xor eax, eax
 	;mov db7, eax
