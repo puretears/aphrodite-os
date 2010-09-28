@@ -23,6 +23,18 @@ SECTIONS
 
 	/* Writable */
 	.data : {
+		__CTOR_LIST__ = .;
+		LONG((__CTOR_LIST__ - __CTOR_END__) / 4 - 2)
+		*(.ctor)
+		LONG(0)
+		__CTOR_END__ = .;
+
+		__DTOR_LIST__ = .;
+		LONG((__DTOR_LIST__ - __DTOR_END__) / 4 - 2)
+		*(.dtor)
+		LONG(0)
+		__DTOR_END__ = .;
+
 		*(.data)
 		CONSTRUCTORS
 	}
