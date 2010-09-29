@@ -3,6 +3,7 @@
 #include "mm.h"
 int page_init(int,int);
 void trap_init();
+void init_IRQ();
 extern char load_end_addr;
 int kmain (unsigned int * pmb, unsigned int magic){
 	if (magic != 0x2BADB002){
