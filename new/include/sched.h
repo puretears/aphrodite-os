@@ -3,10 +3,15 @@
 
 #include "list.h"
 
+
 struct thread_info {
 	task_struct *task;
 };
 
+union thread_union {
+	struct thread_info thread_inf;
+	unsigned long stack[THREAD_SIZE / sizeof(long)];
+};
 // CPU specific
 struct thread_struct {
 	unsigned long esp0;
