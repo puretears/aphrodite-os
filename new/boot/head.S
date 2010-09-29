@@ -59,6 +59,13 @@ ENTRY(startup_32)
 1:
 	lss stack_start, %esp
 
+	/* Initialize EFLAGS*/
+	pushl $0
+	popfl
+
+	call setup_idt
+
+
 .section ".bss.page_aligned", "w"
 ENTRY(swapper_pg_dir)
 	.fill 1024, 4, 0
