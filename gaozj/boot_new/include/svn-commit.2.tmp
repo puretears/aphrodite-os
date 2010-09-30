@@ -1,0 +1,17 @@
+add gaozj/boot_new/include 
+contain IDT表初始化，8259A初始化（完成8259芯片初始化）
+--此行及以下内容将会被忽略--
+
+A    irq.h
+M    print.h
+A    spinklock.h
+A    irq_vectors.h
+A    head.h
+A    segment.h
+M    io.h
+A    mm.h
+A    page.h
+A    multiboot.h
+A    ptrace.h
+A    protect.h
+A    system.h
