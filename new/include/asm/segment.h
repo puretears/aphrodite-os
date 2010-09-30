@@ -1,6 +1,21 @@
 #ifndef ASM_SEGMENT_H
 #define ASM_SEGMENT_H
 
+#define GDT_ENTRY_KERNEL_BASE 12
+
+#define GDT_ENTRY_USER_CS 14
+#define __USER_CS (GDT_ENTRY_USER_CS  * 8 + 3)
+
+#define GDT_ENTRY_USER_DS 15
+#define __USER_DS (GDT_ENTRY_USER_DS * 8 + 3)
+
+
+#define GDT_ENTRY_KERNEL_CS (GDT_ENTRY_KERNEL_BASE + 0)
+#define __KERNEL_CS (GDT_ENTRY_KERNEL_CS * 8)
+
+#define GDT_ENTRY_KERNEL_DS (GDT_ENTRY_KERNEL_BASE + 1)
+#define __KERNEL_DS (GDT_ENTRY_KERNEL_DS * 8)
+
 /* Simple GDT entries for booting only.*/
 #define GDT_ENTRY_BOOT_CS 2
 #define __BOOT_CS (GDT_ENTRY_BOOT_CS * 8)
@@ -9,5 +24,7 @@
 #define __BOOT_DS (GDT_ENTRY_BOOT_DS * 8)
 
 #define IDT_ENTRIES 256
+#define GDT_ENTRIES 32
+#define GDT_SIZE (GDT_ENTRIES * 8)
 
 #endif
