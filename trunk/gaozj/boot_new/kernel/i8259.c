@@ -1,5 +1,6 @@
 #include"type.h"
 
+#define cached_irq_mask = 0xffff;
 static struct hw_interrupt_type i8259A_irq_type = {
 	"XT-PIC",
 	startup_8259A_irq;
@@ -67,12 +68,20 @@ void init_8259A(int auto_eoi){
 
 
 	u_int startup_8259A_irq(u_int irq){
+		enable_8259_irq(irq);
+		return 0;
 	}
 
 	u_int shutdown_8259A_irq(u_int irq){
+		
 	}
 
+/*((unsigned char *)&[0])*/
 	u_int enable_8259A_irq(u_int irq){
+		u_int mask = ~(1<<irq);
+		cached_irq_mask &= mask;
+		if(irq & 8)
+			outb(0xa1, cached_irq_mask);		  
 	}
 
 	u_int disable_8259A_irq(u_int irq){

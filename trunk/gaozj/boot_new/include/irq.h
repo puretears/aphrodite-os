@@ -1,4 +1,19 @@
 #include "type.h"
+
+/*
+ * IRQ line status.
+ */
+#define IRQ_INPROGRESS	1	/* IRQ handler active - do not enter! 一处处理程序正在执行 */
+#define IRQ_DISABLED	2	/* IRQ disabled - do not enter! 设备驱动程序禁用的IRQ*/
+#define IRQ_PENDING	4	/* IRQ pending - replay on enable 已经在线上的IRQ*/
+#define IRQ_REPLAY	8	/* IRQ has been replayed but not acked yet */
+#define IRQ_AUTODETECT	16	/* IRQ is being autodetected */
+#define IRQ_WAITING	32	/* IRQ not yet seen - for autodetection */
+#define IRQ_LEVEL	64	/* IRQ level triggered */
+#define IRQ_MASKED	128	/* IRQ masked - shouldn't be seen again */
+#define IRQ_PER_CPU	256	/* IRQ is per CPU 8086CPU 没有使用*/
+
+
 extern irq_desc_t irq_desc[NR_IRQS];
 
 struct hw_interrupt_type{
