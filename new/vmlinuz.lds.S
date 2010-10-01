@@ -56,29 +56,34 @@ SECTIONS
 	.init.data : {
 		*(.init.data)
 	} 
-	. = ALIGN(16)
+	. = ALIGN(16);
 	__setup_start = .;
 	.init.setup : {
 		*(.init.setup)
 	}
 	__setup_end = .;
 
-	. = ALIGN(4096)
+	. = ALIGN(4096);
 	__init_end = .;
 	/* Freed after init ends here*/
+
+	. = ALIGN(32);
+	__per_cpu_start = .;
+	.data.percpu: { *(.data.percpu) }
+	__per_cpu_end = .;
 
 	__bss_start = .; /*BSS*/
 	.bss : {
 		*(.bss.page_aligned)
 		*(.bss)
 	}
-	. = ALIGNl(4)
+	. = ALIGNl(4);
 	_bss_stop = .;
 
 	_end = .;
 
 	/* This is where the kernel creates the early boot page tables*/
-	. = ALIGN(4096)
+	. = ALIGN(4096);
 	pg0 = .;
 
 	/DISCARD/ : {
