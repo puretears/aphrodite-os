@@ -1,6 +1,8 @@
 #ifndef ASM_SPINLOCK_H
 #define ASM_SPINLOCK_H
 
+#include <asm/rwlock.h>
+
 typedef struct {
 	volatile unsigned int slock;
 #ifdef CONFIG_PREEMPT
@@ -51,5 +53,17 @@ static inline void _raw_spin_lock(spinlock_t *lock) {
 			:"=m" (lock->slock)::"memory");
 }
 
+typedef struct {
+	volatile unsigned int lock;
+#ifdef CONFIG_PREEMPT
+	unsigned int break_lock;
+#endif
+} rwlock_t;
+
+#define read_lock(lock) _read_lock(lock)
+
+static inline void _raw_read_lock(rwlock *lock) {
+	__build_read_lock(lock, "__read_lock_failed");
+}
 
 #endif

@@ -7,6 +7,11 @@ void _spin_lock(spinlock_t *lock) {
 	_raw_spin_lock(lock);
 }
 
+void _read_lock(rwlock_t *lock) {
+	preempt_disable();
+	_raw_read_lock(lock);
+}
+
 #else
 
 #define BUILD_LOCK_OPS(op, locktype)						\
@@ -26,6 +31,7 @@ void _##op##_lock(locktype##_t *lock) {						\
 }
 
 BUILD_LOCK_OPS(spin, spinlock);
+BUILD_LOCK_OPS(read, rwlock);
 #endif /* CONFIG_PREEMPT */
 
 void _spin_unlock(spinlock_t *lock) {
