@@ -16,6 +16,8 @@ typedef struct {
 #define spin_is_locked(x) (*(volatile signed char *)(&(x)->slock) <= 0)
 #define spin_can_lock(lock) (!spin_is_locked(lock))
 
+#define spin_unlock(lock) _spin_unlock(lock)
+
 #define spin_lock_string	\
 	"\n1:\t"				\
 	"lock ; decb %0\n\t"	\
@@ -26,6 +28,11 @@ typedef struct {
 	"jle 2b\n\t"			\
 	"jmp 1b\n"				\
 	"3:\n\t"
+
+#define spin_unlock_string	\
+	"xchgb %b0, %1"			\
+	:"=q" (oldval), "=m"(lock->string)	\
+	:"0" (oldval) : "memory"
 
 static inline int _raw_spin_trylock(spinlock_t *lock) {
 	char oldval;
