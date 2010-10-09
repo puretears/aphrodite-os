@@ -26,4 +26,15 @@ void _##op##_lock(locktype##_t *lock) {						\
 }
 
 BUILD_LOCK_OPS(spin, spinlock);
-#endif
+#endif /* CONFIG_PREEMPT */
+
+void _spin_unlock(spinlock_t *lock) {
+	_raw_spin_unlock(lock);
+	preempt_enable();
+}
+
+static inline void _raw_spin_unlock(spinlock_t *lock) {
+	char oldval = 1;
+	__asm__ __volatile__ (
+			spin_unlock_string );
+}
