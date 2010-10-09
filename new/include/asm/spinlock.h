@@ -66,4 +66,16 @@ static inline void _raw_read_lock(rwlock *lock) {
 	__build_read_lock(lock, "__read_lock_failed");
 }
 
+#define read_can_lock(x) ((int)(x)->lock > 0)
+
+
+static inline int _raw_write_trylock(rwlock *lock) {
+	atomic_t *count = (atomic_t *)lock;
+	atomic_dec(count);
+
+	if (atomic_read(count) >= 0)
+		return 1;
+	atomic_inc(count);
+	return 0;
+}
 #endif
