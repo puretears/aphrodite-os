@@ -12,6 +12,10 @@ void _read_lock(rwlock_t *lock) {
 	_raw_read_lock(lock);
 }
 
+void _write_lock(rwlock_t *lock) {
+	preempt_disable();
+	_raw_write_lock(lock);
+}
 #else
 
 #define BUILD_LOCK_OPS(op, locktype)						\
@@ -32,10 +36,21 @@ void _##op##_lock(locktype##_t *lock) {						\
 
 BUILD_LOCK_OPS(spin, spinlock);
 BUILD_LOCK_OPS(read, rwlock);
+BUILD_LOCK_OPS(write, rwlock);
 #endif /* CONFIG_PREEMPT */
 
 void _spin_unlock(spinlock_t *lock) {
 	_raw_spin_unlock(lock);
+	preempt_enable();
+}
+
+void _read_unlock(rwlock_t *lock) {
+	_raw_read_unlock(lock);
+	preempt_enable();
+}
+
+void _write_unlock(rwlock_t *lock) {
+	_raw_write_unlock(lock);
 	preempt_enable();
 }
 
@@ -44,3 +59,4 @@ static inline void _raw_spin_unlock(spinlock_t *lock) {
 	__asm__ __volatile__ (
 			spin_unlock_string );
 }
+
