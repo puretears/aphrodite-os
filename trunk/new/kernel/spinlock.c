@@ -1,4 +1,7 @@
 #include <asm/spinlock.h>
+#include <asm/atomic.h>
+#include <asm/rwlock.h>
+
 
 #ifndef CONFIG_PREEMPT
 
@@ -38,6 +41,14 @@ BUILD_LOCK_OPS(spin, spinlock);
 BUILD_LOCK_OPS(read, rwlock);
 BUILD_LOCK_OPS(write, rwlock);
 #endif /* CONFIG_PREEMPT */
+
+void preempt_enable() {
+
+}
+
+void preempt_disable() {
+
+}
 
 void _spin_unlock(spinlock_t *lock) {
 	_raw_spin_unlock(lock);

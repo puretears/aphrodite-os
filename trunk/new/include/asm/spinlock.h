@@ -2,6 +2,7 @@
 #define ASM_SPINLOCK_H
 
 #include <asm/rwlock.h>
+#include <asm/atomic.h>
 
 /*Spinlock Related*/
 typedef struct {
@@ -48,7 +49,7 @@ static inline int _raw_spin_trylock(spinlock_t *lock) {
 }
 
 static inline void _raw_spin_lock(spinlock_t *lock) {
-	__asm__ __volatie__ (
+	__asm__ __volatile__ (
 			spin_lock_string
 			:"=m" (lock->slock)::"memory");
 }
@@ -95,3 +96,5 @@ static inline int _raw_read_trylock(rwlock *lock) {
 
 #define _raw_write_unlock(rw) \
 	asm volatile("lock; addl $" RW_LOCK_BIAS_STR ", %0" :"=m" ((rw)->lock): :"memory")
+
+#endif
