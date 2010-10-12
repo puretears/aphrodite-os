@@ -11,11 +11,39 @@
 #include"type.h"
 #include"io.h"
 
+
 //将16位cached_irq_mask分成两个8位的变量
 #define __byte(x,y) (((unsigned char *)&(y))[x])
 #define cached_A1(__byte(0, cached_irq_mask))
 #define cached_21(__byte(1, cached_irq_mask))
 #define cached_irq_mask = 0xffff;
+
+#define BI(x,y)	BUILD_IRQ(x##y)
+#define BUILD_16_IRQ(x)\
+	BI(x,0) BI(x,1) BI(x,2) BI(x,3) \
+	BI(x,4) BI(x,5) BI(x,6) BI(x,7)\
+	BI(x,8) BI(x,9) BI(x,a) BI(x,b)\
+	BI(x,c)	BI(x,d)	BI(x,e)	BI(x,f)
+BUILD_16_IRQ(0x0)
+
+#define IRQ##x##y##_interrupt
+#define IRQLIST_16(x)\
+	IRQ(x, 0), IRQ(x, 1), IRQ(x, 2), IRQ(x, 3)\
+	IRQ(x, 4), IRQ(x, 5), IRQ(x, 6), IRQ(x, 7)\
+	IRQ(x, 8), IRQ(x, 9), IRQ(x, a), IRQ(x, b)\
+	IRQ(x, c), IRQ(x, d), IRQ(x, e), IRQ(x, f)
+void (*interrupt[NR_IRQS])(void) = {
+	IRQLIST_16(0x0),
+#ifdef CONFIG_X86_IO_APIC 
+	IRQLIST_16(0x1), IRQLIST_16(0x2), IRQLIST_16(0x3), IRQLIST_16(0x4),
+	IRQLIST_16(0x5), IRQLIST_16(0x6), IRQLIST_16(0x7), IRQLIST_16(0x8),
+	IRQLIST_16(0x9), IRQLIST_16(0xa), IRQLIST_16(0xb), IRQLIST_16(0xc),
+	IRQLIST_16(0xd)
+#endif
+};
+
+#undef IRQ
+#undef IRQLIST_16
 
 u_int irq_err_count = 0;
 
@@ -150,8 +178,8 @@ spurious_8259_irq:
 	}
 	
 	u_int end_8259A_irq(u_int irq){
-
-
+		if(!(irq_desc[irq].status & (IRQ_DISABLED|IRQ_INPROGRESS)))
+		  enable_8259A_irq(irq);
 	}
 	
 //判断是否为真正的IRQ请求
