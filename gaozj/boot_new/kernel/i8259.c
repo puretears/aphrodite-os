@@ -10,7 +10,7 @@
 */
 #include"type.h"
 #include"io.h"
-
+#include"irq.h"
 
 //将16位cached_irq_mask分成两个8位的变量
 #define __byte(x,y) (((unsigned char *)&(y))[x])
