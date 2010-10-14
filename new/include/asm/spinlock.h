@@ -34,7 +34,7 @@ typedef struct {
 
 #define spin_unlock_string	\
 	"xchgb %b0, %1"			\
-	:"=q" (oldval), "=m"(lock->string)	\
+	:"=q" (oldval), "=m"(lock->slock)	\
 	:"0" (oldval) : "memory"
 
 static inline int _raw_spin_trylock(spinlock_t *lock) {
@@ -78,7 +78,7 @@ static inline void _raw_write_lock(rwlock_t *lock) {
 
 #define read_can_lock(x) ((int)((x)->lock) > 0)
 
-static inline int _raw_read_trylock(rwlock *lock) {
+static inline int _raw_read_trylock(rwlock_t *lock) {
 	atomic_t *count = (atomic_t *)lock;
 	atomic_dec(count);
 

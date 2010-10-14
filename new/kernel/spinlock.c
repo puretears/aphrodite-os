@@ -3,6 +3,14 @@
 #include <asm/rwlock.h>
 
 
+void preempt_enable() {
+
+}
+
+void preempt_disable() {
+
+}
+
 #ifndef CONFIG_PREEMPT
 
 void _spin_lock(spinlock_t *lock) {
@@ -42,12 +50,10 @@ BUILD_LOCK_OPS(read, rwlock);
 BUILD_LOCK_OPS(write, rwlock);
 #endif /* CONFIG_PREEMPT */
 
-void preempt_enable() {
-
-}
-
-void preempt_disable() {
-
+static inline void _raw_spin_unlock(spinlock_t *lock) {
+	char oldval = 1;
+	__asm__ __volatile__ (
+			spin_unlock_string );
 }
 
 void _spin_unlock(spinlock_t *lock) {
@@ -65,9 +71,4 @@ void _write_unlock(rwlock_t *lock) {
 	preempt_enable();
 }
 
-static inline void _raw_spin_unlock(spinlock_t *lock) {
-	char oldval = 1;
-	__asm__ __volatile__ (
-			spin_unlock_string );
-}
 

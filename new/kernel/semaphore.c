@@ -1,4 +1,5 @@
-
+#include "asm/atomic.h"
+#include "asm/rwlock.h"
 
 asm (
 	".section .sched.text\n"		
@@ -17,7 +18,7 @@ asm (
 asm (
 	".section .sched.text\n"		
 	".align 4\n"
-	".global __read_lock_failed"
+	".global __read_lock_failed\n"
 	"__read_lock_failed:\n\t"
 		LOCK "incl (%eax)\n"
 	"1:\n\t"
