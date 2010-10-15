@@ -1,6 +1,6 @@
 CC = gcc
 CXX = g++
-CFLAGS = -c -I../include -I/usr/local/include
+CFLAGS = -c -ggdb -I../include -I/usr/local/include
 CXXFLAGS = $(CFLAGS)
 LDFLAGS = -L../kernel -L/usr/local/lib -lboost_thread
 
