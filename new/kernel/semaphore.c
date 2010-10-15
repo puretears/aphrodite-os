@@ -2,21 +2,22 @@
 #include "asm/rwlock.h"
 
 asm (
-	".section .sched.text\n"		
+	//".section .sched.text\n"		
 	".align 4\n"
 	".global __write_lock_failed\n"
 	"__write_lock_failed:\n\t"
 		LOCK "addl $" RW_LOCK_BIAS_STR ",(%eax)\n\t"
 	"1:\n\t"
+		"pause\n\t"	
 		"cmpl $" RW_LOCK_BIAS_STR ",(%eax)\n\t"
 		"jne 1b\n\t"
 		LOCK "subl $" RW_LOCK_BIAS_STR ", (%eax)\n\t"
-		"jns __write_lock_failed\n\t"
+		"jnz __write_lock_failed\n\t"
 		"ret"
 );
 
 asm (
-	".section .sched.text\n"		
+	//".section .sched.text\n"		
 	".align 4\n"
 	".global __read_lock_failed\n"
 	"__read_lock_failed:\n\t"

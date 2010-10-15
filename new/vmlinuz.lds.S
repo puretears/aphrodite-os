@@ -1,3 +1,4 @@
+#include <linux/vmlinux.lds.h>
 #include <asm/thread_info.h>
 #include <asm/page.h>
 
@@ -14,6 +15,7 @@ SECTIONS
 
 	.text : {
 		*(.text)
+		SCHED_TEXT
 		*(.fixup)
 		*(.gnu.warning)
 	} = 0x9090
