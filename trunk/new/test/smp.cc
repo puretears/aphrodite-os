@@ -1,20 +1,10 @@
 #include <iostream>
+#include <string>
 #include "asm/spinlock.h"
 #include "asm/rwlock.h"
 #include <boost/thread/thread.hpp>
 
-struct shared_obj {
-	spinlock_t lock;
-	unsigned int data[50];
-};
-
-struct rshared_obj {
-	rwlock_t lock;
-	unsigned int data[50];
-};
-shared_obj r;
-rshared_obj r1;
-
+typedef void (*worker_thread)(unsigned int );
 
 extern void _spin_lock(spinlock_t *);
 extern void _spin_unlock(spinlock_t *);
@@ -23,68 +13,71 @@ extern void _read_unlock(rwlock_t *);
 extern void _write_lock(rwlock_t *);
 extern void _write_unlock(rwlock_t *);
 
-struct reader {
-	void operator()() {
-		std::cout<<"r1 started"<<std::endl;
-		read_lock(&r1.lock);
-		std::cout<<"Reader1 got the lock."<<std::endl;
-		std::cout<<"r1 lock:"<<std::hex<<r1.lock.lock<<std::endl;
-		for (int i = 0; i < 50; i++) {
-			std::cout<<"reader1: "<<r1.data[i]<<"\n";
-//			asm volatile("pause":::"memory");
-		}
-		std::cout<<std::endl;
-		read_unlock(&r1.lock);
-		std::cout<<"Reader1 release the lock."<<std::endl;
-	}
-} reader_thread1;
+spinlock_t slock; // For display
 
-struct reader2 {
-	void operator()() {
-		std::cout<<"r2 started"<<std::endl;
-		read_lock(&r1.lock);
-		std::cout<<"Reader2 got the lock."<<std::endl;
-		std::cout<<"r2 lock:"<<std::hex<<r1.lock.lock<<std::endl;
-		for (int i = 0; i < 50; i++) {
-			std::cout<<"reader2: "<<r1.data[i]<<"\n";
-//			asm volatile("pause":::"memory");
-		}
-		std::cout<<std::endl;
-		read_unlock(&r1.lock);
-		std::cout<<"Reader2 release the lock."<<std::endl;
-	}
-} reader_thread2;
+template <typename func_t, typename para_t>
+class adapter {
+public:
+	adapter(func_t f, para_t &p): _f(f), _p(&p) {
+		_index++;
+		spin_lock(&slock);
+		std::cout<<"Thread "<<_index<<" started."<<std::endl;
+		spin_unlock(&slock);
+	};
 
-struct writer {
 	void operator()() {
-		write_lock(&r1.lock);
-		std::cout<<"Writer got the lock."<<std::endl;
-		for (int j = 0; j < 50; j++) {
-			r1.data[j] = 2;
-			//std::cout<<"writer:  "<<i<<"\n";
-			asm volatile("pause":::"memory");
-		}
-		std::cout<<std::endl;
-		write_unlock(&r1.lock);
+		_f(*_p);
 	}
-} writer_thread;
+
+	static unsigned int _index;
+private:
+	func_t _f;
+	para_t *_p; // Pointers to avoid extra copying
+};
+
+template <typename f, typename p>
+unsigned int adapter<f, p>::_index = 0;
+
+struct rshared_obj {
+	rwlock_t rw_lock;
+	unsigned int data[50];
+};
+rshared_obj r1;
+
+void reader(unsigned int i __attribute__ ((unused))) {
+	unsigned int c = 0; 
+	for (int i = 0; i < 49; i++) {
+		read_lock(r1.rw_lock);
+		c = r1.data[i];
+		read_unlock(r1.rw_lock);
+	}
+}
+
+void writer(unsigned int c) {
+	for (int i = 0; i < 49; i++) {
+		write_lock(r1.rw_lock);
+		r1.data[i] = c;
+		write_unlock(r1.rw_lock);
+	}
+}
 
 int main() {
-	spin_lock_init(&r.lock);
-	rwlock_init(&r1.lock);
+	spin_lock_init(&slock);
+	rwlock_init(&r1.rw_lock);
 
 	for (int i = 0; i < 50; i++) {
-		r.data[i] = 1;
-		r1.data[i] = 3;
+		r1.data[i] = 9;
 	}
+	int i = 0, j = 1, m = 6;
+	boost::thread thr1(adapter<worker_thread, int>(reader, i));
+	boost::thread thr2(adapter<worker_thread, int>(reader, i));
+	boost::thread thr3(adapter<worker_thread, int>(writer, j));
+	boost::thread thr4(adapter<worker_thread, int>(writer, m));
 
-	boost::thread reader1(reader_thread1);
-	boost::thread reader2(reader_thread2);
-	boost::thread writer1(writer_thread);
-
-	reader1.join();
-	reader2.join();
-	writer1.join();
+	thr1.join();
+	thr2.join();
+	thr3.join();
+	thr4.join();
 
 	return 0;
 }
