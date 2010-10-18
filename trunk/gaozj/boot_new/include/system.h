@@ -11,7 +11,7 @@ do { \
 				"movw %4, %%dx\n\t" \
 				"movl %%eax, %0\n\t" \
 				"movl %%edx, %1\n\t" \
-				:"=m"(*gate_addr), "=m"(*(gate_add + 1)), "=&a" (__d0), "=&d"(__d1)\
+				:"=m"(*gate_addr), "=m"(*(gate_addr + 1)), "=&a" (__d0), "=&d"(__d1)\
 				:"i"((short)(0x8000 + (dpl <<13) + (type << 8))), "3" (offset), "2" (KERNEL_CS << 16)); \
 } while(0)
 

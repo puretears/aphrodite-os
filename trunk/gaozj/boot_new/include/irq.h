@@ -13,6 +13,15 @@
 #define IRQ_MASKED	128	/* IRQ masked - shouldn't be seen again */
 #define IRQ_PER_CPU	256	/* IRQ is per CPU 8086CPU 没有使用*/
 
+#define IRQ_NAME2(nr) nr##_interrupt(void)
+#define IRQ_NAME(nr) IRQ_NAME2(IRQ##nr)
+#define BUILD_IRQ(nr)\
+	asmlinkage void IRQ_NAME(nr);\
+__asm__(\
+"\n"__ALIGN_STR"\n" \
+SYMBOL_NAME_STR(IRQ) #nr "_interrupt:\n\t" \
+			"pushl $"#nr"-256\n\t"\
+			"jmp common_interrupt");
 
 extern irq_desc_t irq_desc[NR_IRQS];
 
