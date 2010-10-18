@@ -1,4 +1,4 @@
-global entry_addr,display,swapper_pg_dir
+global entry_addr,display,swapper_pg_dir, idt
 extern load_addr, load_end_addr, bss_end_addr, kmain
 LOADE_ADDR equ 0100000h
 NR_TASKS	equ 128
@@ -92,6 +92,14 @@ USER_DATA_SEL	equ	data_r3 - gdt_kernel + 3
 gdt_pesudo:
 	dw $ - gdt_kernel
 	dd gdt_kernel
+
+align 8
+idt:
+	times 256 dq 0
+
+idt_pesudo:
+	dw 256 * 8 -1
+	dd 0c0000000H + idt 
 
 section .bss
 align	4

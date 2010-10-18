@@ -8,6 +8,7 @@ extern do_invalid_opcode
 extern do_device_not_available
 extern do_double_fault
 extern do_coprocessor_segment_overrun
+extern do_invalid_tss
 extern do_stack_segment_fault
 extern do_general_protection
 extern do_page_fault
@@ -16,6 +17,7 @@ extern do_alignment_check
 extern do_machine_check
 extern do_smid_exception
 extern do_reserved 
+
 
 global ret_from_system_call
 global divide_error
@@ -76,7 +78,7 @@ _OLD_SS		equ	40H
 	pop eax
 	pop ds
 	pop es
-	add esp, 4	；
+	add esp, 4	
 	iret
 %endmacro
 
@@ -90,20 +92,20 @@ _OLD_SS		equ	40H
 	push edx
 	push ecx
 	push ebx
-
 %endmacro
 
-re_from_system_call:
+ret_from_exception:
 	RESTORE_ALL
 
 align 4
 
 divide_error:
-	push	0	;only for some exp
+	push 0 ;only for some exp
 	push do_divide_error	
 	jmp error_code
 
 error_code:
+	
 	push ds
 	push eax
 	xor eax, eax			;eax =1 
@@ -116,7 +118,7 @@ error_code:
 	push ebx 
 	cld		; clear DF
 
-	mov ecx es
+	mov ecx, es
 	mov esi, [esp + _0_EAX]		;GET error code
 	mov edi, [_ES + esp]	;get the fuction address
 	mov eax, [esp + _0_EAX]	;	set _0_EAX = -1 no syscall to restart
@@ -157,13 +159,13 @@ overflow:
 align 4
 bounds:
 	push 0
-	push do_bounds
+	push do_bound_range_exceeded
 	jmp error_code
 
 align 4
 invalid_op:
 	push 0
-	push do_invalid_op
+	push do_invalid_opcode
 	jmp error_code
 
 align 4
