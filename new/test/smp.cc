@@ -4,6 +4,9 @@
 #include "asm/rwlock.h"
 #include <boost/thread/thread.hpp>
 
+
+#define THREAD_INDEX template <typename f, typename p> unsigned int adapter<f, p>::_index;
+
 typedef void (*worker_thread)(unsigned int );
 
 extern void _spin_lock(spinlock_t *);
