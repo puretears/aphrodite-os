@@ -4,10 +4,9 @@
 #include "asm/rwlock.h"
 #include <boost/thread/thread.hpp>
 
-
-#define THREAD_INDEX template <typename f, typename p> unsigned int adapter<f, p>::_index;
-
 typedef void (*worker_thread)(unsigned int );
+
+#define THREAD_INDEX adapter<worker_thread, unsigned int>::_index
 
 extern void _spin_lock(spinlock_t *);
 extern void _spin_unlock(spinlock_t *);
@@ -29,6 +28,10 @@ public:
 	};
 
 	void operator()() {
+		spin_lock(&slock);
+		std::cout<<"Thread "<<_index<<": "<<std::endl;
+		spin_unlock(&slock);
+		
 		_f(*_p);
 	}
 
@@ -49,18 +52,22 @@ rshared_obj r1;
 
 void reader(unsigned int i __attribute__ ((unused))) {
 	unsigned int c = 0; 
-	for (int i = 0; i < 49; i++) {
-		read_lock(r1.rw_lock);
-		c = r1.data[i];
-		read_unlock(r1.rw_lock);
+
+	for (int j = 0; j <= 49; j++) {
+		read_lock(&r1.rw_lock);
+		c = r1.data[j];
+		read_unlock(&r1.rw_lock);
+		spin_lock(&slock);
+		std::cout<<"["<<j<<"] "<<r1.data[j]<<std::endl;
+		spin_unlock(&slock);
 	}
 }
 
 void writer(unsigned int c) {
-	for (int i = 0; i < 49; i++) {
-		write_lock(r1.rw_lock);
+	for (int i = 0; i <= 49; i++) {
+		write_lock(&r1.rw_lock);
 		r1.data[i] = c;
-		write_unlock(r1.rw_lock);
+		write_unlock(&r1.rw_lock);
 	}
 }
 
