@@ -11,4 +11,6 @@ typedef unsigned long long u_int64;
 
 typedef long long int64;
 
+typedef int pid_t;
+
 #endif
