@@ -7,6 +7,8 @@
 #define LOCK ""
 #endif
 
+#define ATOMIC_INIT(i) { (i) }
+
 typedef struct { volatile int counter; } atomic_t;
 
 #define atomic_read(v) ((v)->counter)
