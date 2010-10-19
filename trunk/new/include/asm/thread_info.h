@@ -12,6 +12,12 @@ struct thread_info {
 	unsigned long addr_limit;
 };
 
+static inline struct thread_info *current_thread_info() {
+	struct thread_info *ti;
+	__asm__ ("andl %%esp, %0" :"=r" (ti) :"0" (~(THREAD_SIZE - 1)))
+	return ti;
+}
+
 #define INIT_THREAD_INFO(tsk) \
 { \
 	.task = &tsk, \
