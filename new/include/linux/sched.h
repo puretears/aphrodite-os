@@ -2,7 +2,18 @@
 #define SCHED_H
 
 #include "list.h"
+#include "include/type.h"
 #include "asm/thread_info.h"
+
+// The process is either executing on a CPU or waiting to be executed
+#define TASK_RUNNING			0
+// The process is suspended until some condition becomes true.
+#define TASK_INTERRUPTIBLE		1
+#define TASK_UNINTERRUPTIBLE	2
+#define TASK_STOPPED			4
+#define TASK_TRACED				8
+#define EXIT_ZOMBIE				16
+#define EXIT_DEAD				32	// The final state. 
 
 union thread_union {
 	struct thread_info thread_inf;
@@ -18,6 +29,9 @@ struct thread_struct {
 struct task_struct {
 	unsigned state;
 	thread_info *p_thread_info;
+
+	pid_t pid;
+	pid_t tgid;
 
 	task_struct *parent;
 

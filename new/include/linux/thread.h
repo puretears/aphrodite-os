@@ -1,0 +1,7 @@
+#ifndef LINUX_THREAD_H
+#define LINUX_THREAD_H
+
+#define PID_MAX_DEFAULT 0x8000
+#define PID_MAX_LIMIT PID_MAX_DEFAULT
+
+#endif
