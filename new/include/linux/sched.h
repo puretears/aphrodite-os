@@ -1,8 +1,8 @@
 #ifndef SCHED_H
 #define SCHED_H
 
-#include "list.h"
-#include "include/type.h"
+#include "linux/list.h"
+#include "linux/type.h"
 #include "asm/thread_info.h"
 
 // The process is either executing on a CPU or waiting to be executed
@@ -34,6 +34,8 @@ struct task_struct {
 	pid_t tgid;
 
 	task_struct *parent;
+
+	struct list_head tasks;
 
 	list_head children;
 	list_head sibling;
