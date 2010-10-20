@@ -33,9 +33,12 @@ struct task_struct {
 	pid_t pid;
 	pid_t tgid;
 
-	task_struct *parent;
+	struct task_struct *parent;
 
 	struct list_head tasks;
+
+	struct task_struct *real_parent;
+	struct task_struct *parent;
 
 	list_head children;
 	list_head sibling;
