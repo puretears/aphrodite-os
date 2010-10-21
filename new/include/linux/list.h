@@ -75,4 +75,16 @@ static inline void hlist_add_head(struct hlist_node *n, struct hlist_head *h) {
 	n->pprev = &h->first;
 }
 
+// next must != NULL
+static inline void hlist_add_before(struct hlist_node *n, struct hlist_node *next) {
+	n->next = next;
+	n->pprev = next->pprev;
+	next->pprev = &n->next;
+	*(n->pprev) = n;
+}
+
+static inline void hlist_add_after(struct hlist_node *n, struct hlist_node *next) {
+	n->next = next->next;
+	n->pprev = &next->next;
+}
 #endif
