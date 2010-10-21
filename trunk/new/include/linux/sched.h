@@ -30,18 +30,18 @@ struct task_struct {
 	unsigned state;
 	thread_info *p_thread_info;
 
+	struct list_head tasks;
+
 	pid_t pid;
 	pid_t tgid;
-
-	struct task_struct *parent;
-
-	struct list_head tasks;
 
 	struct task_struct *real_parent;
 	struct task_struct *parent;
 
-	list_head children;
-	list_head sibling;
+	struct list_head children;
+	struct list_head sibling;
+
+	struct task_struct *group_leader;
 
 	thread_struct thread;
 
