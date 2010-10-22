@@ -1,0 +1,12 @@
+#ifndef LINUX_PID_H
+#define LINUX_PID_H
+
+enum pid_type {
+	PIDTYPE_PID,
+	PIDTYPE_TGID,
+	PIDTYPE_PGID,
+	PIDTYPE_SID,
+	PIDTYPE_MAX
+};
+
+#endif
