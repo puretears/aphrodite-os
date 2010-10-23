@@ -15,6 +15,12 @@
 #define EXIT_ZOMBIE				16
 #define EXIT_DEAD				32	// The final state. 
 
+#define MAX_USER_RT_PRIO 100
+#define MAX_RT_PRIO MAX_USER_RT_PRIO
+
+#define MAX_PRIO (MAX_RT_PRIO + 40)
+
+
 union thread_union {
 	struct thread_info thread_inf;
 	unsigned long stack[THREAD_SIZE / sizeof(long)];
@@ -44,8 +50,6 @@ struct task_struct {
 	struct task_struct *group_leader;
 
 	thread_struct thread;
-
-	unsigned int pid;
 };
 
 static inline thread_info *current_thread_info() {
