@@ -2,10 +2,11 @@
 extern "C" {
 #endif
 
-#include "mbinfo.h"
+#include "linux/mbinfo.h"
 #include "print.h"
-#include "type.h"
-#include "page.h"
+#include "linux/type.h"
+#include "asm/page.h"
+
 #define MAGIC_NUM 0x2BADB002
 
 extern char end;
@@ -26,8 +27,11 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 	printk_new("BaseL    BaseH    LimitL   LimitH   Type\n");
 
 	int memory_end = 0;
-
-	for(; p_mmap < (pmb->mmap_addr + pmb->mmap_length / sizeof(mmap)); ) {
+	int i = 0;
+	for(; p_mmap < (pmb->mmap_addr + pmb->mmap_length / sizeof(mmap)); i++) {
+		e820.map[i].addr = p_mmap->mmap_addr;
+		e820.map[i].size = p_mmap->limit;
+		e820.map[i].type = p_mmap->type;
 
 		printk_new("%8x %8x %8x %8x %8d\n",
 				(int)(p_mmap->base), 
@@ -40,6 +44,7 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 		}
 		p_mmap = (mmap *)((u_int)p_mmap + sizeof(p_mmap->size) + p_mmap->size);
 	}
+	e820.nr_map = i;
 
 	printk_new("Total memory size: %d.\n", memory_end/1024/1024);
 	int memory_start = (int)&end;
@@ -48,14 +53,7 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 	printk_new("memory start at 0x%8x.\n", memory_start);
 	trap_init();
 	init_IRQ();
-//	__asm__("int $0");
-//	__asm__("sti");	
-	//__asm__("int $0x3");
-	//int i_test = 3 / 0;
-//	__asm__("int $0x4");
-	
-//	__asm__("int $0x0F");
-//
+
 	return;
 }
 

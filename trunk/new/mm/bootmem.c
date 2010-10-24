@@ -1,4 +1,8 @@
 
+unsigned long max_low_pfn;
+unsigned long min_low_pfn;
+unsigned long max_pfn;
+
 // Initialize the memory between 0 and PFN page. The beginning of usable
 // memory is at the PFN start
 unsigned long init_bootmem(unsigned long start, unsigned long page) {
