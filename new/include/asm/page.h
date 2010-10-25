@@ -11,6 +11,7 @@
 #define VMALLOC_RESERVE ((unsigned long) __VMALLOC_RESERVE)
 // -__PAGE_OFFSET = 1GB, MAXMEM = 896MB
 #define MAXMEM (-__PAGE_OFFSET - __VMALLOC_RESERVE)
+#define MAXMEM_PFN PFN_DOWN(MAXMEM)
 
 #define __pa(x) ((unsigned long)x - PAGE_OFFSET)
 #define __va(x) ((void *) ((unsigned long)x + PAGE_OFFSET))
