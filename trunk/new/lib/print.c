@@ -1,6 +1,6 @@
-#include "type.h"
-#include "print.h"
-#include "string.h"
+#include "linux/type.h"
+#include "linux/print.h"
+#include "linux/string.h"
 
 #define COLUMNS 80
 #define ROWS    25
