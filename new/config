@@ -1,0 +1,3 @@
+CONFIG_PREEMPT: Set to enable kernel preempt.
+CONFIG_HIGHMEM: Set to enable the kernel to address memory above 896MB.
+CONFIG_X86_PAE: Set to enable PAE features.
