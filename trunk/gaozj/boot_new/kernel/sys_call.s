@@ -9,6 +9,7 @@ extern do_device_not_available
 extern do_double_fault
 extern do_coprocessor_segment_overrun
 extern do_invalid_tss
+extern do_segment_not_present
 extern do_stack_segment_fault
 extern do_general_protection
 extern do_page_fault
@@ -17,8 +18,10 @@ extern do_alignment_check
 extern do_machine_check
 extern do_smid_exception
 extern do_reserved 
-
-
+extern do_stack_segment
+extern do_system_call
+;do_segment_not_present
+;do_stack_segmentn
 global ret_from_system_call
 global divide_error
 global debug
@@ -41,6 +44,7 @@ global machine_check
 global smid_exception
 global reserved
 global system_call
+global stack_segment
 
 section .text
 
