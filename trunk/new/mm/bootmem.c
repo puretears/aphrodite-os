@@ -54,3 +54,9 @@ unsigned long bootmem_bootmap_pages(unsigned long pages) {
 unsigned long free_all_bootmem() {
 
 }
+
+
+static unsigned long __init init_bootmem_core(pg_data_t *pgdat, 
+		unsigned long mapstart, unsigned long start, unsigned long end) {
+	
+}
