@@ -1,4 +1,5 @@
 #include "asm/e820.h"
+#include "asm/pgtable.h"
 
 struct e820map e820;
 
