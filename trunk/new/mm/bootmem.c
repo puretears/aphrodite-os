@@ -58,5 +58,11 @@ unsigned long free_all_bootmem() {
 
 static unsigned long __init init_bootmem_core(pg_data_t *pgdat, 
 		unsigned long mapstart, unsigned long start, unsigned long end) {
-	
+	bootmem_data_t *bdata = pgdat->bdata;
+	unsigned long mapsize = ((end - start) + 7) / 8;
+
+	pgdat->pgdat_next = pg_list;
+	pg_list = pgdat;
+
+	mapsize
 }
