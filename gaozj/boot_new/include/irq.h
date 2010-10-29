@@ -22,7 +22,7 @@ __asm__(\
 SYMBOL_NAME_STR(IRQ) #nr "_interrupt:\n\t" \
 			"pushl $"#nr"-256\n\t"\
 			"jmp common_interrupt");
-
+			
 extern irq_desc_t irq_desc[NR_IRQS];
 
 struct hw_interrupt_type{
@@ -45,7 +45,7 @@ typedef struct{
 	struct irqaction *action;
 	u_int depth;	
 	spinlock_t lock;
-}irq_desc_t;
+}irq_desc_t;a
 
 
 //当中断发生时自动
