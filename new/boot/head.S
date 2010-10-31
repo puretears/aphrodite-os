@@ -41,7 +41,7 @@ ENTRY(startup_32)
 
 11: /* Init pg0*/
 	stosl
-	addl$0x1000, %eax
+	addl $0x1000, %eax
 	loop 11b
 
 	leal (INIT_MAP_BEYOND_END + 0x007)(%edi), %ecx
