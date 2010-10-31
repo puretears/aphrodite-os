@@ -1,3 +1,6 @@
+#include "asm/page.h"
+#include "asm/bootmem.h"
+#include "linux/string.h"
 
 unsigned long max_low_pfn;
 unsigned long min_low_pfn;
@@ -64,5 +67,12 @@ static unsigned long __init init_bootmem_core(pg_data_t *pgdat,
 	pgdat->pgdat_next = pg_list;
 	pg_list = pgdat;
 
-	mapsize
+	mapsize = (mapsize + sizeof(long) - 1) & ~(sizeof(long) - 1);
+	bdata->node_bootmem_map = __va(mapstart << PAGE_SHIFT);
+	bdata->node_boot_start = (start << PAGE_SHIFT);
+	bdata->node_low_pfn = end;
+
+	/* Initially all pages are reserved.*/
+	memset(bdata->node_bootmem_map, 0xFF, mapsize);
+	return mapsize;
 }
