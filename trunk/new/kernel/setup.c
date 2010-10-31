@@ -85,3 +85,29 @@ unsigned long __init find_max_low_pfn() {
 	}
 	return max_low_pfn;
 }
+
+static void __init register_bootmem_low_pages(unsigned long max_low_pfn) {
+	int i = 0;
+	unsigned long curr_pfn, last_pfn, size;
+	for (; i < e820.nr_map; i++) {
+		if (e820.map[i].type != E820_RAM)
+			continue;
+
+		curr_pfn = PAGE_UP(e820.map[i].addr);
+
+		if (curr_pfn >= max_low_pfn)
+			continue;
+
+		last_pfn = PAGE_DOWN(e820.map[i].addr + e820.map[i].size);
+
+		if (last_pfn >= max_low_pfn)
+			last_pfn = max_low_pfn;
+
+		if (last_pfn <= curr_pfn)
+			continue;
+
+		size = last_pfn - curr_pfn;
+		free_bootmem(PFN_PHYS(curr_pfn), PFN_PHYS(size));
+	}
+}
+

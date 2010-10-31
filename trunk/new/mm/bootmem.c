@@ -58,6 +58,11 @@ unsigned long free_all_bootmem() {
 
 }
 
+unsigned long __init init_bootmem(unsigned long start, unsigned long pages) {
+	max_low_pfn = pages;
+	min_low_pfn = start;
+	return (init_bootmem_core(NODE_DATA(0), start, 0, pages));
+}
 
 static unsigned long __init init_bootmem_core(pg_data_t *pgdat, 
 		unsigned long mapstart, unsigned long start, unsigned long end) {
