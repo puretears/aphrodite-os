@@ -20,7 +20,12 @@ void reserve_bootmem(unsigned long addr, unsigned long size) {
 
 // Marks the pages between addr and addr+size as free
 void free_bootmem(unsigned long addr, unsigned long size) {
+	free_bootmem_core(NODE_DATA(0)->bdata, addr, size);
+}
 
+static void __init free_bootmem_core(bootmem_data_t *bdata, 
+		unsigned long addr, unsigned long size) {
+	
 }
 
 // Allocates size number of bytes from ZONE_NORMAL. The allocator will be
