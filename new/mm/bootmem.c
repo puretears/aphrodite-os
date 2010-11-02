@@ -8,8 +8,10 @@ unsigned long max_pfn;
 
 // Initialize the memory between 0 and PFN page. The beginning of usable
 // memory is at the PFN start
-unsigned long init_bootmem(unsigned long start, unsigned long page) {
-
+unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
+	max_low_pfn = pages;
+	min_low_pfn = start;
+	return (init_bootmem_core(NODE_DATA(0), start, 0, pages));
 }
 
 // Marks the pages between the address and address+size reserved. Requests
@@ -25,7 +27,28 @@ void free_bootmem(unsigned long addr, unsigned long size) {
 
 static void __init free_bootmem_core(bootmem_data_t *bdata, 
 		unsigned long addr, unsigned long size) {
-	
+	unsigned long i;
+	unsigned long start;
+	unsigned long sidx;
+	unsigned long eidx = (addr + size - bdata->node_boot_start) / PAGE_SIZE;
+	unsigned long end = (addr + size) / PAGE_SIZE;
+
+	if (end > bdata->node_low_pfn) {
+		return;
+	}
+
+	if (addr < bdata->last_success) {
+		bdata->last_success = addr;
+	}
+
+	start = (addr + PAGE_SIZE - 1) / PAGE_SIZE;
+	sidx = start - (bdata->node_boot_start / PAGE_SIZE);
+
+	for (i = sidx; i < eidx; i++) {
+		if(unlikely(!test_and_clear_bit(i, bdata->node_bootmem_map))) {
+			return;
+		}
+	}
 }
 
 // Allocates size number of bytes from ZONE_NORMAL. The allocator will be
@@ -63,11 +86,6 @@ unsigned long free_all_bootmem() {
 
 }
 
-unsigned long __init init_bootmem(unsigned long start, unsigned long pages) {
-	max_low_pfn = pages;
-	min_low_pfn = start;
-	return (init_bootmem_core(NODE_DATA(0), start, 0, pages));
-}
 
 static unsigned long __init init_bootmem_core(pg_data_t *pgdat, 
 		unsigned long mapstart, unsigned long start, unsigned long end) {
