@@ -1,6 +1,6 @@
-#include <linux/vmlinux.lds.h>
-#include <asm/thread_info.h>
-#include <asm/page.h>
+#include "linux/vmlinux.lds.h"
+#include "asm/thread_info.h"
+#include "asm/page.h"
 
 OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")
 OUTPUT_FORMAT(i386)
