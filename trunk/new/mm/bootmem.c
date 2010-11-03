@@ -1,5 +1,5 @@
 #include "asm/page.h"
-#include "asm/bootmem.h"
+#include "linux/bootmem.h"
 #include "linux/string.h"
 
 unsigned long max_low_pfn;

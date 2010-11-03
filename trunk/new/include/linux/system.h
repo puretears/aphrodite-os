@@ -1,9 +1,9 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include "head.h"
-#include "segment.h"
-#include "ptrace.h"
+#include "linux/head.h"
+#include "asm/segment.h"
+#include "linux/ptrace.h"
 
 #define set_gate(gate_addr, dpl, type, offset) \
 do { \
