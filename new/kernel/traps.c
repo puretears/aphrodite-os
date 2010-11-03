@@ -1,8 +1,8 @@
-#include "type.h"
-#include "ptrace.h"
-#include "print.h"
-#include "system.h"
-#include "segment.h"
+#include "linux/type.h"
+#include "linux/ptrace.h"
+#include "linux/print.h"
+#include "linux/system.h"
+#include "asm/segment.h"
 
 void set_trap_gate(int vector, void *offset) {
 	set_gate(&idt[vector], 0, 15, offset);

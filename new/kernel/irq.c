@@ -1,7 +1,7 @@
-#include "system.h"
-#include "segment.h"
-#include "irq.h"
-#include "io.h"
+#include "linux/system.h"
+#include "asm/segment.h"
+#include "linux/irq.h"
+#include "linux/io.h"
 
 #define NR_IRQS 224 // 256 - 32 = 224. 0~31 is reserved by Intel
 

@@ -34,35 +34,42 @@ clean:
 # File dependencies
 #
 # Boot
-loader.o: boot/loader.s
+loader.o: boot/head.S
 
 # Init modules
-kmain.o: init/kmain.cc include/mbinfo.h include/type.h include/print.h \
-	 include/type.h include/page.h
+kmain.o: init/kmain.cc include/linux/mbinfo.h include/linux/type.h \
+	 include/linux/print.h include/linux/type.h include/asm/page.h
 
 # Kernel modules
 sys_call.o: kernel/sys_call.s
 
-irq.o: kernel/irq.cc include/system.h include/head.h include/type.h \
-	 include/segment.h include/ptrace.h include/segment.h include/irq.h \
-	  include/spinlock.h include/print.h include/ptrace.h include/spinlock.h \
-	   include/io.h
+irq.o: kernel/irq.c include/linux/system.h include/linux/head.h \
+	 include/linux/type.h include/asm/segment.h include/linux/ptrace.h \
+	  include/linux/irq.h include/linux/spinlock.h include/linux/ptrace.h \
+	   include/linux/io.h
 
-spinlock.o: kernel/spinlock.cc include/spinlock.h
+spinlock.o: kernel/spinlock.c include/asm/spinlock.h include/asm/rwlock.h \
+	 include/asm/atomic.h
 
-pic.o: kernel/pic.c include/io.h include/type.h
+pic.o: kernel/pic.c include/linux/io.h include/linux/type.h
 
-traps.o: kernel/traps.c include/type.h include/ptrace.h include/type.h \
-	 include/print.h include/system.h include/head.h include/segment.h \
-	  include/ptrace.h include/segment.h
+traps.o: kernel/traps.c include/linux/type.h include/linux/ptrace.h \
+	 include/linux/type.h include/linux/print.h include/linux/system.h \
+	  include/linux/head.h include/asm/segment.h
 
 # Memory modules
 memory.o: mm/memory.c include/page.h include/mm.h include/type.h \
 	 include/head.h
 
+bootmem.o: mm/bootmem.c include/asm/page.h include/linux/bootmem.h \
+	 include/linux/string.h include/linux/type.h
+
+page_alloc.o: mm/page_alloc.c include/linux/mmzone.h \
+	 include/linux/bootmem.h
+
 # Libs
-print.o: lib/print.c include/type.h include/print.h include/type.h \
-	 include/string.h
+print.o: lib/print.c include/linux/type.h include/linux/print.h \
+	 include/linux/type.h include/linux/string.h
 
 string.o: lib/string.c include/string.h include/type.h include/type.h
 

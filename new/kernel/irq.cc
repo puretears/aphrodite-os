@@ -1,10 +1,11 @@
-#include "system.h"
-#include "segment.h"
-#include "irq.h"
-#include "print.h"
-#include "ptrace.h"
-#include "spinlock.h"
-#include "io.h"
+#include "linux/system.h"
+#include "asm/system.h"
+#include "asm/segment.h"
+#include "linux/irq.h"
+#include "linux/print.h"
+#include "linux/ptrace.h"
+#include "asm/spinlock.h"
+#include "linux/io.h"
 
 #define NR_IRQS 16
 #define SA_INTERRUPT 1

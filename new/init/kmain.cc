@@ -3,7 +3,7 @@ extern "C" {
 #endif
 
 #include "linux/mbinfo.h"
-#include "print.h"
+#include "linux/print.h"
 #include "linux/type.h"
 #include "asm/page.h"
 
