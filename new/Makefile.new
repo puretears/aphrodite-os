@@ -30,10 +30,10 @@ vmlinuz: loader.o $(KRN_OBJS)
 # File dependencies
 #
 # Boot
-loader.o: boot/head.S
+boot/loader.o: boot/head.S
 
 # Init modules
-kmain.o: init/kmain.cc include/linux/mbinfo.h include/linux/type.h \
+init/kmain.o: init/kmain.cc include/linux/mbinfo.h include/linux/type.h \
 	 include/linux/print.h include/linux/type.h include/asm/page.h
 
 # Kernel modules
