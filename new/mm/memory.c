@@ -1,6 +1,6 @@
-#include "page.h"
-#include "mm.h"
-#include "head.h"
+#include "linux/page.h"
+#include "linux/mm.h"
+#include "linux/head.h"
 
 int paging_init(int start_mem, int end_mem) {
 	unsigned int *pg_dir; // Page directory entry

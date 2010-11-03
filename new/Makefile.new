@@ -4,8 +4,11 @@ CXX = g++
 LD = ld
 vpath %.h ./include
 
-CFLAGS = -ggdb -c -fstrength-reduce -finline-functions -nostdinc -nostdlib -nostartfiles -nodefaultlibs -fno-builtin
-CXXFLAGS = -ggdb -c -nostdlib -fno-builtin -nostartfiles -nodefaultlibs -fno-exceptions -fno-rtti -fno-stack-protector
+CFLAGS = -ggdb -c -fstrength-reduce -finline-functions -nostdinc -nostdlib \
+		 -nostartfiles -nodefaultlibs -fno-builtin
+
+CXXFLAGS = -ggdb -c -nostdlib -fno-builtin -nostartfiles -nodefaultlibs \
+		   -fno-exceptions -fno-rtti -fno-stack-protector
 
 KRN_OBJS = kmain.o pic.o icxxabi.o print.o string.o memory.o bootmem.o page_alloc.o \
 		   traps.o sys_call.o irq.o spinlock.o 
@@ -14,22 +17,14 @@ KRN_OBJS = kmain.o pic.o icxxabi.o print.o string.o memory.o bootmem.o page_allo
 	$(CC) $(CFLAGS) $< -o $@
 %.o:%.cc
 	$(CXX) $(CXXFLAGS) $< -o $@
-%.o:%.s
+%.o:%.S
 	$(AS) -f elf $< -o $@
 
+all:vmlinuz
+
 vmlinuz: loader.o $(KRN_OBJS)
-	$(LD) -T link.ld $^ -o $@ 
+	$(LD) -T vmlinuz.lds  $^ -o $@ 
 
-.phony: clean install
-
-install:
-	mount -o loop ./bochs.new/30M.img /mnt/
-	cp vmlinuz /mnt/boot/
-	umount /mnt/
-
-clean:
-	rm *.o
-	rm vmlinuz
 
 #-------------------------------------------------------------------------------
 # File dependencies
@@ -59,8 +54,8 @@ traps.o: kernel/traps.c include/linux/type.h include/linux/ptrace.h \
 	  include/linux/head.h include/asm/segment.h
 
 # Memory modules
-memory.o: mm/memory.c include/page.h include/mm.h include/type.h \
-	 include/head.h
+memory.o: mm/memory.c include/linux/page.h include/linux/mm.h \
+	 include/linux/type.h include/linux/head.h
 
 bootmem.o: mm/bootmem.c include/asm/page.h include/linux/bootmem.h \
 	 include/linux/string.h include/linux/type.h
@@ -72,6 +67,19 @@ page_alloc.o: mm/page_alloc.c include/linux/mmzone.h \
 print.o: lib/print.c include/linux/type.h include/linux/print.h \
 	 include/linux/type.h include/linux/string.h
 
-string.o: lib/string.c include/string.h include/type.h include/type.h
+string.o: lib/string.c include/linux/string.h include/linux/type.h
 
 icxxabi.o: cxx/icxxabi.cc include/icxxabi.h
+
+
+
+.phony: clean install
+
+install:
+	mount -o loop ./bochs.new/30M.img /mnt/
+	cp vmlinuz /mnt/boot/
+	umount /mnt/
+
+clean:
+	rm *.o
+	rm vmlinuz
