@@ -7,7 +7,8 @@ vpath %.h ./include
 CFLAGS = -ggdb -c -fstrength-reduce -finline-functions -nostdinc -nostdlib -nostartfiles -nodefaultlibs -fno-builtin
 CXXFLAGS = -ggdb -c -nostdlib -fno-builtin -nostartfiles -nodefaultlibs -fno-exceptions -fno-rtti -fno-stack-protector
 
-KRN_OBJS = kmain.o pic.o icxxabi.o print.o string.o memory.o traps.o sys_call.o irq.o spinlock.o
+KRN_OBJS = kmain.o pic.o icxxabi.o print.o string.o memory.o bootmem.o page_alloc.o \
+		   traps.o sys_call.o irq.o spinlock.o 
 
 %.o:%.c
 	$(CC) $(CFLAGS) $< -o $@
