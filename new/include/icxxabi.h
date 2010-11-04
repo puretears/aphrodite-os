@@ -15,8 +15,8 @@
 				 *	* Each member is at least 4 bytes large. Such that each entry is 12bytes.
 				 *		* 128 * 12 = 1.5KB exact.
 				 *			**/
-				void (*destructor_func)(void *);
-					void *obj_ptr;
+				void (*destructor)(void *);
+					void *para_ptr;
 						void *dso_handle;
 		};
 		 

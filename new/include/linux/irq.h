@@ -1,8 +1,8 @@
 #ifndef IRQ_H
 #define IRQ_H
 
-#include "spinlock.h"
-#include "ptrace.h"
+#include "asm/spinlock.h"
+#include "linux/ptrace.h"
 
 struct hw_interrupt_type {
 	const char *pic_name;
@@ -30,7 +30,7 @@ typedef struct hw_interrupt_type hw_irq_controller;
 
 struct irqaction {
 	// Points to the ISR for an I/O device.
-	int (*handler) (int, void *, pt_regs *);
+	int (*handler) (int, void *, struct pt_regs *);
 	// Describe the relationships between the IRQ line and I/O device
 	unsigned long flags;
 	// The name of I/O device.
@@ -39,7 +39,7 @@ struct irqaction {
 	// itself or device's driver data.
 	void *dev_id;
 	// Points to the next element of a list of irqaction descriptors.
-	irqaction *next;
+	struct irqaction *next;
 	// IRQ line.
 	int irq;
 };
@@ -52,7 +52,7 @@ struct irq_desc_t {
 	// Pointer to data used by the PIC.
 	void *handler_data;
 	// Identify the interrupt service routine.
-	irqaction *action;
+	struct irqaction *action;
 	// Show 0 if the IRQ line is enabled and a positive value if
 	// it has been disabled at least once.
 	unsigned int depth;

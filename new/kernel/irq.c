@@ -45,7 +45,7 @@ static hw_irq_controller no_irq_type = {
 	end_none
 };
 
-irq_desc_t irq_desc_table[NR_IRQS] = {
+struct irq_desc_t irq_desc_table[NR_IRQS] = {
 	[0 ... (NR_IRQS - 1)] = { 0, &no_irq_type }
 };
 #define SYMBOL_NAME_STR(x) x
@@ -95,7 +95,7 @@ irq_desc_t irq_desc_table[NR_IRQS] = {
 
 unsigned int do_IRQ(struct pt_regs regs) {
 	int irq_no = regs.orig_eax & 0xFF;
-	irq_desc_t *desc = &irq_desc_table[irq_no];
+	struct irq_desc_t *desc = &irq_desc_table[irq_no];
 
 	desc->handler->ack(irq_no);
 };

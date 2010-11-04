@@ -5,7 +5,7 @@
 
 struct mmap {
 	u_int size;
-	u_int64 base;
+	u_int64 addr;
 	u_int64 limit;
 	u_int type;
 };

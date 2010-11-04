@@ -1,4 +1,6 @@
 #include "asm/page.h"
+#include "linux/init.h"
+#include "linux/mmzone.h"
 #include "linux/bootmem.h"
 #include "linux/string.h"
 
@@ -6,13 +8,7 @@ unsigned long max_low_pfn;
 unsigned long min_low_pfn;
 unsigned long max_pfn;
 
-// Initialize the memory between 0 and PFN page. The beginning of usable
-// memory is at the PFN start
-unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
-	max_low_pfn = pages;
-	min_low_pfn = start;
-	return (init_bootmem_core(NODE_DATA(0), start, 0, pages));
-}
+extern struct pglist_data *pgdat_list;
 
 // Marks the pages between the address and address+size reserved. Requests
 // to partially reserve a pge will result in the full page being reserved.
@@ -20,10 +16,6 @@ void reserve_bootmem(unsigned long addr, unsigned long size) {
 
 }
 
-// Marks the pages between addr and addr+size as free
-void free_bootmem(unsigned long addr, unsigned long size) {
-	free_bootmem_core(NODE_DATA(0)->bdata, addr, size);
-}
 
 static void __init free_bootmem_core(bootmem_data_t *bdata, 
 		unsigned long addr, unsigned long size) {
@@ -49,6 +41,11 @@ static void __init free_bootmem_core(bootmem_data_t *bdata,
 			return;
 		}
 	}
+}
+
+// Marks the pages between addr and addr+size as free
+void free_bootmem(unsigned long addr, unsigned long size) {
+	free_bootmem_core(NODE_DATA(0)->bdata, addr, size);
 }
 
 // Allocates size number of bytes from ZONE_NORMAL. The allocator will be
@@ -92,8 +89,8 @@ static unsigned long __init init_bootmem_core(pg_data_t *pgdat,
 	bootmem_data_t *bdata = pgdat->bdata;
 	unsigned long mapsize = ((end - start) + 7) / 8;
 
-	pgdat->pgdat_next = pg_list;
-	pg_list = pgdat;
+	pgdat->pgdat_next = pgdat_list;
+	pgdat_list = pgdat;
 
 	mapsize = (mapsize + sizeof(long) - 1) & ~(sizeof(long) - 1);
 	bdata->node_bootmem_map = __va(mapstart << PAGE_SHIFT);
@@ -103,4 +100,12 @@ static unsigned long __init init_bootmem_core(pg_data_t *pgdat,
 	/* Initially all pages are reserved.*/
 	memset(bdata->node_bootmem_map, 0xFF, mapsize);
 	return mapsize;
+}
+
+// Initialize the memory between 0 and PFN page. The beginning of usable
+// memory is at the PFN start
+unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
+	max_low_pfn = page;
+	min_low_pfn = start;
+	return (init_bootmem_core(NODE_DATA(0), start, 0, page));
 }
