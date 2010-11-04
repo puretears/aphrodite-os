@@ -1,6 +1,6 @@
 .text
 
-#include <linux/linkage.h>
+#include "linux/linkage.h"
 
 #include <asm/segment.h>
 #include <asm/page.h>
@@ -15,10 +15,10 @@ ENTRY(startup_32)
 	cld
 	lgdt boot_gdt_desc - __PAGE_OFFSET
 	movl $(__BOOT_DS), %eax
-	movl %ax, %ds
-	movl %ax, %es
-	movl %ax, %fs
-	movl %ax, %gs
+	movl %eax, %ds
+	movl %eax, %es
+	movl %eax, %fs
+	movl %eax, %gs
 
 	/* Clear bss so that there are no surprises.*/
 	xorl %eax, %eax
@@ -113,7 +113,7 @@ ignore_int:
 	movl  $(__KERNEL_DS), %eax
 	movw  %ax, %es
 	movw  %ax, %ds
-	movl  $40(%esp), %eax
+	movl  40(%esp), %eax
 	pushl %eax
 	pushl $int_msg
 	call  printk_new

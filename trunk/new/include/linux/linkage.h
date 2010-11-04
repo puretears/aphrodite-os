@@ -15,13 +15,13 @@
 #define __ALIGN .align 4, 0x90
 #endif
 
-#ifdef __ASSEMBLY__
+//#ifdef __ASSEMBLY__
 #define ALIGN __ALIGN
 #define ENTRY(name) \
 	.global name; \
 	ALIGN; \
 	name:
 
-#endif
+//#endif
 
 #endif

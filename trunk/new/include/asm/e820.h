@@ -1,6 +1,8 @@
 #ifndef ASM_E820_H
 #define ASM_E820_H
 
+#include "linux/type.h"
+
 #define E820MAX 128
 
 #define E820_RAM 1

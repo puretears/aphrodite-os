@@ -6,15 +6,18 @@ extern "C" {
 #include "linux/print.h"
 #include "linux/type.h"
 #include "asm/page.h"
+#include "asm/e820.h"
 
 #define MAGIC_NUM 0x2BADB002
+
+extern struct e820map e820;
 
 extern char end;
 void trap_init();
 int paging_init(int, int);
 void init_IRQ(void);
 
-void kmain(mbinfo *pmb, u_int magic_num) {
+void startup_32(mbinfo *pmb, u_int magic_num) {
 	if (magic_num != MAGIC_NUM) {
 		printk_new("Invalid kernel image.\n");
 	}
@@ -29,18 +32,18 @@ void kmain(mbinfo *pmb, u_int magic_num) {
 	int memory_end = 0;
 	int i = 0;
 	for(; p_mmap < (pmb->mmap_addr + pmb->mmap_length / sizeof(mmap)); i++) {
-		e820.map[i].addr = p_mmap->mmap_addr;
+		e820.map[i].addr = p_mmap->addr;
 		e820.map[i].size = p_mmap->limit;
 		e820.map[i].type = p_mmap->type;
 
 		printk_new("%8x %8x %8x %8x %8d\n",
-				(int)(p_mmap->base), 
-				(int)(p_mmap->base >> 32),
+				(int)(p_mmap->addr), 
+				(int)(p_mmap->addr >> 32),
 				(int)(p_mmap->limit), 
 				(int)(p_mmap->limit >> 32),
 				(int)(p_mmap->type));
 		if (p_mmap->type == 1) {
-			memory_end = (int)(p_mmap->base + p_mmap->limit);
+			memory_end = (int)(p_mmap->addr + p_mmap->limit);
 		}
 		p_mmap = (mmap *)((u_int)p_mmap + sizeof(p_mmap->size) + p_mmap->size);
 	}

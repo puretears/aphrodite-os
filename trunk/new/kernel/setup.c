@@ -1,4 +1,6 @@
 #include "asm/e820.h"
+#include "asm/setup.h"
+#include "linux/init.h"
 #include "asm/pgtable.h"
 
 struct e820map e820;
@@ -6,6 +8,14 @@ struct e820map e820;
 unsigned long init_pg_tables_end __initdata = ~0UL;
 static unsigned int highmem_pages = -1;
 
+extern unsigned long max_low_pfn;
+extern unsigned long min_low_pfn;
+extern unsigned long max_pfn;
+extern unsigned int __VMALLOC_RESERVE;
+
+void __init find_max_pfn();
+unsigned long __init find_max_low_pfn();
+	
 static unsigned long __init setup_memory() {
 	min_low_pfn = PFN_UP(init_pg_tables_end);
 

@@ -12,7 +12,7 @@ do { \
 		"movl %%eax, %0\n\t" \
 		"movl %%edx, %1" \
 		: "=m" (*((int *)gate_addr)), "=m" (*((int *)(gate_addr) + 1)) \
-		: "b" (0x8000 + (dpl << 13) + (type << 8)), "d" (offset), "a" (KERNEL_CS << 16)); \
+		: "b" (0x8000 + (dpl << 13) + (type << 8)), "d" (offset), "a" (__KERNEL_CS << 16)); \
 } while(0)
 
 

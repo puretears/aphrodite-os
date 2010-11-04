@@ -56,7 +56,7 @@ void die_if_kernel(const char *err_str, struct pt_regs *p_regs, int err_no) {
 		return;
 	}
 
-	int ss = KERNEL_DS, esp = (int)&p_regs->old_esp;
+	int ss = __KERNEL_DS, esp = (int)&p_regs->old_esp;
 
 	if (p_regs->cs & 3) { // Ring1 or 2
 		ss = p_regs->ss;
