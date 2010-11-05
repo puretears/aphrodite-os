@@ -11,7 +11,7 @@ static unsigned int highmem_pages = -1;
 extern unsigned long max_low_pfn;
 extern unsigned long min_low_pfn;
 extern unsigned long max_pfn;
-extern unsigned int __VMALLOC_RESERVE;
+extern unsigned long __VMALLOC_RESERVE;
 
 void __init find_max_pfn();
 unsigned long __init find_max_low_pfn();

@@ -17,7 +17,7 @@ void trap_init();
 int paging_init(int, int);
 void init_IRQ(void);
 
-void startup_32(mbinfo *pmb, u_int magic_num) {
+void start_kernel(mbinfo *pmb, u_int magic_num) {
 	if (magic_num != MAGIC_NUM) {
 		printk_new("Invalid kernel image.\n");
 	}

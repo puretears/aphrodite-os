@@ -19,10 +19,14 @@ KRN_OBJS = boot/head.o init/kmain.o kernel/pic.o cxx/icxxabi.o lib/print.o lib/s
 	$(CC) $(CFLAGS) $< -o $@
 %.o:%.cc
 	$(CXX) $(CXXFLAGS) $< -o $@
-%.o:%.S
-	$(AS) -Iinclude $< -o $@
-%.o:%.s
+#%.o:%.S
+#	$(AS) -Iinclude $< -o $@
+%.o:%.asm
 	nasm -f elf $< -o $@
+%.o:%.s
+	$(AS) -Iinclude $< -o $@
+%.s:%.S
+	$(CC) -E -D__ASSEMBLY__ -Iinclude $< -o $@
 
 all:vmlinuz
 
@@ -34,15 +38,16 @@ vmlinuz: $(KRN_OBJS)
 # File dependencies
 #
 # Boot
-boot/head.o: boot/head.s.1
-	$(AS) -Iinclude $< -o $@
+boot/head.s: boot/head.S
+
+boot/head.o: boot/head.s
 
 # Init modules
 init/kmain.o: init/kmain.cc include/linux/mbinfo.h include/linux/type.h \
 	 include/linux/print.h include/linux/type.h include/asm/page.h
 
 # Kernel modules
-kernel/sys_call.o: kernel/sys_call.s
+kernel/sys_call.o: kernel/sys_call.asm
 
 irq.o: kernel/irq.c include/linux/system.h include/linux/head.h \
 	 include/linux/type.h include/asm/segment.h include/linux/ptrace.h \
@@ -91,5 +96,6 @@ install:
 	umount /mnt/
 
 clean:
-	rm *.o
+	rm boot/*.o kernel/*.o lib/*.o
+	rm boot/head.s
 	rm vmlinuz
