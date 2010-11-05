@@ -80,7 +80,7 @@ SECTIONS
 		*(.bss)
 	}
 	. = ALIGN(4);
-	_bss_stop = .;
+	__bss_stop = .;
 
 	_end = .;
 

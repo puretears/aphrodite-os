@@ -3,21 +3,25 @@
 #include "linux/print.h"
 #include "linux/system.h"
 #include "asm/segment.h"
+#include "asm/processor.h"
+
+struct desc_struct idt_table[256] __attribute__((__section__(".data.idt"))) = { {0, 0}, };
+
 
 void set_trap_gate(int vector, void *offset) {
-	set_gate(&idt[vector], 0, 15, offset);
+	set_gate(&idt_table[vector], 0, 15, offset);
 }
 
 void set_system_gate(int vector, void *offset) {
-	set_gate(&idt[vector], 3, 15, offset);
+	set_gate(&idt_table[vector], 3, 15, offset);
 }
 
 void set_system_intr_gate(int vector, void *offset) {
-	set_gate(&idt[vector], 3, 14, offset);
+	set_gate(&idt_table[vector], 3, 14, offset);
 }
 
 void set_task_gate(int vector, void *offset) {
-	set_gate(&idt[vector], 0, 3, 0);
+	set_gate(&idt_table[vector], 0, 3, 0);
 }
 
 // Definite in sys_call.s

@@ -6,6 +6,8 @@
 #define init_thread_info (init_thread_union.thread_inf)
 #define init_thtread_stack (init_thread_union.stack)
 
+
+#ifndef __ASSEMBLY__
 struct thread_info {
     task_struct *task;
 	unsigned long flags;
@@ -17,6 +19,7 @@ static inline struct thread_info *current_thread_info() {
 	__asm__ ("andl %%esp, %0" :"=r" (ti) :"0" (~(THREAD_SIZE - 1)))
 	return ti;
 }
+#endif
 
 #define INIT_THREAD_INFO(tsk) \
 { \

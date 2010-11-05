@@ -2,9 +2,9 @@
 
 #include "linux/linkage.h"
 
-#include <asm/segment.h>
-#include <asm/page.h>
-#include <asm/thread_info.h>
+#include "asm/segment.h"
+#include "asm/page.h"
+#include "asm/thread_info.h"
 
 /* 128KB for bootmem allocator bitmap.*/
 #define INIT_MAP_BEYOND_END (1024 * 768)
@@ -22,10 +22,10 @@ ENTRY(startup_32)
 
 	/* Clear bss so that there are no surprises.*/
 	xorl %eax, %eax
-	movl __bss_start - __PAGE_OFFSET, %edi
-	movl __bss_stop - __PAGE_OFFSET, %ecx
+	movl $__bss_start - __PAGE_OFFSET, %edi
+	movl $__bss_stop - __PAGE_OFFSET, %ecx
 	subl %edi, %ecx
-	shrl %ecx, 2
+	shrl $2, %ecx
 	rep ; stosl
 
 	/* Init page tables.*/
@@ -53,9 +53,9 @@ ENTRY(startup_32)
 	movl $swapper_pg_dir - __PAGE_OFFSET, %eax
 	movl %eax, %cr3
 	movl %cr0, %eax
-	orl 0x80000000, %eax
+	orl $0x80000000, %eax
 	movl %eax, %cr0
-	ljmp %__BOOT_CS, $1f
+	ljmp $__BOOT_CS, $1f
 1:
 	lss stack_start, %esp
 
