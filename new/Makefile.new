@@ -13,7 +13,7 @@ CXXFLAGS = -ggdb -c -Iinclude -nostdlib -fno-builtin -nostartfiles -nodefaultlib
 KRN_OBJS = boot/head.o init/kmain.o kernel/pic.o cxx/icxxabi.o lib/print.o lib/string.o \
 		   mm/memory.o mm/bootmem.o mm/page_alloc.o \
 		   kernel/traps.o kernel/sys_call.o kernel/irq.o kernel/spinlock.o \
-		   kernel/setup.o
+		   kernel/setup.o kernel/pid.o kernel/semaphore.o kernel/init_task.o
 
 %.o:%.c
 	$(CC) $(CFLAGS) $< -o $@
@@ -49,23 +49,36 @@ init/kmain.o: init/kmain.cc include/linux/mbinfo.h include/linux/type.h \
 # Kernel modules
 kernel/sys_call.o: kernel/sys_call.asm
 
-irq.o: kernel/irq.c include/linux/system.h include/linux/head.h \
-	 include/linux/type.h include/asm/segment.h include/linux/ptrace.h \
-	  include/linux/irq.h include/asm/spinlock.h include/asm/rwlock.h \
-	   include/asm/atomic.h include/linux/io.h
+kernel/init_task.o: kernel/init_task.c include/linux/sched.h \
+	 include/linux/list.h include/linux/type.h include/asm/thread_info.h \
+	 include/linux/init_task.h
 
-kernel/spinlock.o: kernel/spinlock.c include/asm/spinlock.h include/asm/rwlock.h \
-	 include/asm/atomic.h
+kernel/irq.o: kernel/irq.c include/linux/system.h include/linux/head.h \
+		 include/linux/type.h include/asm/processor.h include/asm/segment.h \
+		  include/linux/ptrace.h include/linux/type.h include/linux/irq.h \
+		   include/asm/spinlock.h include/asm/rwlock.h include/asm/atomic.h \
+		    include/linux/io.h
 
 kernel/pic.o: kernel/pic.c include/linux/io.h include/linux/type.h
 
-kernel/traps.o: kernel/traps.c include/linux/type.h include/linux/ptrace.h \
-	 include/linux/type.h include/linux/print.h include/linux/system.h \
-	  include/linux/head.h include/asm/segment.h
+kernel/pid.o: kernel/pid.c include/linux/thread.h include/linux/list.h \
+	 include/linux/type.h include/linux/pid.h include/asm/page.h
+
+kernel/sched.o: kernel/sched.c include/linux/sched.h include/linux/list.h \
+		 include/linux/type.h include/asm/thread_info.h
+
+kernel/semaphore.o: kernel/semaphore.c include/asm/atomic.h include/asm/rwlock.h
 
 kernel/setup.o: kernel/setup.c include/asm/e820.h include/linux/type.h \
 	 include/asm/setup.h include/asm/page.h include/linux/init.h \
 	  include/asm/pgtable.h
+
+kernel/spinlock.o: kernel/spinlock.c include/asm/spinlock.h include/asm/rwlock.h \
+		 include/asm/atomic.h
+
+kernel/traps.o: kernel/traps.c include/linux/type.h include/linux/ptrace.h \
+		 include/linux/type.h include/linux/print.h include/linux/system.h \
+		  include/linux/head.h include/asm/processor.h include/asm/segment.h
 
 # Memory modules
 mm/memory.o: mm/memory.c include/linux/page.h include/linux/mm.h \
