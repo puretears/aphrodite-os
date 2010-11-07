@@ -8,15 +8,18 @@
 
 
 #ifndef __ASSEMBLY__
+
+#include <linux/sched.h>
+
 struct thread_info {
-    task_struct *task;
+    struct task_struct *task;
 	unsigned long flags;
 	unsigned long addr_limit;
 };
 
 static inline struct thread_info *current_thread_info() {
 	struct thread_info *ti;
-	__asm__ ("andl %%esp, %0" :"=r" (ti) :"0" (~(THREAD_SIZE - 1)))
+	__asm__ ("andl %%esp, %0" :"=r" (ti) :"0" (~(THREAD_SIZE - 1)));
 	return ti;
 }
 #endif

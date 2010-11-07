@@ -34,7 +34,7 @@ struct thread_struct {
 
 struct task_struct {
 	unsigned state;
-	thread_info *p_thread_info;
+	struct thread_info *p_thread_info;
 
 	struct list_head tasks;
 
@@ -49,16 +49,10 @@ struct task_struct {
 
 	struct task_struct *group_leader;
 
-	thread_struct thread;
+	struct thread_struct thread;
 };
 
-static inline thread_info *current_thread_info() {
-	struct thread_info *ti;
-	__asm__("andl %%esp, %0" :=r(ti) :""(0xFFFFE000));
-	return ti;
-}
-
-static inline struct task_truct get_current() {
+static inline struct task_struct *get_current() {
 	return current_thread_info()->task;
 }
 

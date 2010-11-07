@@ -2,7 +2,7 @@
 #define LINUX_INIT_TASK_H
 
 #include <linux/list.h>
-#include <linux/thread.info.h>
+#include <asm/thread_info.h>
 
 #define INIT_TASK(tsk) \
 { \

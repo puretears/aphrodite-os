@@ -181,9 +181,6 @@ void init_8259A(int auto_eoi) {
 	outb(0xA1, cached_A1);
 }
 
-#define IRQ_DISABLED 0
-#define IRQ_INPROGRESS 1
-
 void init_ISA_irqs() {
 	init_8259A(0);
 
