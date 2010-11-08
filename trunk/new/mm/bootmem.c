@@ -3,6 +3,8 @@
 #include "linux/mmzone.h"
 #include "linux/bootmem.h"
 #include "linux/string.h"
+#include "linux/compiler.h"
+#include "asm/bitops.h"
 
 unsigned long max_low_pfn;
 unsigned long min_low_pfn;
