@@ -5,8 +5,10 @@
 
 #define NR_IRQS 224 // 256 - 32 = 224. 0~31 is reserved by Intel
 
+extern struct desc_struct idt_table[256];
+
 static inline void set_interrupt_gate(int vector, void *offset) {
-	set_gate(&idt[vector], 0, 14, offset);
+	set_gate(&idt_table[vector], 0, 14, offset);
 }
 
 unsigned int startup_8259A_irq(unsigned int);

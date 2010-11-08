@@ -2,6 +2,7 @@
 #include "asm/setup.h"
 #include "linux/init.h"
 #include "asm/pgtable.h"
+#include "asm/setup.h"
 
 struct e820map e820;
 
@@ -15,6 +16,7 @@ extern unsigned long __VMALLOC_RESERVE;
 
 void __init find_max_pfn();
 unsigned long __init find_max_low_pfn();
+void __init setup_bootmem_allocator();
 	
 static unsigned long __init setup_memory() {
 	min_low_pfn = PFN_UP(init_pg_tables_end);
@@ -39,6 +41,10 @@ static unsigned long __init setup_memory() {
 	setup_bootmem_allocator();
 
 	return max_low_pfn;
+}
+
+void __init setup_bootmem_allocator() {
+
 }
 
 void __init find_max_pfn() {
@@ -103,12 +109,12 @@ static void __init register_bootmem_low_pages(unsigned long max_low_pfn) {
 		if (e820.map[i].type != E820_RAM)
 			continue;
 
-		curr_pfn = PAGE_UP(e820.map[i].addr);
+		curr_pfn = PFN_UP(e820.map[i].addr);
 
 		if (curr_pfn >= max_low_pfn)
 			continue;
 
-		last_pfn = PAGE_DOWN(e820.map[i].addr + e820.map[i].size);
+		last_pfn = PFN_DOWN(e820.map[i].addr + e820.map[i].size);
 
 		if (last_pfn >= max_low_pfn)
 			last_pfn = max_low_pfn;

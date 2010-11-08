@@ -12,7 +12,7 @@ extern "C" {
 
 extern struct e820map e820;
 
-extern char end;
+extern char _end;
 void trap_init();
 int paging_init(int, int);
 void init_IRQ(void);
@@ -50,7 +50,7 @@ void start_kernel(mbinfo *pmb, u_int magic_num) {
 	e820.nr_map = i;
 
 	printk_new("Total memory size: %d.\n", memory_end/1024/1024);
-	int memory_start = (int)&end;
+	int memory_start = (int)&_end;
 	int low_memory_start = PAGE_SIZE;
 	memory_start = paging_init(memory_start, memory_end);
 	printk_new("memory start at 0x%8x.\n", memory_start);

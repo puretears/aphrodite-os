@@ -11,7 +11,7 @@ CXXFLAGS = -ggdb -c -Iinclude -nostdlib -fno-builtin -nostartfiles -nodefaultlib
 		   -fno-exceptions -fno-rtti -fno-stack-protector
 
 KRN_OBJS = boot/head.o init/kmain.o kernel/pic.o cxx/icxxabi.o lib/print.o lib/string.o \
-		   mm/memory.o mm/bootmem.o mm/page_alloc.o \
+		   mm/memory.o mm/bootmem.o mm/page_alloc.o mm/init.o\
 		   kernel/traps.o kernel/sys_call.o kernel/irq.o kernel/spinlock.o \
 		   kernel/setup.o kernel/pid.o kernel/semaphore.o kernel/init_task.o
 
@@ -82,14 +82,16 @@ kernel/traps.o: kernel/traps.c include/linux/type.h include/linux/ptrace.h \
 
 # Memory modules
 mm/memory.o: mm/memory.c include/linux/page.h include/linux/mm.h \
-	 include/linux/type.h include/linux/head.h
+	 include/linux/type.h include/linux/head.h 
 
-mm/bootmem.o: mm/bootmem.c include/asm/page.h include/linux/bootmem.h \
-	 include/linux/string.h include/linux/type.h include/linux/type.h include/linux/mmzone.h \
-	 include/linux/init.h
+mm/bootmem.o: mm/bootmem.c include/asm/page.h include/linux/init.h \
+	 include/linux/mmzone.h include/linux/bootmem.h include/linux/string.h \
+	  include/linux/type.h include/asm/bitops.h include/asm/atomic.h include/linux/compiler.h
 
 mm/page_alloc.o: mm/page_alloc.c include/linux/mmzone.h \
 	 include/linux/bootmem.h
+
+mm/init.o: mm/init.c
 
 # Libs
 lib/print.o: lib/print.c include/linux/type.h include/linux/print.h \
