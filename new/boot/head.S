@@ -9,7 +9,26 @@
 /* 128KB for bootmem allocator bitmap.*/
 #define INIT_MAP_BEYOND_END (1024 * 768)
 
-page_pde_offset = (__PAGE_OFFSET >> 20);
+page_pde_offset  = (__PAGE_OFFSET >> 20);
+
+#define MODULEALIGN (1 << 0)            /* align loaded modules on page boundaries*/
+#define MEMINFO     (1 << 1)            /* provide memory map */
+#define FLAGS       (MODULEALIGN | MEMINFO)   /* this is the Multiboot 'flag' field*/
+#define MAGIC       0x1BADB002          /* 'magic number' lets bootloader find the header*/
+#define CHECKSUM    (-(MAGIC + FLAGS))        /* checksum required */
+
+.align 4
+MultiBootHeader:
+    .long MAGIC
+	.long FLAGS
+	.long CHECKSUM
+	.long MultiBootHeader - __PAGE_OFFSET
+	.long _text - __PAGE_OFFSET
+	.long _end  - __PAGE_OFFSET
+	.long _end - __PAGE_OFFSET
+	.long startup_32 - __PAGE_OFFSET
+
+
 
 ENTRY(startup_32)
 	cld
