@@ -1,3 +1,4 @@
+/*.section ".multiboot_text"*/
 .text
 
 #include "linux/linkage.h"
@@ -17,20 +18,22 @@
 page_pde_offset  = (__PAGE_OFFSET >> 20);
 
 .align 4
-MultiBootHeader:
+ENTRY(MultiBootHeader)
 	.long MAGIC
 	.long FLAGS
 	.long CHECKSUM
 	.long MultiBootHeader
 
 	.long _text
-	.long _end 
+	.long _end
 	.long _end
 	.long startup_32
 
 ENTRY(startup_32)
+	cli
 	cld
-	lgdt boot_gdt_desc - __PAGE_OFFSET
+	lgdt boot_gdt_desc
+	movl %ebx, (mbi)
 	movl $(__BOOT_DS), %eax
 	movl %eax, %ds
 	movl %eax, %es
@@ -39,15 +42,15 @@ ENTRY(startup_32)
 
 	/* Clear bss so that there are no surprises.*/
 	xorl %eax, %eax
-	movl $__bss_start - __PAGE_OFFSET, %edi
-	movl $__bss_stop - __PAGE_OFFSET, %ecx
+	movl $__bss_start, %edi
+	movl $__bss_stop, %ecx
 	subl %edi, %ecx
 	shrl $2, %ecx
 	rep ; stosl
 
 	/* Init page tables.*/
-	movl $(pg0 - __PAGE_OFFSET),  %edi
-	movl $(swapper_pg_dir - __PAGE_OFFSET), %edx
+	movl $(pg0),  %edi
+	movl $(swapper_pg_dir), %edx
 	movl $0x007, %eax /* Present + RW + User*/
 10:
 	leal 0x007(%edi), %ecx /* Create a PDE entry*/
@@ -64,10 +67,10 @@ ENTRY(startup_32)
 	leal (INIT_MAP_BEYOND_END + 0x007)(%edi), %ecx
 	cmpl %ecx, %eax
 	jb 10b 
-	movl %edi, (init_pg_tables_end - __PAGE_OFFSET)
+	movl %edi, (init_pg_tables_end)
 
 	/* Enable paging*/
-	movl $swapper_pg_dir - __PAGE_OFFSET, %eax
+	movl $swapper_pg_dir, %eax
 	movl %eax, %cr3
 	movl %cr0, %eax
 	orl $0x80000000, %eax
@@ -88,17 +91,22 @@ ENTRY(startup_32)
 	movl $(__KERNEL_DS), %eax
 	movw %ax, %ss
 
-	movl $(__USER_DS), %eax
+	/*movl $(__USER_DS), %eax*/
 	movw %ax, %ds
 	movw %ax, %es
 
 	xorl %eax, %eax /* Clear FS/GS and LDT*/
 	movw %ax, %fs
-	movw %ax, %es
+	movw %ax, %gs
 	lldt %ax
 
 	cld
+	movl $0x2BADB002, %eax
+	movl (mbi), %ebx
+	pushl %ebx
+	pushl %eax
 	call start_kernel
+	addl $8, %esp
 L6:
 	jmp L6 # Main should never return here.
 	
@@ -106,7 +114,7 @@ setup_idt:
 	lea ignore_int, %edx
 	movl $(__KERNEL_CS << 16), %eax
 	movw %dx, %ax
-	movw 0x8E00, %dx
+	movw $0x8E00, %dx
 
 	lea idt_table, %edi
 	movl $256, %ecx
@@ -154,6 +162,9 @@ ENTRY(stack_start)
 
 int_msg:
 	.asciz "Unknown interrupt or fault at EIP %8X.\n"
+mbi:
+	.long 0
+
 
 .global boot_gdt_desc
 .global idt_desc
@@ -164,7 +175,7 @@ ALIGN
 	.word 0
 boot_gdt_desc:
 	.word __BOOT_DS + 7
-	.long boot_gdt_table - __PAGE_OFFSET
+	.long boot_gdt_table
 
 	.word  0
 idt_desc:

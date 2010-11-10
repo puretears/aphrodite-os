@@ -39,8 +39,9 @@ vmlinuz: $(KRN_OBJS)
 #
 # Boot
 boot/head.s: boot/head.S
-
+#boot/load.s: boot/load.S
 boot/head.o: boot/head.s
+#boot/load.o: boot/load.s
 
 # Init modules
 init/kmain.o: init/kmain.cc include/linux/mbinfo.h include/linux/type.h \
@@ -112,5 +113,5 @@ install:
 
 clean:
 	rm boot/*.o kernel/*.o lib/*.o mm/*.o
-	rm boot/head.s
+	rm boot/*.s
 	rm vmlinuz
