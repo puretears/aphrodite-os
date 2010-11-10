@@ -106,7 +106,7 @@ cxx/icxxabi.o: cxx/icxxabi.cc include/icxxabi.h
 .phony: clean install
 
 install:
-	mount -o loop ./bochs.new/30M.img /mnt/
+	mount -o loop ./bochs.debug/30M.img /mnt/
 	cp vmlinuz /mnt/boot/
 	umount /mnt/
 
