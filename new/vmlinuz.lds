@@ -1,18 +1,25 @@
 
-/*OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")*/
-/*OUTPUT_FORMAT(i386)*/
+OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")
+OUTPUT_FORMAT(i386)
 
 THREAD_SIZE = 8192;
-__PAGE_OFFSET = 0xC0000000;
+/*__PAGE_OFFSET = 0xC0000000;*/
+__PAGE_OFFSET = 0x00000000;
 
 ENTRY(startup_32)
+/*ENTRY(multiboot_startup_32)*/
 
 SECTIONS
 {
-	. = __PAGE_OFFSET + 0x100000;		
+	. = 0x100000;		
 	/* Read only */
 	_text = .;
 
+	/*.stext 0x100000: {
+		*(.stext)
+	}*/
+	
+	/*.text . : AT(LOADADDR(.stext) + SIZEOF(.stext)) {*/
 	.text : {
 		*(.text)
 		/*SCHED_TEXT*/

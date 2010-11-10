@@ -17,11 +17,10 @@ void trap_init();
 int paging_init(int, int);
 void init_IRQ(void);
 
-void start_kernel(mbinfo *pmb, u_int magic_num) {
+void start_kernel(u_int magic_num, mbinfo *pmb) {
 	if (magic_num != MAGIC_NUM) {
 		printk_new("Invalid kernel image.\n");
 	}
-
 	cls();
 
 	mmap *p_mmap = pmb->mmap_addr;
