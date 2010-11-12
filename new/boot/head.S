@@ -18,7 +18,7 @@
 page_pde_offset  = (__PAGE_OFFSET >> 20);
 
 .align 4
-ENTRY(MultiBootHeader)
+/*ENTRY(MultiBootHeader)
 	.long MAGIC
 	.long FLAGS
 	.long CHECKSUM
@@ -27,13 +27,13 @@ ENTRY(MultiBootHeader)
 	.long _text
 	.long _end
 	.long _end
-	.long startup_32
+	.long startup_32*/
 
 ENTRY(startup_32)
 	cli
 	cld
-	lgdt boot_gdt_desc
-	movl %ebx, (mbi)
+	lgdt boot_gdt_desc - __PAGE_OFFSET
+	movl %ebx, (mbi - __PAGE_OFFSET)
 	movl $(__BOOT_DS), %eax
 	movl %eax, %ds
 	movl %eax, %es
@@ -42,15 +42,15 @@ ENTRY(startup_32)
 
 	/* Clear bss so that there are no surprises.*/
 	xorl %eax, %eax
-	movl $__bss_start, %edi
-	movl $__bss_stop, %ecx
+	movl $__bss_start - __PAGE_OFFSET, %edi
+	movl $__bss_stop - __PAGE_OFFSET, %ecx
 	subl %edi, %ecx
 	shrl $2, %ecx
 	rep ; stosl
 
 	/* Init page tables.*/
-	movl $(pg0),  %edi
-	movl $(swapper_pg_dir), %edx
+	movl $(pg0 - __PAGE_OFFSET),  %edi
+	movl $(swapper_pg_dir - __PAGE_OFFSET), %edx
 	movl $0x007, %eax /* Present + RW + User*/
 10:
 	leal 0x007(%edi), %ecx /* Create a PDE entry*/
@@ -67,10 +67,10 @@ ENTRY(startup_32)
 	leal (INIT_MAP_BEYOND_END + 0x007)(%edi), %ecx
 	cmpl %ecx, %eax
 	jb 10b 
-	movl %edi, (init_pg_tables_end)
+	movl %edi, (init_pg_tables_end - __PAGE_OFFSET)
 
 	/* Enable paging*/
-	movl $swapper_pg_dir, %eax
+	movl $swapper_pg_dir - __PAGE_OFFSET, %eax
 	movl %eax, %cr3
 	movl %cr0, %eax
 	orl $0x80000000, %eax
@@ -175,7 +175,7 @@ ALIGN
 	.word 0
 boot_gdt_desc:
 	.word __BOOT_DS + 7
-	.long boot_gdt_table
+	.long boot_gdt_table - __PAGE_OFFSET
 
 	.word  0
 idt_desc:
