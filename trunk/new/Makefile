@@ -31,7 +31,7 @@ KRN_OBJS = boot/load.o boot/head.o init/kmain.o kernel/pic.o cxx/icxxabi.o lib/p
 all:vmlinuz
 
 vmlinuz: $(KRN_OBJS)
-	$(LD) -T vmlinuz.lds.new  $^ -o $@ 
+	$(LD) -T vmlinuz.lds  $^ -o $@ 
 
 
 #-------------------------------------------------------------------------------
