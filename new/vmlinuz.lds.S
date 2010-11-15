@@ -3,7 +3,7 @@
 #include "asm/page.h"
 
 OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")
-OUTPUT_FORMAT(i386)
+/*OUTPUT_FORMAT(i386) */
 
 ENTRY(startup_32)
 
@@ -13,7 +13,7 @@ SECTIONS
 	/* Read only */
 	_text = .;
 
-	.text : {
+	.text : AT(ADDR(.text) - __PAGE_OFFSET){
 		*(.text)
 		SCHED_TEXT
 		*(.fixup)
@@ -41,11 +41,11 @@ SECTIONS
 		CONSTRUCTORS
 	}
 
-	. = ALIGN(4096)
+	. = ALIGN(4096);
 	.data_page_aligned : { *(.data.idt) }
 	_edata = .; /*End of data section*/
 
-	. = ALIGN(THREAD_SIZE) /* Init task*/
+	. = ALIGN(THREAD_SIZE); /* Init task*/
 	.data.init_task : { *(.data.init_task) }
 
 	/* Will be freed after init */
@@ -71,7 +71,7 @@ SECTIONS
 
 	. = ALIGN(32);
 	__per_cpu_start = .;
-	.data.percpu: { *(.data.percpu) }
+	.data.percpu : { *(.data.percpu) }
 	__per_cpu_end = .;
 
 	__bss_start = .; /*BSS*/
@@ -79,10 +79,10 @@ SECTIONS
 		*(.bss.page_aligned)
 		*(.bss)
 	}
-	. = ALIGNl(4);
-	_bss_stop = .;
+	. = ALIGN(4);
+	__bss_stop = .;
 
-	_end = .;
+	__end = .;
 
 	/* This is where the kernel creates the early boot page tables*/
 	. = ALIGN(4096);

@@ -1,94 +1,91 @@
-#include "linux/vmlinux.lds.h"
-#include "asm/thread_info.h"
-#include "asm/page.h"
 
 OUTPUT_FORMAT("elf32-i386", "elf32-i386", "elf32-i386")
-OUTPUT_FORMAT(i386)
+
 
 ENTRY(startup_32)
 
 SECTIONS
 {
-	. = __PAGE_OFFSET + 0x100000;		
-	/* Read only */
-	_text = .;
+ . = 0xC0000000 + 0x100000;
 
-	.text : AT(ADDR(.text) - __PAGE_OFFSET){
-		*(.text)
-		SCHED_TEXT
-		*(.fixup)
-		*(.gnu.warning)
-	} = 0x9090
-	_etext = .;
+ _text = .;
 
-	. = ALIGN(16);
+ .text : AT(ADDR(.text) - 0xC0000000){
+  *(.text)
+  __sched_text_start = .; *(.sched.text) __sched_text.end = .;
+  *(.fixup)
+  *(.gnu.warning)
+ } = 0x9090
+ _etext = .;
 
-	/* Writable */
-	.data : {
-		__CTOR_LIST__ = .;
-		LONG((__CTOR_LIST__ - __CTOR_END__) / 4 - 2)
-		*(.ctor)
-		LONG(0)
-		__CTOR_END__ = .;
+ . = ALIGN(16);
 
-		__DTOR_LIST__ = .;
-		LONG((__DTOR_LIST__ - __DTOR_END__) / 4 - 2)
-		*(.dtor)
-		LONG(0)
-		__DTOR_END__ = .;
 
-		*(.data)
-		CONSTRUCTORS
-	}
+ .data : {
+  __CTOR_LIST__ = .;
+  LONG((__CTOR_LIST__ - __CTOR_END__) / 4 - 2)
+  *(.ctor)
+  LONG(0)
+  __CTOR_END__ = .;
 
-	. = ALIGN(4096)
-	.data_page_aligned : { *(.data.idt) }
-	_edata = .; /*End of data section*/
+  __DTOR_LIST__ = .;
+  LONG((__DTOR_LIST__ - __DTOR_END__) / 4 - 2)
+  *(.dtor)
+  LONG(0)
+  __DTOR_END__ = .;
 
-	. = ALIGN(THREAD_SIZE) /* Init task*/
-	.data.init_task : { *(.data.init_task) }
+  *(.data)
+  CONSTRUCTORS
+ }
 
-	/* Will be freed after init */
-	__init_begin = .;
-	.init.text : {
-		_sinittext = .;
-		*(.init.text)
-		_einittext = .;
-	}
-	.init.data : {
-		*(.init.data)
-	} 
-	. = ALIGN(16);
-	__setup_start = .;
-	.init.setup : {
-		*(.init.setup)
-	}
-	__setup_end = .;
+ . = ALIGN(4096);
+ .data_page_aligned : { *(.data.idt) }
+ _edata = .;
 
-	. = ALIGN(4096);
-	__init_end = .;
-	/* Freed after init ends here*/
+ . = ALIGN(8192);
+ .data.init_task : { *(.data.init_task) }
 
-	. = ALIGN(32);
-	__per_cpu_start = .;
-	.data.percpu: { *(.data.percpu) }
-	__per_cpu_end = .;
 
-	__bss_start = .; /*BSS*/
-	.bss : {
-		*(.bss.page_aligned)
-		*(.bss)
-	}
-	. = ALIGNl(4);
-	_bss_stop = .;
+ __init_begin = .;
+ .init.text : {
+  _sinittext = .;
+  *(.init.text)
+  _einittext = .;
+ }
+ .init.data : {
+  *(.init.data)
+ }
+ . = ALIGN(16);
+ __setup_start = .;
+ .init.setup : {
+  *(.init.setup)
+ }
+ __setup_end = .;
 
-	_end = .;
+ . = ALIGN(4096);
+ __init_end = .;
 
-	/* This is where the kernel creates the early boot page tables*/
-	. = ALIGN(4096);
-	pg0 = .;
 
-	/DISCARD/ : {
-		*(.exitcall.exit)
-	}
+ . = ALIGN(32);
+ __per_cpu_start = .;
+ .data.percpu : { *(.data.percpu) }
+ __per_cpu_end = .;
+
+ __bss_start = .;
+ .bss : {
+  *(.bss.page_aligned)
+  *(.bss)
+ }
+ . = ALIGN(4);
+ __bss_stop = .;
+
+ __end = .;
+
+
+ . = ALIGN(4096);
+ pg0 = .;
+
+ /DISCARD/ : {
+  *(.exitcall.exit)
+ }
 }

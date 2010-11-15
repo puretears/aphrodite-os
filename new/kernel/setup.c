@@ -15,9 +15,14 @@ extern unsigned long max_pfn;
 extern unsigned long __VMALLOC_RESERVE;
 
 void __init find_max_pfn();
+static unsigned long __init setup_memory();
 unsigned long __init find_max_low_pfn();
 void __init setup_bootmem_allocator();
 	
+void __init setup_arch() {
+	unsigned long _max_low_pfn = setup_memory();	
+}
+
 static unsigned long __init setup_memory() {
 	min_low_pfn = PFN_UP(init_pg_tables_end);
 

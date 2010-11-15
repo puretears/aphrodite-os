@@ -12,17 +12,15 @@ extern "C" {
 
 extern struct e820map e820;
 
-extern char _end;
+extern char __end;
 void trap_init();
 int paging_init(int, int);
 void init_IRQ(void);
+void page_address_init();
+void setup_arch();
 
-void start_kernel(u_int magic_num, mbinfo *pmb) {
-	if (magic_num != MAGIC_NUM) {
-		printk_new("Invalid kernel image.\n");
-	}
-	cls();
 
+void print_memory_map(struct mbinfo *pmb) {
 	mmap *p_mmap = pmb->mmap_addr;
 	
 	printk_new("System Address Map:\n");
@@ -49,10 +47,21 @@ void start_kernel(u_int magic_num, mbinfo *pmb) {
 	e820.nr_map = i;
 
 	printk_new("Total memory size: %d.\n", memory_end/1024/1024);
-	int memory_start = (int)&_end;
+	int memory_start = (int)&__end;
 	int low_memory_start = PAGE_SIZE;
 	memory_start = paging_init(memory_start, memory_end);
 	printk_new("memory start at 0x%8x.\n", memory_start);
+}
+
+void start_kernel(u_int magic_num, struct mbinfo *pmb) {
+	if (magic_num != MAGIC_NUM) {
+		printk_new("Invalid kernel image.\n");
+	}
+	cls();
+	print_memory_map(pmb);
+	page_address_init();
+	setup_arch();
+
 	trap_init();
 	init_IRQ();
 
