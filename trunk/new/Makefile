@@ -11,7 +11,7 @@ CXXFLAGS = -ggdb -c -Iinclude -nostdlib -fno-builtin -nostartfiles -nodefaultlib
 		   -fno-exceptions -fno-rtti -fno-stack-protector
 
 KRN_OBJS = boot/load.o boot/head.o init/kmain.o kernel/pic.o cxx/icxxabi.o lib/print.o lib/string.o \
-		   mm/memory.o mm/bootmem.o mm/page_alloc.o mm/init.o\
+		   mm/highmem.o mm/memory.o mm/bootmem.o mm/page_alloc.o mm/init.o\
 		   kernel/traps.o kernel/sys_call.o kernel/irq.o kernel/spinlock.o \
 		   kernel/setup.o kernel/pid.o kernel/semaphore.o kernel/init_task.o
 
@@ -28,12 +28,17 @@ KRN_OBJS = boot/load.o boot/head.o init/kmain.o kernel/pic.o cxx/icxxabi.o lib/p
 %.s:%.S
 	$(CC) -E -D__ASSEMBLY__ -Iinclude $< -o $@
 
-all:vmlinuz
+all: vmlinuz.lds vmlinuz
 
 vmlinuz: $(KRN_OBJS)
 	$(LD) -T vmlinuz.lds  $^ -o $@ 
 
 
+vmlinuz.lds.1: vmlinuz.lds.S
+	$(CC) -E -D__ASSEMBLY__ -Iinclude $< -o $@
+
+vmlinuz.lds: vmlinuz.lds.1
+	sed '/#/'d $< > $@
 #-------------------------------------------------------------------------------
 # File dependencies
 #
@@ -87,12 +92,17 @@ mm/memory.o: mm/memory.c include/linux/page.h include/linux/mm.h \
 
 mm/bootmem.o: mm/bootmem.c include/asm/page.h include/linux/init.h \
 	 include/linux/mmzone.h include/linux/bootmem.h include/linux/string.h \
-	  include/linux/type.h include/asm/bitops.h include/asm/atomic.h include/linux/compiler.h
+	  include/linux/type.h include/asm/bitops.h include/asm/atomic.h include/linux/compiler.h \
+	  include/linux/init.h
 
 mm/page_alloc.o: mm/page_alloc.c include/linux/mmzone.h \
 	 include/linux/bootmem.h
 
 mm/init.o: mm/init.c
+
+mm/highmem.o: mm/highmem.c include/linux/linkage.h include/linux/list.h \
+	 include/linux/type.h include/asm/spinlock.h include/asm/rwlock.h \
+	  include/asm/atomic.h
 
 # Libs
 lib/print.o: lib/print.c include/linux/type.h include/linux/print.h \
@@ -115,3 +125,5 @@ clean:
 	rm boot/*.o kernel/*.o lib/*.o mm/*.o
 	rm boot/*.s
 	rm vmlinuz
+	rm vmlinuz.lds
+	rm vmlinuz.lds.1
