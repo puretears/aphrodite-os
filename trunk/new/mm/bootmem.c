@@ -85,7 +85,7 @@ unsigned long free_all_bootmem() {
 
 }
 
-
+/* Reserve all memories between start and end.*/
 static unsigned long __init init_bootmem_core(pg_data_t *pgdat, 
 		unsigned long mapstart, unsigned long start, unsigned long end) {
 	bootmem_data_t *bdata = pgdat->bdata;
