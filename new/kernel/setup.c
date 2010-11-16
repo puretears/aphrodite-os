@@ -49,7 +49,11 @@ static unsigned long __init setup_memory() {
 }
 
 void __init setup_bootmem_allocator() {
+	unsigned long bootmap_size;
 
+	bootmap_size = init_bootmem(min_low_pfn, max_low_pfn);
+
+	register_bootmem_low_pages(max_low_pfn);
 }
 
 void __init find_max_pfn() {
