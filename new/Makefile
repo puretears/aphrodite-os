@@ -10,9 +10,9 @@ CFLAGS = -ggdb -Iinclude -c -fstrength-reduce -finline-functions -nostdinc -nost
 CXXFLAGS = -ggdb -c -Iinclude -nostdlib -fno-builtin -nostartfiles -nodefaultlibs \
 		   -fno-exceptions -fno-rtti -fno-stack-protector
 
-KRN_OBJS = boot/load.o boot/head.o init/kmain.o kernel/pic.o cxx/icxxabi.o lib/print.o lib/string.o \
-		   mm/highmem.o mm/memory.o mm/bootmem.o mm/page_alloc.o mm/init.o\
-		   kernel/traps.o kernel/sys_call.o kernel/irq.o kernel/spinlock.o \
+KRN_OBJS = boot/load.o boot/head.o init/kmain.o cxx/icxxabi.o lib/bitops.c lib/print.o \
+		   lib/string.o mm/highmem.o mm/memory.o mm/bootmem.o mm/page_alloc.o mm/init.o\
+		   kernel/pic.o kernel/traps.o kernel/sys_call.o kernel/irq.o kernel/spinlock.o \
 		   kernel/setup.o kernel/pid.o kernel/semaphore.o kernel/init_task.o
 
 %.o:%.c
@@ -92,8 +92,8 @@ mm/memory.o: mm/memory.c include/linux/page.h include/linux/mm.h \
 
 mm/bootmem.o: mm/bootmem.c include/asm/page.h include/linux/init.h \
 	 include/linux/mmzone.h include/linux/bootmem.h include/linux/string.h \
-	  include/linux/type.h include/asm/bitops.h include/asm/atomic.h include/linux/compiler.h \
-	  include/linux/init.h
+	  include/linux/type.h include/asm/bitops.h include/asm/atomic.h \
+	  include/linux/compiler.h include/linux/init.h
 
 mm/page_alloc.o: mm/page_alloc.c include/linux/mmzone.h \
 	 include/linux/bootmem.h
@@ -110,6 +110,9 @@ lib/print.o: lib/print.c include/linux/type.h include/linux/print.h \
 
 lib/string.o: lib/string.c include/linux/string.h include/linux/type.h
 
+lib/bitops.o: lib/bitops.c
+
+# CXX runtimes
 cxx/icxxabi.o: cxx/icxxabi.cc include/icxxabi.h
 
 
