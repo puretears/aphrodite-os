@@ -111,3 +111,41 @@ unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
 	min_low_pfn = start;
 	return (init_bootmem_core(NODE_DATA(0), start, 0, page));
 }
+
+static void * __init __alloc_bootmem_core(struct bootmem_data *bdata, unsigned long size,
+		unsigned long align, unsigned long goal) {
+	unsigned long idx;
+	unsigned long offset = 0;
+
+	if (!size) {
+		printk_new("__alloc_bootmem_core(): zero-sized request.\n");
+	}
+	// @edit: How may pages in the current node.
+	eidx = bdata->node_low_pfn - ((bdata->node_boot_start) >> PAGE_SHIFT);
+
+	// If the align boundary is greater than the base address of the current node, we
+	// need to add the offset when calculate memroy.
+	if (align && ((bdata->node_boot_start & (align - 1)) != 0)) {
+		offset = align - (bdata->node_boot_start & (align - 1));
+	}
+	offset >>= PAGE_SHIFT;
+
+	/* Try to allocate pages above 'goal' first.*/
+	if (goal && 
+			(goal >= bdata->node_boot_start) &&
+			((goal >> PAGE_SHIFT) < bdata->node_low_pfn)) {
+		preferred = goal - bdata->node_boot_start;
+
+		if (bdata->last_success >= preferred)
+			preferred = bdata->last_success;
+	}
+	else {
+		preferred = 0;
+	}
+
+	preferred = ((preferred + align - 1) & ~(align - 1)) >> PAGE_SHIFT;
+	preferred += offset;
+
+	areasize = (size + PAGE_SIZE - 1) / PAGE_SIZE;
+	incr = align >> PAGE_SHIFT ? 0 : 1;
+}
