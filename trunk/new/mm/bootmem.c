@@ -15,19 +15,58 @@ extern struct pglist_data *pgdat_list;
 // Marks the pages between the address and address+size reserved. Requests
 // to partially reserve a pge will result in the full page being reserved.
 void reserve_bootmem(unsigned long addr, unsigned long size) {
-
+	reserve_bootmem_core(NODE_DATA(0)->bdata,  addr, size)
 }
 
+// Marks the pages between addr and addr+size as free
+void free_bootmem(unsigned long addr, unsigned long size) {
+	free_bootmem_core(NODE_DATA(0)->bdata, addr, size);
+}
+
+// Initialize the memory between 0 and PFN page. The beginning of usable
+// memory is at the PFN start
+unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
+	max_low_pfn = page;
+	min_low_pfn = start;
+	return (init_bootmem_core(NODE_DATA(0), start, 0, page));
+}
+
+static void __init reserve_bootmem_core(bootmem_data *bdata,
+		unsigned long addr, unsigned long size) {
+	int i;
+	/* 
+	 * Round up: partially reserved pages are considered fully reserved.
+	 * */
+	unsigned sidx = (addr - bdata->node_boot_start) / PAGE_SIZE;
+	unsigned eidx = (addr + size - bdata->node_boot_start + 
+			PAGE_SIZE - 1) / PAGE_SIZE;
+
+	unsigned int end = (addr + size + PAGE_SIZE - 1) / PAGE_SIZE;
+
+	if ((!size) || (sidx >= eidx) || ((addr >> PAGE_SHIFT) >= bdata->node_low_pfn) ||
+			(end > bdata->node_low_pfn)) {
+		// BUGs HERE!!!
+		return;
+	}
+	
+	for (i = sidx; i < eidx; i++) {
+		test_and_set_bit(i, bdata->node_bootmem_map);
+	}
+}
 
 static void __init free_bootmem_core(bootmem_data_t *bdata, 
 		unsigned long addr, unsigned long size) {
 	unsigned long i;
 	unsigned long start;
 	unsigned long sidx;
+	/*
+	 * Round up: partially free pages are considered reserved.
+	 * */
 	unsigned long eidx = (addr + size - bdata->node_boot_start) / PAGE_SIZE;
 	unsigned long end = (addr + size) / PAGE_SIZE;
 
 	if (end > bdata->node_low_pfn) {
+		// BUGs HERE!!!!
 		return;
 	}
 
@@ -40,15 +79,12 @@ static void __init free_bootmem_core(bootmem_data_t *bdata,
 
 	for (i = sidx; i < eidx; i++) {
 		if(unlikely(!test_and_clear_bit(i, bdata->node_bootmem_map))) {
+			// BUGs HERE!!!!!
 			return;
 		}
 	}
 }
 
-// Marks the pages between addr and addr+size as free
-void free_bootmem(unsigned long addr, unsigned long size) {
-	free_bootmem_core(NODE_DATA(0)->bdata, addr, size);
-}
 
 // Allocates size number of bytes from ZONE_NORMAL. The allocator will be
 // aligned to the L1 hardware cache to get the maximum benefit from the
@@ -104,13 +140,6 @@ static unsigned long __init init_bootmem_core(pg_data_t *pgdat,
 	return mapsize;
 }
 
-// Initialize the memory between 0 and PFN page. The beginning of usable
-// memory is at the PFN start
-unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
-	max_low_pfn = page;
-	min_low_pfn = start;
-	return (init_bootmem_core(NODE_DATA(0), start, 0, page));
-}
 
 static void * __init __alloc_bootmem_core(struct bootmem_data *bdata, unsigned long size,
 		unsigned long align, unsigned long goal) {
