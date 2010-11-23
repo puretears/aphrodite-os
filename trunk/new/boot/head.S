@@ -53,6 +53,14 @@ ENTRY(startup_32)
 	movl $(swapper_pg_dir - __PAGE_OFFSET), %edx
 	movl $0x007, %eax /* Present + RW + User*/
 10:
+#ifdef DEBUG
+	/* print "The %d page tables.", pg_idx */
+	incl (pg_idx)
+	pushl (pg_idx)
+	pushl dbg_pg_str
+	call printk_new
+	addl $8, %esp
+#endif
 	leal 0x007(%edi), %ecx /* Create a PDE entry*/
 	movl %ecx, (%edx)		/* Store identity PDE entry*/
 	movl %ecx, page_pde_offset(%edx) /* Store kernel PDE entry*/
@@ -159,6 +167,12 @@ ENTRY(empty_zero_page)
 ENTRY(stack_start)
 	.long init_thread_union + THREAD_SIZE
 	.long __BOOT_DS
+#ifdef DEBUG
+pg_idx:
+	.long 0 
+dbg_pg_str:
+	.byte "The %d page tables.\n", 0
+#endif
 
 int_msg:
 	.asciz "Unknown interrupt or fault at EIP %8X.\n"

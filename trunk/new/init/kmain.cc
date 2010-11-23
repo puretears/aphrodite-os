@@ -46,10 +46,10 @@ void print_memory_map(struct mbinfo *pmb) {
 	}
 	e820.nr_map = i;
 
-	printk_new("Total memory size: %d.\n", memory_end/1024/1024);
+	printk_new("Total memory size: %d.\n", (memory_end + 1024 * 1024 - 1)/1024/1024);
 	int memory_start = (int)&__end;
-	int low_memory_start = PAGE_SIZE;
-	memory_start = paging_init(memory_start, memory_end);
+	//int low_memory_start = PAGE_SIZE;
+	//memory_start = paging_init(memory_start, memory_end);
 	printk_new("memory start at 0x%8x.\n", memory_start);
 }
 
