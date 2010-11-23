@@ -10,7 +10,7 @@ CFLAGS = -ggdb -Iinclude -c -fstrength-reduce -finline-functions -nostdinc -nost
 CXXFLAGS = -ggdb -c -Iinclude -nostdlib -fno-builtin -nostartfiles -nodefaultlibs \
 		   -fno-exceptions -fno-rtti -fno-stack-protector
 
-KRN_OBJS = boot/load.o boot/head.o init/kmain.o cxx/icxxabi.o lib/bitops.c lib/print.o \
+KRN_OBJS = boot/load.o boot/head.o init/kmain.o cxx/icxxabi.o lib/bitops.o lib/print.o \
 		   lib/string.o mm/highmem.o mm/memory.o mm/bootmem.o mm/page_alloc.o mm/init.o\
 		   kernel/pic.o kernel/traps.o kernel/sys_call.o kernel/irq.o kernel/spinlock.o \
 		   kernel/setup.o kernel/pid.o kernel/semaphore.o kernel/init_task.o

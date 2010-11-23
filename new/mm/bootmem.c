@@ -12,26 +12,8 @@ unsigned long max_pfn;
 
 extern struct pglist_data *pgdat_list;
 
-// Marks the pages between the address and address+size reserved. Requests
-// to partially reserve a pge will result in the full page being reserved.
-void reserve_bootmem(unsigned long addr, unsigned long size) {
-	reserve_bootmem_core(NODE_DATA(0)->bdata,  addr, size)
-}
 
-// Marks the pages between addr and addr+size as free
-void free_bootmem(unsigned long addr, unsigned long size) {
-	free_bootmem_core(NODE_DATA(0)->bdata, addr, size);
-}
-
-// Initialize the memory between 0 and PFN page. The beginning of usable
-// memory is at the PFN start
-unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
-	max_low_pfn = page;
-	min_low_pfn = start;
-	return (init_bootmem_core(NODE_DATA(0), start, 0, page));
-}
-
-static void __init reserve_bootmem_core(bootmem_data *bdata,
+static void __init reserve_bootmem_core(bootmem_data_t *bdata,
 		unsigned long addr, unsigned long size) {
 	int i;
 	/* 
@@ -141,9 +123,28 @@ static unsigned long __init init_bootmem_core(pg_data_t *pgdat,
 }
 
 
+// Marks the pages between the address and address+size reserved. Requests
+// to partially reserve a pge will result in the full page being reserved.
+void reserve_bootmem(unsigned long addr, unsigned long size) {
+	reserve_bootmem_core(NODE_DATA(0)->bdata,  addr, size);
+}
+
+// Marks the pages between addr and addr+size as free
+void free_bootmem(unsigned long addr, unsigned long size) {
+	free_bootmem_core(NODE_DATA(0)->bdata, addr, size);
+}
+
+// Initialize the memory between 0 and PFN page. The beginning of usable
+// memory is at the PFN start
+unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
+	max_low_pfn = page;
+	min_low_pfn = start;
+	return (init_bootmem_core(NODE_DATA(0), start, 0, page));
+}
+
 static void * __init __alloc_bootmem_core(struct bootmem_data *bdata, unsigned long size,
 		unsigned long align, unsigned long goal) {
-	unsigned long idx;
+	unsigned long eidx, preferred, areasize, incr;
 	unsigned long offset = 0;
 
 	if (!size) {
