@@ -14,10 +14,12 @@ extern unsigned long min_low_pfn;
 extern unsigned long max_pfn;
 extern unsigned long __VMALLOC_RESERVE;
 
+// Forward function declarations.
 void __init find_max_pfn();
 static unsigned long __init setup_memory();
 unsigned long __init find_max_low_pfn();
 void __init setup_bootmem_allocator();
+static void __init register_bootmem_low_pages(unsigned long max_low_pfn) ;
 	
 void __init setup_arch() {
 	unsigned long _max_low_pfn = setup_memory();	

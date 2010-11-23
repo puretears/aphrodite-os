@@ -1,7 +1,7 @@
 
 
 inline int find_first_zero_bit(const unsigned long *addr, unsigned size) {
-	int res;
+	int res, d0, d1, d2;
 
 	if (!size) {
 		return 0;
@@ -9,7 +9,7 @@ inline int find_first_zero_bit(const unsigned long *addr, unsigned size) {
 
 	__asm__ __volatile__ (
 		"movl $-1, %%eax\n\t"
-		"xorl  %edx, %edx\n\t"
+		"xorl  %%edx, %%edx\n\t"
 		"repne: scasl\n\t"
 		"je 1f\n\t"
 		"xorl -4(%%edi), %%eax\n\t"

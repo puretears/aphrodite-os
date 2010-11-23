@@ -82,6 +82,8 @@ SECTIONS
 	. = ALIGN(4);
 	__bss_stop = .;
 
+	.patched_bytes : { *(.patched_bytes) }
+
 	__end = .;
 
 	/* This is where the kernel creates the early boot page tables*/

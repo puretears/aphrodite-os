@@ -236,3 +236,7 @@ ENTRY(cpu_gdt_table)
 	.quad 0x0000000000000000        /* 0xe8 - unused */
 	.quad 0x0000000000000000        /* 0xf0 - unused */
 	.quad 0x0000000000000000        /* 0xf8 - GDT entry 31: double-fault TSS */
+
+.section ".patched_bytes"
+ENTRY(patched_bytes)
+	.fill 1048576, 4, 0
