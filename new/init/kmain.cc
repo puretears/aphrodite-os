@@ -28,6 +28,7 @@ void print_memory_map(struct mbinfo *pmb) {
 
 	int memory_end = 0;
 	int i = 0;
+
 	for(; p_mmap < (pmb->mmap_addr + pmb->mmap_length / sizeof(mmap)); i++) {
 		e820.map[i].addr = p_mmap->addr;
 		e820.map[i].size = p_mmap->limit;
@@ -44,14 +45,48 @@ void print_memory_map(struct mbinfo *pmb) {
 		}
 		p_mmap = (mmap *)((u_int)p_mmap + sizeof(p_mmap->size) + p_mmap->size);
 	}
-	e820.nr_map = i;
 
+	e820.nr_map = i;
 	printk_new("Total memory size: %d.\n", (memory_end + 1024 * 1024 - 1)/1024/1024);
+
 	int memory_start = (int)&__end;
 	//int low_memory_start = PAGE_SIZE;
 	//memory_start = paging_init(memory_start, memory_end);
 	printk_new("memory start at 0x%8x.\n", memory_start);
 }
+
+#ifdef DEBUG
+extern unsigned long swapper_pg_dir;
+extern unsigned long pg0;
+extern unsigned long init_pg_tables_end;
+
+void bootmem_dbg() {
+	int i;
+	int ipde = 0;
+	unsigned long _pg0;
+	unsigned long *pde = &swapper_pg_dir;
+	unsigned long *pte = &pg0;
+
+	printk_new("Swapper_pg_dir = %8x.\n", pde);
+	while (*(pde++)) {
+		ipde++;
+	}
+	printk_new("%d page directories entries.\n", ipde);
+
+	if ((swapper_pg_dir & 0xFFFFF000) != ((unsigned int)(&pg0) - 0xC0000000)) {
+		// BUGs Here!!!!
+		return;
+	}
+
+	for (i = 0; i <= ipde; i++) {
+		printk_new("pte [%d]: %8x.\n", i, *((&swapper_pg_dir) + i));
+	}
+
+	printk_new("Init_pg_tables_end: %8x.\n", init_pg_tables_end);
+
+	return;
+}
+#endif
 
 void start_kernel(u_int magic_num, struct mbinfo *pmb) {
 	if (magic_num != MAGIC_NUM) {
@@ -59,6 +94,9 @@ void start_kernel(u_int magic_num, struct mbinfo *pmb) {
 	}
 	cls();
 	print_memory_map(pmb);
+#ifdef DEBUG
+	bootmem_dbg();
+#endif
 	page_address_init();
 	setup_arch();
 

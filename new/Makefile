@@ -4,10 +4,10 @@ CXX = g++
 LD = ld
 vpath %.h ./include
 
-CFLAGS = -ggdb -Iinclude -c -fstrength-reduce -finline-functions -nostdinc -nostdlib \
+CFLAGS = -DDEBUG -ggdb -Iinclude -c -fstrength-reduce -finline-functions -nostdinc -nostdlib \
 		 -nostartfiles -nodefaultlibs -fno-builtin
 
-CXXFLAGS = -ggdb -c -Iinclude -nostdlib -fno-builtin -nostartfiles -nodefaultlibs \
+CXXFLAGS = -DDEBUG -ggdb -c -Iinclude -nostdlib -fno-builtin -nostartfiles -nodefaultlibs \
 		   -fno-exceptions -fno-rtti -fno-stack-protector
 
 KRN_OBJS = boot/load.o boot/head.o init/kmain.o cxx/icxxabi.o lib/bitops.o lib/print.o \
@@ -125,7 +125,7 @@ install:
 	umount /mnt/
 
 clean:
-	rm boot/*.o kernel/*.o lib/*.o mm/*.o
+	rm boot/*.o kernel/*.o lib/*.o init/*.o mm/*.o
 	rm boot/*.s
 	rm vmlinuz
 	rm vmlinuz.lds
