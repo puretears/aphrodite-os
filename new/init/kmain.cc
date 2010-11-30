@@ -47,7 +47,7 @@ void print_memory_map(struct mbinfo *pmb) {
 	}
 
 	e820.nr_map = i;
-	printk_new("Total memory size: %d.\n", (memory_end + 1024 * 1024 - 1)/1024/1024);
+	printk_new("Total memory size: %d. MB\n", (memory_end + 1024 * 1024 - 1)/1024/1024);
 
 	int memory_start = (int)&__end;
 	//int low_memory_start = PAGE_SIZE;
