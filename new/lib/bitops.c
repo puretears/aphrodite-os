@@ -10,7 +10,7 @@ inline int find_first_zero_bit(const unsigned long *addr, unsigned size) {
 	__asm__ __volatile__ (
 		"movl $-1, %%eax\n\t"
 		"xorl  %%edx, %%edx\n\t"
-		"repne: scasl\n\t"
+		"repe: scasl\n\t"
 		"je 1f\n\t"
 		"xorl -4(%%edi), %%eax\n\t"
 		"subl $-4, %%edi\n\t"
