@@ -68,10 +68,10 @@ void bootmem_dbg() {
 	unsigned long *pte = &pg0;
 
 	printk_new("Swapper_pg_dir = %8x.\n", pde);
-	while (*(pde++)) {
+	while (*(pde) && *(pde +768)) {
 		ipde++;
 	}
-	printk_new("%d page directories entries.\n", ipde);
+	printk_new("%d page directories entries.\n", ipde * 2);
 
 	if ((swapper_pg_dir & 0xFFFFF000) != ((unsigned int)(&pg0) - 0xC0000000)) {
 		// BUGs Here!!!!
@@ -80,6 +80,7 @@ void bootmem_dbg() {
 
 	for (i = 0; i <= ipde; i++) {
 		printk_new("pte [%d]: %8x.\n", i, *((&swapper_pg_dir) + i));
+		printk_new("pte [%d]: %8x.\n", (i + 768), *((&swapper_pg_dir) + i + 768));
 	}
 
 	printk_new("Init_pg_tables_end: %8x.\n", init_pg_tables_end);
