@@ -42,7 +42,7 @@ static unsigned long __init setup_memory() {
 			pages_to_mb(highend_pfn - highstart_pfn));
 #endif
 
-	printk_new("%dMB LOWMEM available.\n",
+	printk_new("%d MB LOWMEM available.\n",
 			pages_to_mb(max_low_pfn));
 
 	setup_bootmem_allocator();
