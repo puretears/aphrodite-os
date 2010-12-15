@@ -68,6 +68,7 @@ void bootmem_dbg() {
 
 	printk_new("Swapper_pg_dir = %8x.\n", pde);
 	while (*(pde) && *(pde +768)) {
+		pde++;
 		ipde++;
 	}
 	printk_new("%d page directories entries.\n", ipde * 2);

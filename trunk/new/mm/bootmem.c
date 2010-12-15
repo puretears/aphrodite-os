@@ -5,6 +5,7 @@
 #include "linux/string.h"
 #include "linux/compiler.h"
 #include "asm/bitops.h"
+#include "asm/bug.h"
 
 unsigned long max_low_pfn;
 unsigned long min_low_pfn;
@@ -142,19 +143,34 @@ unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
 	return (init_bootmem_core(NODE_DATA(0), start, 0, page));
 }
 
-static void * __init __alloc_bootmem_core(struct bootmem_data *bdata, unsigned long size,
+/*
+ * The core boot memory allcation funcion.
+ * @bdata: Point to the current allocation memory node. For UMA, point 
+ * to global contig_bootmem_data.
+ * @size: The requested allocation size.
+ * @align: The allocation base memory alignment.
+ * @goal: The preferred allocation base address.
+ *
+ * Return: The base address of requested buffer, NULL for failed.
+ * */
+static void * __init __alloc_bootmem_core(struct bootmem_data *bdata, 
+		unsigned long size,
 		unsigned long align, unsigned long goal) {
 	unsigned long eidx, preferred, areasize, incr;
 	unsigned long offset = 0;
 
 	if (!size) {
 		printk_new("__alloc_bootmem_core(): zero-sized request.\n");
+		BUG();
 	}
-	// @edit: How may pages in the current node.
+
+	BUG_ON(align & (align - 1));
+
+	// @eidx: How may pages in the current node.
 	eidx = bdata->node_low_pfn - ((bdata->node_boot_start) >> PAGE_SHIFT);
 
-	// If the align boundary is greater than the base address of the current node, we
-	// need to add the offset when calculate memroy.
+	/* If the alignment of the base address of current node is less than
+	 * the alignment of @align, caculate the offset.*/
 	if (align && ((bdata->node_boot_start & (align - 1)) != 0)) {
 		offset = align - (bdata->node_boot_start & (align - 1));
 	}
@@ -172,7 +188,9 @@ static void * __init __alloc_bootmem_core(struct bootmem_data *bdata, unsigned l
 	else {
 		preferred = 0;
 	}
-
+	/* Make the distance between @goal and base address of current node
+	 * aligned to @align.
+	 * */
 	preferred = ((preferred + align - 1) & ~(align - 1)) >> PAGE_SHIFT;
 	preferred += offset;
 
