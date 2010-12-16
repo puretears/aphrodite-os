@@ -49,8 +49,9 @@ boot/head.o: boot/head.s
 boot/load.o: boot/load.s
 
 # Init modules
-init/kmain.o: init/kmain.cc include/linux/mbinfo.h include/linux/type.h \
-	 include/linux/print.h include/linux/type.h include/asm/page.h
+kmain.o: init/kmain.cc include/linux/mbinfo.h include/linux/type.h \
+	 include/linux/print.h include/linux/type.h include/linux/mmzone.h \
+	  include/linux/bootmem.h include/asm/page.h include/asm/e820.h
 
 # Kernel modules
 kernel/sys_call.o: kernel/sys_call.asm
@@ -90,10 +91,11 @@ kernel/traps.o: kernel/traps.c include/linux/type.h include/linux/ptrace.h \
 mm/memory.o: mm/memory.c include/linux/page.h include/linux/mm.h \
 	 include/linux/type.h include/linux/head.h 
 
-mm/bootmem.o: mm/bootmem.c include/asm/page.h include/linux/init.h \
-	 include/linux/mmzone.h include/linux/bootmem.h include/linux/string.h \
-	  include/linux/type.h include/asm/bitops.h include/asm/atomic.h \
-	  include/linux/compiler.h include/linux/init.h
+bootmem.o: mm/bootmem.c include/asm/page.h include/linux/init.h \
+	 include/linux/bitops.h include/linux/kernel.h include/linux/mmzone.h \
+	  include/linux/bootmem.h include/linux/string.h include/linux/type.h \
+	   include/linux/page.h include/linux/compiler.h include/asm/bitops.h \
+	    include/asm/atomic.h include/asm/bug.h
 
 mm/page_alloc.o: mm/page_alloc.c include/linux/mmzone.h \
 	 include/linux/bootmem.h

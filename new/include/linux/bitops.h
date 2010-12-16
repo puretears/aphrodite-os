@@ -13,7 +13,7 @@ static inline int variable_test_bit(int nr, const volatile unsigned long *addr) 
 	__asm__ __volatile__ (
 		"btl %2, %1\n\t"
 		"sbbl %0, %0"
-		:"=r (oldbit)"
+		:"=r" (oldbit)
 		:"m" (ADDR), "Ir" (nr));
 
 	return oldbit;

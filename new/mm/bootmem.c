@@ -1,8 +1,11 @@
 #include "asm/page.h"
 #include "linux/init.h"
+#include "linux/bitops.h"
+#include "linux/kernel.h"
 #include "linux/mmzone.h"
 #include "linux/bootmem.h"
 #include "linux/string.h"
+#include "linux/page.h"
 #include "linux/compiler.h"
 #include "asm/bitops.h"
 #include "asm/bug.h"
@@ -153,11 +156,12 @@ unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
  *
  * Return: The base address of requested buffer, NULL for failed.
  * */
-static void * __init __alloc_bootmem_core(struct bootmem_data *bdata, 
+void * __init __alloc_bootmem_core(struct bootmem_data *bdata, 
 		unsigned long size,
 		unsigned long align, unsigned long goal) {
-	unsigned long eidx, preferred, areasize, incr;
+	unsigned long eidx, preferred, areasize, incr, remaining_size;
 	unsigned long offset = 0;
+	void *ret;
 
 	if (!size) {
 		printk_new("__alloc_bootmem_core(): zero-sized request.\n");
@@ -192,8 +196,92 @@ static void * __init __alloc_bootmem_core(struct bootmem_data *bdata,
 	 * aligned to @align.
 	 * */
 	preferred = ((preferred + align - 1) & ~(align - 1)) >> PAGE_SHIFT;
+	/* Both @offset and @preferred are aligned to @align.
+	 * Total pages we need to move from preferred starting address to
+	 * node_boot_start.*/
 	preferred += offset;
 
 	areasize = (size + PAGE_SIZE - 1) / PAGE_SIZE;
-	incr = align >> PAGE_SHIFT ? 0 : 1;
+	incr = align >> PAGE_SHIFT ? : 1;
+
+	int i = 0, j = 0, start = 0;
+restart_scan:
+	for (i = preferred; i < eidx; i += incr) {
+		i = find_next_zero_bit(bdata->node_bootmem_map, eidx, i);
+		i = ALIGN(i, incr);
+		/* The page after align must be still available, else continue to 
+		 * scan.*/	
+		if (test_bit(i, bdata->node_bootmem_map))
+			continue;
+
+		// Here we find a nice beginning page.
+		// Continue to scan whether we can get enough page from this beginning
+		// page.	
+		for (j = i; j < (i + areasize); j++) {
+			if ((j >= eidx) || test_bit(j, bdata->node_bootmem_map))
+				// Cannot get enough pages.
+				goto fail_block;
+		}
+		// We've got it.
+		start = i;
+		goto found;
+		
+fail_block:
+		i = ALIGN(j, incr);
+	} // End for (i = preferred ...)
+
+	// If i >=  eidx, we'll get here. It says that we cannot get enough pages
+	// from the preferred address. Try to get pages from 0
+	if (preferred > offset) {
+		preferred = offset;
+		goto restart_scan;
+	}
+	// We cannot get pages neither from preferred address nor 0.
+	return NULL;
+
+found:
+	bdata->last_success = start << PAGE_SHIFT;
+
+	/* Deciding if this allocation can be merged with previous one.*/
+	if (align < PAGE_SIZE  &&
+		bdata->last_offset &&
+		(bdata->last_pos + 1) == start) {
+		/* The beginning address must be aligned with @align.*/
+		offset = (bdata->last_offset + align - 1) & ~(align - 1);	
+		BUG_ON(offset > PAGE_SIZE);
+		/* How many bytes in the previous allocated page?*/
+		remaining_size = PAGE_SIZE - offset;
+
+		if (size < remaining_size) {
+			areasize = 0;
+			/* last_pos unchanged.*/
+			bdata->last_offset = offset + size;
+			ret = __va(bdata->last_pos * PAGE_SIZE + offset + bdata->node_boot_start);
+		}
+		else {
+			remaining_size = size - remaining_size;
+			areasize = (remaining_size + PAGE_SIZE - 1) / PAGE_SIZE;
+			ret = __va(bdata->last_pos * PAGE_SIZE + offset + bdata->node_boot_start);
+
+			bdata->last_pos = start + areasize - 1;
+			bdata->last_offset = remaining_size;
+		} // End if (size < remaining_size)
+
+		bdata->last_offset &= ~PAGE_MASK;
+	}
+	else {
+		bdata->last_pos = start + areasize - 1;
+		bdata->last_offset = size & ~PAGE_MASK;
+		ret = __va(start * PAGE_SIZE + bdata->node_boot_start);
+	} // End if (align < PAGE_SIZE ...)
+
+	/* Reserve the pages now.*/
+	for (i = start; i < (start + areasize); i++) {
+		if (unlikely(test_and_set_bit(i, bdata->node_bootmem_map)))
+			BUG();
+	}
+
+	memset(ret, 0, size);
+	return ret;
+
 }
