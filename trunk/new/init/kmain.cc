@@ -5,13 +5,14 @@ extern "C" {
 #include "linux/mbinfo.h"
 #include "linux/print.h"
 #include "linux/type.h"
+#include "linux/mmzone.h"
+#include "asm/mmzone.h"
 #include "asm/page.h"
 #include "asm/e820.h"
 
 #define MAGIC_NUM 0x2BADB002
 
 extern struct e820map e820;
-
 extern char __end;
 void trap_init();
 int paging_init(int, int);
@@ -59,6 +60,10 @@ void print_memory_map(struct mbinfo *pmb) {
 extern unsigned long swapper_pg_dir;
 extern unsigned long pg0;
 extern unsigned long init_pg_tables_end;
+extern bootmem_data_t contig_bootmem_data;
+
+void * __init __alloc_bootmem_core(bootmem_data *bdata, 
+		        unsigned long size, unsigned long align, unsigned long goal); 
 
 void bootmem_dbg() {
 	int i;
@@ -91,6 +96,11 @@ void bootmem_dbg() {
 
 	return;
 }
+
+void bootmem_alloc_dbg() {
+	void *test_addr = alloc_bootmem(64);
+	printk_new("The allocated address is: %8x.\n", test_addr);
+}
 #endif
 
 void start_kernel(u_int magic_num, struct mbinfo *pmb) {
@@ -101,6 +111,7 @@ void start_kernel(u_int magic_num, struct mbinfo *pmb) {
 	print_memory_map(pmb);
 #ifdef DEBUG
 	bootmem_dbg();
+	bootmem_alloc_dbg();
 #endif
 	page_address_init();
 	setup_arch();

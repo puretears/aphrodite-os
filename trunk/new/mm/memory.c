@@ -1,3 +1,4 @@
+#include "asm/page.h"
 #include "linux/page.h"
 #include "linux/mm.h"
 #include "linux/head.h"
