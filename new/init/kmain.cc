@@ -7,6 +7,7 @@ extern "C" {
 #include "linux/print.h"
 #include "linux/type.h"
 #include "linux/mmzone.h"
+
 #include "asm/mmzone.h"
 #include "asm/page.h"
 #include "asm/e820.h"
@@ -20,7 +21,8 @@ int paging_init(int, int);
 void init_IRQ(void);
 void page_address_init();
 void setup_arch();
-
+static void * __init __alloc_bootmem_core(struct bootmem_data *bdata,
+		        unsigned long size, unsigned long align, unsigned long goal);
 
 void print_memory_map(struct mbinfo *pmb) {
 	mmap *p_mmap = pmb->mmap_addr;
@@ -62,9 +64,6 @@ extern unsigned long swapper_pg_dir;
 extern unsigned long pg0;
 extern unsigned long init_pg_tables_end;
 extern bootmem_data_t contig_bootmem_data;
-
-//void * __init __alloc_bootmem_core(bootmem_data *bdata, 
-//		        unsigned long size, unsigned long align, unsigned long goal); 
 
 void bootmem_dbg() {
 	int i;
