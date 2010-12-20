@@ -2,6 +2,7 @@
 extern "C" {
 #endif
 
+#include "linux/bootmem.h"
 #include "linux/mbinfo.h"
 #include "linux/print.h"
 #include "linux/type.h"
@@ -62,8 +63,8 @@ extern unsigned long pg0;
 extern unsigned long init_pg_tables_end;
 extern bootmem_data_t contig_bootmem_data;
 
-void * __init __alloc_bootmem_core(bootmem_data *bdata, 
-		        unsigned long size, unsigned long align, unsigned long goal); 
+//void * __init __alloc_bootmem_core(bootmem_data *bdata, 
+//		        unsigned long size, unsigned long align, unsigned long goal); 
 
 void bootmem_dbg() {
 	int i;
