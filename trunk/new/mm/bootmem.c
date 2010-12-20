@@ -75,9 +75,9 @@ static void __init free_bootmem_core(bootmem_data_t *bdata,
 // Allocates size number of bytes from ZONE_NORMAL. The allocator will be
 // aligned to the L1 hardware cache to get the maximum benefit from the
 // hardware cache.
-void *alloc_bootmem(unsigned long size) {
+//void *alloc_bootmem(unsigned long size) {
 	
-}
+//}
 
 // Allocates size number of bytes from ZONE_DMA.
 void *alloc_bootmem_low(unsigned long size) {
@@ -156,7 +156,7 @@ unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
  *
  * Return: The base address of requested buffer, NULL for failed.
  * */
-void * __init __alloc_bootmem_core(struct bootmem_data *bdata, 
+static void * __init __alloc_bootmem_core(struct bootmem_data *bdata, 
 		unsigned long size,
 		unsigned long align, unsigned long goal) {
 	unsigned long eidx, preferred, areasize, incr, remaining_size;
