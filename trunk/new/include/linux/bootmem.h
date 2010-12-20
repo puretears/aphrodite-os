@@ -17,4 +17,7 @@ typedef struct bootmem_data {
 	unsigned long last_success;
 } bootmem_data_t;
 
+extern void * __init __alloc_bootmem_core(struct bootmem_data *bdata,
+		unsigned long size, unsigned long align, unsigned long goal);
+
 #endif

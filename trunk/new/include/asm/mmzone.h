@@ -2,6 +2,7 @@
 #define ASM_MMZONE_H
 
 #include "asm/dma.h"
+#include "linux/mmzone.h"
 #include "linux/bootmem.h"
 
 #define L1_CACHE_BYTES (1 << 6)
