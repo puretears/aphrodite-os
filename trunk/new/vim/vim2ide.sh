@@ -43,7 +43,9 @@ if [ ! -e "a.vim" ]; then
 	wget http://www.vim.org/scripts/download_script.php?src_id=7218 -O ~/.vim/plugin/a.vim
 fi
 
-
+if [ ! -e "grep.vim" ]; then
+	http://www.vim.org/scripts/download_script.php?src_id=7645 -o ~/.vim/plugin/grep.vim
+fi
 
 cd ~/.vim/
 unzip ~/.vim/taglist_45.zip 
