@@ -91,7 +91,7 @@ kernel/traps.o: kernel/traps.c include/linux/type.h include/linux/ptrace.h \
 mm/memory.o: mm/memory.c include/linux/page.h include/linux/mm.h \
 	 include/linux/type.h include/linux/head.h 
 
-bootmem.o: mm/bootmem.c include/asm/page.h include/linux/init.h \
+mm/bootmem.o: mm/bootmem.c include/asm/page.h include/linux/init.h \
 	 include/linux/bitops.h include/linux/kernel.h include/linux/mmzone.h \
 	  include/linux/bootmem.h include/linux/string.h include/linux/type.h \
 	   include/linux/page.h include/linux/compiler.h include/asm/bitops.h \

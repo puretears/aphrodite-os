@@ -1,4 +1,5 @@
 #include "asm/page.h"
+#include "asm/mmzone.h"
 #include "linux/init.h"
 #include "linux/bitops.h"
 #include "linux/kernel.h"
@@ -15,7 +16,10 @@ unsigned long min_low_pfn;
 unsigned long max_pfn;
 
 extern struct pglist_data *pgdat_list;
+extern bootmem_data_t contig_bootmem_data;
 
+void * __init __alloc_bootmem_core(struct bootmem_data *bdata,
+		unsigned long size, unsigned long align, unsigned long goal); 
 
 static void __init reserve_bootmem_core(bootmem_data_t *bdata,
 		unsigned long addr, unsigned long size) {
@@ -75,9 +79,9 @@ static void __init free_bootmem_core(bootmem_data_t *bdata,
 // Allocates size number of bytes from ZONE_NORMAL. The allocator will be
 // aligned to the L1 hardware cache to get the maximum benefit from the
 // hardware cache.
-//void *alloc_bootmem(unsigned long size) {
-	
-//}
+void *alloc_bootmem(unsigned long size) {
+	__alloc_bootmem_core(NODE_DATA(0), size, SMP_CACHE_BYTES, 0);	
+}
 
 // Allocates size number of bytes from ZONE_DMA.
 void *alloc_bootmem_low(unsigned long size) {
@@ -156,7 +160,7 @@ unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
  *
  * Return: The base address of requested buffer, NULL for failed.
  * */
-static void * __init __alloc_bootmem_core(struct bootmem_data *bdata, 
+void * __init __alloc_bootmem_core(struct bootmem_data *bdata, 
 		unsigned long size,
 		unsigned long align, unsigned long goal) {
 	unsigned long eidx, preferred, areasize, incr, remaining_size;
