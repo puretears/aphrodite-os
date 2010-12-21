@@ -21,8 +21,11 @@ int paging_init(int, int);
 void init_IRQ(void);
 void page_address_init();
 void setup_arch();
-static void * __init __alloc_bootmem_core(struct bootmem_data *bdata,
-		        unsigned long size, unsigned long align, unsigned long goal);
+void *alloc_bootmem(unsigned long size);
+
+/*void * __init __alloc_bootmem_core(struct bootmem_data *bdata, 
+		        unsigned long size,
+				        unsigned long align, unsigned long goal);*/
 
 void print_memory_map(struct mbinfo *pmb) {
 	mmap *p_mmap = pmb->mmap_addr;
@@ -59,7 +62,7 @@ void print_memory_map(struct mbinfo *pmb) {
 	printk_new("memory start at 0x%8x.\n", memory_start);
 }
 
-#ifdef DEBUG
+//#ifdef DEBUG
 extern unsigned long swapper_pg_dir;
 extern unsigned long pg0;
 extern unsigned long init_pg_tables_end;
@@ -101,7 +104,7 @@ void bootmem_alloc_dbg() {
 	void *test_addr = alloc_bootmem(64);
 	printk_new("The allocated address is: %8x.\n", test_addr);
 }
-#endif
+//#endif
 
 void start_kernel(u_int magic_num, struct mbinfo *pmb) {
 	if (magic_num != MAGIC_NUM) {
