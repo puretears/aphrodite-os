@@ -18,7 +18,7 @@ unsigned long max_pfn;
 extern struct pglist_data *pgdat_list;
 extern bootmem_data_t contig_bootmem_data;
 
-void * __init __alloc_bootmem_core(struct bootmem_data *bdata,
+void * __init __alloc_bootmem_core(struct pglist_data *bdata,
 		unsigned long size, unsigned long align, unsigned long goal); 
 
 static void __init reserve_bootmem_core(bootmem_data_t *bdata,
@@ -160,11 +160,12 @@ unsigned long __init init_bootmem(unsigned long start, unsigned long page) {
  *
  * Return: The base address of requested buffer, NULL for failed.
  * */
-void * __init __alloc_bootmem_core(struct bootmem_data *bdata, 
+void * __init __alloc_bootmem_core(struct pglist_data *pdata, 
 		unsigned long size,
 		unsigned long align, unsigned long goal) {
 	unsigned long eidx, preferred, areasize, incr, remaining_size;
 	unsigned long offset = 0;
+	struct bootmem_data *bdata = pdata->bdata;
 	void *ret;
 
 	if (!size) {
