@@ -22,6 +22,7 @@ void init_IRQ(void);
 void page_address_init();
 void setup_arch();
 void *alloc_bootmem(unsigned long size);
+void setup_arch();
 
 /*void * __init __alloc_bootmem_core(struct bootmem_data *bdata, 
 		        unsigned long size,
@@ -92,7 +93,6 @@ void bootmem_dbg() {
 	for (i = 0; i <= ipde; i++) {
 		printk_new("pte [%d]: %8x.\n", i, *(&swapper_pg_dir + i));
 		printk_new("pte [%d]: %8x.\n", (i + 768), *(&swapper_pg_dir + 768 + i));
-		printk_new("pte [%d]: %8x.\n", (i + 768), *((&swapper_pg_dir) + i + 768));
 	}
 
 	printk_new("Init_pg_tables_end: %8x.\n", init_pg_tables_end);
@@ -100,8 +100,8 @@ void bootmem_dbg() {
 	return;
 }
 
-void bootmem_alloc_dbg() {
-	void *test_addr = alloc_bootmem(64);
+void bootmem_alloc_dbg(int size) {
+	void *test_addr = alloc_bootmem(size);
 	printk_new("The allocated address is: %8x.\n", test_addr);
 }
 //#endif
@@ -112,9 +112,12 @@ void start_kernel(u_int magic_num, struct mbinfo *pmb) {
 	}
 	cls();
 	print_memory_map(pmb);
+	setup_arch();
 #ifdef DEBUG
 	bootmem_dbg();
-	bootmem_alloc_dbg();
+	bootmem_alloc_dbg(64);
+	bootmem_alloc_dbg(1024);
+	bootmem_alloc_dbg(64);
 #endif
 	page_address_init();
 	setup_arch();
